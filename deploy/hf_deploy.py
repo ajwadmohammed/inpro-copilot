@@ -98,7 +98,32 @@ def stage(folder: Path) -> None:
     (folder / "README.md").write_text(FRONT_MATTER + readme, encoding="utf-8")
 
 
+def report(title: str, message: str) -> None:
+    """A readable error; on GitHub it also becomes an annotation shown on the run's summary page."""
+    message = " ".join(str(message).split())[:400]
+    if os.getenv("GITHUB_ACTIONS"):
+        print(f"::error title={title}::{message}")
+    print(f"\n{title}: {message}")
+
+
+STEP = {"now": "Starting"}
+
+
 def main() -> int:
+    try:
+        return run()
+    except Exception as e:                      # never prints a token: huggingface_hub errors carry none
+        hint, text = "", str(e)
+        status = getattr(getattr(e, "response", None), "status_code", None)
+        if status == 401:
+            hint = " (the Hugging Face token is not valid: create a new one with Write access and update HF_TOKEN)"
+        elif status == 403:
+            hint = " (the token can only read: it needs Write access, or for a fine-grained token, write access to your Spaces)"
+        report(f"Deploy failed at: {STEP['now']}", f"{type(e).__name__}: {text}{hint}")
+        return 1
+
+
+def run() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--space", default=os.getenv("HF_SPACE") or "inpro-copilot", help="Space name (or owner/name)")
     ap.add_argument("--wait", action="store_true", help="follow the build until the app is running")
@@ -114,13 +139,16 @@ def main() -> int:
         print("No Hugging Face token: nothing deployed.")
         return 1
     api = HfApi(token=tok)
+    STEP["now"] = "checking the Hugging Face token"
     owner = api.whoami()["name"]
     repo_id = args.space if "/" in args.space else f"{owner}/{args.space}"
     local = dotenv()
 
     print(f"1/4  Space {repo_id}")
+    STEP["now"] = f"creating the Space {repo_id}"
     api.create_repo(repo_id, repo_type="space", space_sdk="docker", exist_ok=True, private=False)
 
+    STEP["now"] = "saving the AI keys as Space secrets"
     print("2/4  Keys and settings (stored encrypted at Hugging Face as Space secrets; values are never printed)")
     for k in SECRETS:
         v = setting(k, local)
@@ -134,6 +162,7 @@ def main() -> int:
             print(f"       {k} = {v}")
 
     print("3/4  Uploading the app")
+    STEP["now"] = "uploading the app"
     sha = (os.getenv("GITHUB_SHA") or "")[:7]
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
@@ -145,6 +174,9 @@ def main() -> int:
     host = getattr(api.space_info(repo_id), "host", None) or \
         "https://" + repo_id.replace("/", "-").replace("_", "-").replace(".", "-").lower() + ".hf.space"
     print(f"4/4  Building. The app will be at:\n\n       {host}\n")
+    if os.getenv("GITHUB_ACTIONS"):
+        print(f"::notice title=Live link::{host}")
+    STEP["now"] = "waiting for the build"
     if not args.wait:
         print("     (Building takes 3 to 6 minutes. Progress: https://huggingface.co/spaces/" + repo_id + ")")
         return 0
@@ -158,11 +190,13 @@ def main() -> int:
         if stage_now == "RUNNING":
             break
         if stage_now in ("BUILD_ERROR", "RUNTIME_ERROR", "CONFIG_ERROR", "NO_APP_FILE"):
-            print(f"The Space reported {stage_now}. Open https://huggingface.co/spaces/{repo_id} and check the logs.")
+            rt = api.get_space_runtime(repo_id)
+            report(f"Space {stage_now}", (getattr(rt, "raw", {}) or {}).get("errorMessage")
+                   or f"Open https://huggingface.co/spaces/{repo_id} and check the logs.")
             return 1
         time.sleep(15)
     else:
-        print("Still not running after 20 minutes; check the Space page.")
+        report("Build too slow", "Still not running after 20 minutes; check the Space page.")
         return 1
 
     import urllib.request
@@ -171,6 +205,8 @@ def main() -> int:
             with urllib.request.urlopen(host + "/api/health", timeout=10) as r:
                 if r.status == 200:
                     print(f"Live and answering: {host}")
+                    if os.getenv("GITHUB_ACTIONS"):
+                        print(f"::notice title=Live and answering::{host}")
                     return 0
         except Exception:
             time.sleep(10)
