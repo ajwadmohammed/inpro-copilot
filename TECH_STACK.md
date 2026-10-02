@@ -101,14 +101,15 @@ already checked), and the page prints them.
 | Tool | What it does | Why |
 |---|---|---|
 | **Docker** (`Dockerfile`) | Packs the app, Python and Tesseract into one container | Runs the same everywhere |
-| **Hugging Face Spaces** | Free hosting for the container, with an https link | Free, no card, 16 GB RAM, opens from any country except mainland China; a natural home for an AI project |
-| **GitHub Actions** (`.github/workflows/deploy.yml`) | On every push: install, run all tests, and only if they pass, publish to the Space | Automatic updates, and a broken version never goes live |
-| **huggingface_hub** (`deploy/hf_deploy.py`) | Creates the Space, stores the AI keys as encrypted secrets, uploads the app, waits until it answers | One script for both the automatic and the by-hand deploy |
+| **Render** (`render.yaml`) | Free hosting for the container, with an https link | Free without a card; builds straight from GitHub; opens from any country |
+| **GitHub Actions** (`.github/workflows/tests.yml`) | On every push: install the app and run all tests | Render publishes only after this check passes, so a broken version never goes live |
+| **Keep-awake job** (`.github/workflows/keep-awake.yml`) | Opens the health page every 5 minutes | Free services sleep after 15 idle minutes; this keeps the demo instant |
+| **huggingface_hub** (`deploy/hf_deploy.py`) | Optional: publish to a Hugging Face Space instead | Docker Spaces need Hugging Face PRO since July 2026 |
 
 ### 6. Quality
 | Tool | Used for |
 |---|---|
-| **pytest** (153 tests) | Automatic tests for parsing, checks, tax IDs, IBANs, look-alike domains, the Fraud lab, public-demo protections, e-mail/folder/mailbox intake (with a fake mailbox), learning on approval, sign-in and roles, the AI-grounding guard, AI providers (faked, no network), caching, budget caps, merging, the API, and the missing-Tesseract case |
+| **pytest** (154 tests) | Automatic tests for parsing, checks, tax IDs, IBANs, look-alike domains, the Fraud lab, public-demo protections, e-mail/folder/mailbox intake (with a fake mailbox), learning on approval, sign-in and roles, the AI-grounding guard, AI providers (faked, no network), caching, budget caps, merging, the API, and the missing-Tesseract case |
 | **Benchmark scripts** (`eval/`) | Measures accuracy on 12 real invoices and 130 altered/scanned copies, in rules, hybrid or AI mode, with AI requests/tokens/cost |
 | **Setup check** (`check_setup.py`) | Checks packages, Tesseract and sends one tiny test request to every configured AI model |
 

@@ -1,0 +1,21 @@
+# Render's free plan puts the app to sleep after 15 minutes without visitors, and waking takes about a
+# minute. This opens the health page every 5 minutes so the demo is always awake. (One free service running
+# all month fits inside Render's 750 free hours.) Set a repository variable APP_URL if the address differs.
+name: Keep the demo awake
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Open the health page
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://inpro-copilot.onrender.com' }}
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" -m 90 "$APP_URL/api/health" || true)
+          echo "$APP_URL answered $code"

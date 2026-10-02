@@ -41,9 +41,10 @@ MAX_BYTES = 15 * 1024 * 1024
 UNSAFE = {"POST", "PUT", "PATCH", "DELETE"}
 
 def security_headers(public: bool) -> dict[str, str]:
-    """Strict browser rules. On the public demo (Hugging Face) the app may be shown inside the
-    huggingface.co Space page, so framing is allowed for that one site and nobody else."""
-    ancestors = "https://huggingface.co" if public else "'none'"
+    """Strict browser rules. No other website may show the app inside a frame, unless a host that needs it
+    is named in INPRO_FRAME_ANCESTORS (e.g. https://huggingface.co for a Hugging Face Space page)."""
+    allowed = (os.getenv("INPRO_FRAME_ANCESTORS") or "").strip()
+    ancestors = allowed or "'none'"
     h = {
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "no-referrer",
@@ -54,7 +55,7 @@ def security_headers(public: bool) -> dict[str, str]:
             f"img-src 'self' data: blob:; connect-src 'self'; frame-ancestors {ancestors}; base-uri 'none'; form-action 'self'"
         ),
     }
-    if not public:
+    if not allowed:
         h["X-Frame-Options"] = "DENY"
     return h
 

@@ -1,7 +1,7 @@
-"""Publish InPro Copilot to a Hugging Face Space: free hosting with an https link that opens anywhere.
+"""Publish InPro Copilot to a Hugging Face Space (optional: Docker Spaces need a Hugging Face PRO plan).
 
 Two ways to run it:
-  * Automatically, by GitHub Actions, after every push to the main branch (.github/workflows/deploy.yml).
+  * From GitHub: Actions > "Deploy to Hugging Face" > Run workflow (.github/workflows/deploy-hf.yml).
     GitHub secrets used: HF_TOKEN (required), GEMINI_API_KEY and GROQ_API_KEY (optional).
   * By hand from the laptop: double-click deploy_hf.bat. It asks for your Hugging Face token once
     (typed by you, saved by Hugging Face's own login) and reads the AI keys from your .env file.
@@ -160,6 +160,7 @@ def run() -> int:
         if v:
             api.add_space_variable(repo_id, k, v)
             print(f"       {k} = {v}")
+    api.add_space_variable(repo_id, "INPRO_FRAME_ANCESTORS", "https://huggingface.co")   # the Space page shows the app in a frame
 
     print("3/4  Uploading the app")
     STEP["now"] = "uploading the app"

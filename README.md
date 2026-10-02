@@ -124,18 +124,21 @@ An approval is only worth something if you know **who** approved, so the app has
 
 ## 5. Put it online (free, opens anywhere)
 
-The public demo runs on **Hugging Face Spaces** (free: 2 CPUs, 16 GB RAM, an `https://...hf.space` link that works
-in any country with internet access, except mainland China where Hugging Face is blocked). The repository contains
-everything: a `Dockerfile`, `deploy/hf_deploy.py` and a GitHub Actions workflow.
+The public demo runs on **Render's free plan**: no card, an `https://...onrender.com` link that opens from any
+country, and the app in its own Docker container (`Dockerfile`, `render.yaml`).
 
-**Automatic updates (recommended).** Put the project on GitHub, then add these repository secrets
-(Settings > Secrets and variables > Actions): `HF_TOKEN` (a Hugging Face token with Write access), and optionally
-`GEMINI_API_KEY` and `GROQ_API_KEY`. From then on, every push to `main` runs all tests and, only if they pass,
-publishes the new version (`.github/workflows/deploy.yml`). The Space is created on the first run; the AI keys are
-stored as encrypted Space secrets, never in the code.
-
-**By hand.** Double-click `deploy_hf.bat`: it asks for your Hugging Face token once, copies the AI keys from `.env`
-into the Space's secrets, uploads the app and waits until it answers.
+* **Automatic updates.** Every push to `main` runs all tests on GitHub (`.github/workflows/tests.yml`). Render
+  publishes the new version only after that check has passed (`autoDeployTrigger: checksPass`), so a broken version
+  never goes live.
+* **One-time setup.** In Render: New > Blueprint > pick this repository > paste `GEMINI_API_KEY` and `GROQ_API_KEY`
+  when asked (stored encrypted by Render, never in the code) > Apply.
+* **Always awake.** Free services sleep after 15 minutes without visitors and take about a minute to wake.
+  `.github/workflows/keep-awake.yml` opens the health page every 5 minutes, which fits inside Render's 750 free hours
+  a month for one service.
+* **Free means small**: 0.1 CPU and 512 MB (the app uses about 180 MB), so pages and the Fraud lab answer in about
+  half a second instead of a twentieth.
+* **Alternative:** a Hugging Face Space (`deploy/hf_deploy.py`, `deploy_hf.bat`, or the manual
+  "Deploy to Hugging Face" workflow). Since July 2026, Docker Spaces need a Hugging Face PRO plan.
 
 On the public demo: the three demo accounts are one click on the sign-in page and cannot be changed or locked by
 visitors, uploads and forgeries are rate-limited, the AI budget caps still apply, the server's folders are never
@@ -227,6 +230,6 @@ src/inpro_copilot/  reader.py (READ) | extractor_rules.py, smart_extract.py, ext
                     decision.py (DECIDE) | pipeline.py (incl. learning on approval) | store.py (SQLite) | api.py (FastAPI)
                     intake.py (e-mail, folder, mailbox) | insights.py (Overview numbers) | lab.py (Fraud lab) | auth.py | demo.py
 ui/index.html       the screens
-eval/               benchmark          tests/   153 tests          data/real   the 12 invoices
-Dockerfile, deploy/, .github/workflows/   hosting on Hugging Face and automatic test-and-deploy
+eval/               benchmark          tests/   154 tests          data/real   the 12 invoices
+Dockerfile, render.yaml, .github/workflows/   hosting on Render, tests on every push, keep-awake ping
 ```

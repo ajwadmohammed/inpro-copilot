@@ -1,0 +1,17 @@
+# Render Blueprint: the free public demo. In Render: New > Blueprint > pick this repository.
+# Render builds the Dockerfile and, because of autoDeployTrigger: checksPass, publishes a new version
+# after every push to main ONLY when the GitHub tests have passed.
+services:
+  - type: web
+    name: inpro-copilot
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: GEMINI_API_KEY          # asked once when the Blueprint is created; stored encrypted by Render
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false

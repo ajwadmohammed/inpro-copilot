@@ -1,0 +1,24 @@
+# Every push and pull request: install the app and run all tests.
+# Render publishes a new version only after this check has passed (render.yaml: autoDeployTrigger: checksPass).
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install Tesseract (reads scanned invoices)
+        run: sudo apt-get update -q && sudo apt-get install -y -q tesseract-ocr
+      - run: pip install -r requirements.txt
+      - name: Run the tests
+        run: python -m pytest -q

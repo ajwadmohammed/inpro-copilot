@@ -72,7 +72,7 @@ def test_public_demo_protects_the_shared_accounts(public):
 def test_public_demo_headers_and_health(public):
     a, c = public
     h = c.get("/").headers
-    assert "frame-ancestors https://huggingface.co" in h["content-security-policy"] and "x-frame-options" not in h
+    assert "frame-ancestors 'none'" in h["content-security-policy"] and h["x-frame-options"] == "DENY"
     assert c.head("/api/health").status_code == 200 and c.head("/").status_code == 200
     assert "cdn.jsdelivr.net" in c.get("/docs").headers["content-security-policy"]
     assert c.get("/api/auth/config").json()["public"] is True
@@ -82,3 +82,9 @@ def test_public_demo_headers_and_health(public):
 def test_private_install_keeps_strict_framing(app):
     h = TestClient(app).get("/").headers
     assert h["x-frame-options"] == "DENY" and "frame-ancestors 'none'" in h["content-security-policy"]
+
+
+def test_framing_can_be_allowed_for_one_named_host(tmp_path, monkeypatch):
+    monkeypatch.setenv("INPRO_FRAME_ANCESTORS", "https://huggingface.co")
+    h = TestClient(create_app(db_path=str(tmp_path / "f.db"), upload_dir=str(tmp_path / "fu"), extractor="rules")).get("/").headers
+    assert "frame-ancestors https://huggingface.co" in h["content-security-policy"] and "x-frame-options" not in h
