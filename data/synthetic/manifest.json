@@ -1,0 +1,1627 @@
+{
+ "known_tax_ids": {
+  "QualityHosting.pdf": "DE232446240",
+  "coolblue1.pdf": "NL810433941B01",
+  "coolblue2.pdf": "NL810433941B01",
+  "free_fiber.pdf": "FR60421938861",
+  "oyo.pdf": "06AABCO6063D1ZQ"
+ },
+ "known_bank": {
+  "coolblue1.pdf": "NL50INGB0683251309",
+  "coolblue2.pdf": "NL50INGB0683251309",
+  "NetpresseInvoice.pdf": "FR7610107002450061705231739",
+  "QualityHosting.pdf": "DE30507500940000048567",
+  "sparrow_invoice_1.pdf": "GB50ACIE59715038217063",
+  "AzureInterior.pdf": "US1234567890",
+  "oyo.pdf": "00030340067212 / HDFC0000003"
+ },
+ "known_domains": {
+  "AzureInterior.pdf": "azure-interior.com",
+  "QualityHosting.pdf": "qualityhosting.de",
+  "oyo.pdf": "oyorooms.com",
+  "free_fiber.pdf": "free.fr",
+  "FlipkartInvoice.pdf": "flipkart.com",
+  "coolblue1.pdf": "coolblue.nl",
+  "coolblue2.pdf": "coolblue.nl",
+  "NetpresseInvoice.pdf": "publicationannoncelegale.fr"
+ },
+ "cases": [
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/AmazonWebServices/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/AmazonWebServices/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/AmazonWebServices/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/AmazonWebServices/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/AmazonWebServices/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 4.11,
+    "vendor": "Amazon Web Services"
+   }
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/AmazonWebServices/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 2.06,
+    "vendor": "Amazon Web Services"
+   }
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/AmazonWebServices/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 4.11,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/AmazonWebServices/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "AmazonWebServices.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/AmazonWebServices/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/AzureInterior/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/AzureInterior/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/AzureInterior/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/AzureInterior/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/AzureInterior/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/AzureInterior/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/AzureInterior/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 279.84,
+    "vendor": "Azure Interior"
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/AzureInterior/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 139.92,
+    "vendor": "Azure Interior"
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/AzureInterior/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 279.84,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/AzureInterior/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "AzureInterior.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/AzureInterior/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/FlipkartInvoice/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/FlipkartInvoice/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/FlipkartInvoice/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/FlipkartInvoice/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/FlipkartInvoice/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 319.0,
+    "vendor": "WS Retail Services"
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/FlipkartInvoice/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 159.5,
+    "vendor": "WS Retail Services"
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/FlipkartInvoice/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 319.0,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/FlipkartInvoice/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "FlipkartInvoice.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/FlipkartInvoice/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/NetpresseInvoice/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/NetpresseInvoice/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/NetpresseInvoice/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/NetpresseInvoice/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/NetpresseInvoice/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/NetpresseInvoice/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "iban_typo",
+   "file": "data/synthetic/NetpresseInvoice/iban_typo.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/NetpresseInvoice/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 56.02,
+    "vendor": "NETPRESSE"
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/NetpresseInvoice/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 28.01,
+    "vendor": "NETPRESSE"
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/NetpresseInvoice/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 56.02,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/NetpresseInvoice/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "NetpresseInvoice.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/NetpresseInvoice/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/QualityHosting/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/QualityHosting/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/QualityHosting/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/QualityHosting/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "vendor_taxid_swapped",
+   "file": "data/synthetic/QualityHosting/taxid_swapped.pdf",
+   "expect": {
+    "check": "vendor",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/QualityHosting/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "iban_typo",
+   "file": "data/synthetic/QualityHosting/iban_typo.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/QualityHosting/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 34.73,
+    "vendor": "QualityHosting"
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/QualityHosting/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 17.36,
+    "vendor": "QualityHosting"
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/QualityHosting/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 34.73,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/QualityHosting/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "QualityHosting.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/QualityHosting/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/SammyMaystoneLinesTest/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/SammyMaystoneLinesTest/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/SammyMaystoneLinesTest/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/SammyMaystoneLinesTest/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/SammyMaystoneLinesTest/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 127.5,
+    "vendor": "Sammy Maystone"
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/SammyMaystoneLinesTest/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 63.75,
+    "vendor": "Sammy Maystone"
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/SammyMaystoneLinesTest/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 127.5,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/SammyMaystoneLinesTest/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "SammyMaystoneLinesTest.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/SammyMaystoneLinesTest/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/coolblue1/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/coolblue1/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/coolblue1/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/coolblue1/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/coolblue1/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "vendor_taxid_swapped",
+   "file": "data/synthetic/coolblue1/taxid_swapped.pdf",
+   "expect": {
+    "check": "vendor",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/coolblue1/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "iban_typo",
+   "file": "data/synthetic/coolblue1/iban_typo.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/coolblue1/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 717.97,
+    "vendor": "Coolblue"
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/coolblue1/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 358.99,
+    "vendor": "Coolblue"
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/coolblue1/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 717.97,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/coolblue1/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "coolblue1.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/coolblue1/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/coolblue2/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/coolblue2/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/coolblue2/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/coolblue2/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/coolblue2/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "vendor_taxid_swapped",
+   "file": "data/synthetic/coolblue2/taxid_swapped.pdf",
+   "expect": {
+    "check": "vendor",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/coolblue2/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "iban_typo",
+   "file": "data/synthetic/coolblue2/iban_typo.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/coolblue2/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 4904.94,
+    "vendor": "Coolblue"
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/coolblue2/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 2452.47,
+    "vendor": "Coolblue"
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/coolblue2/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 4904.94,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/coolblue2/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "coolblue2.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/coolblue2/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/free_fiber/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/free_fiber/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/free_fiber/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/free_fiber/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/free_fiber/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/free_fiber/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 29.99,
+    "vendor": "Free"
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/free_fiber/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 14.99,
+    "vendor": "Free"
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/free_fiber/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 29.99,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/free_fiber/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "free_fiber.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/free_fiber/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/oyo/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/oyo/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/oyo/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "gstin_typo",
+   "file": "data/synthetic/oyo/gstin_typo.pdf",
+   "expect": {
+    "check": "tax_id",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/oyo/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/oyo/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 1939.0,
+    "vendor": "OYO"
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/oyo/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 969.5,
+    "vendor": "OYO"
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/oyo/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 1939.0,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/oyo/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "oyo.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/oyo/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/saeco/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/saeco/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/saeco/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/saeco/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/saeco/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/saeco/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 49.99,
+    "vendor": "e-Luscious"
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/saeco/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 25.0,
+    "vendor": "e-Luscious"
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/saeco/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 49.99,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/saeco/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "saeco.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/saeco/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "duplicate_exact",
+   "file": "data/synthetic/sparrow_invoice_1/dup_exact.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "duplicate_renumbered",
+   "file": "data/synthetic/sparrow_invoice_1/dup_renumbered.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "same_number_new_amount",
+   "file": "data/synthetic/sparrow_invoice_1/dup_new_amount.pdf",
+   "expect": {
+    "check": "duplicate",
+    "status": [
+     "fail"
+    ]
+   },
+   "needs_base_first": true
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "math_tampered_total",
+   "file": "data/synthetic/sparrow_invoice_1/math_tampered.pdf",
+   "expect": {
+    "check": "math",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "missing_invoice_number",
+   "file": "data/synthetic/sparrow_invoice_1/no_number.pdf",
+   "expect": {
+    "check": "completeness",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "bank_changed",
+   "file": "data/synthetic/sparrow_invoice_1/bank_changed.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "iban_typo",
+   "file": "data/synthetic/sparrow_invoice_1/iban_typo.pdf",
+   "expect": {
+    "check": "bank",
+    "status": [
+     "fail"
+    ]
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "po_match_ok",
+   "file": "data/synthetic/sparrow_invoice_1/po_ok.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "pass"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 212.09,
+    "vendor": "Chapman, Kim and Green"
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "po_overbilled",
+   "file": "data/synthetic/sparrow_invoice_1/po_overbilled.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 106.05,
+    "vendor": "Chapman, Kim and Green"
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "po_wrong_vendor",
+   "file": "data/synthetic/sparrow_invoice_1/po_wrong_vendor.pdf",
+   "expect": {
+    "check": "po_match",
+    "status": [
+     "warn",
+     "fail"
+    ]
+   },
+   "po": {
+    "number": "PO-7731",
+    "amount": 212.09,
+    "vendor": "Zenith Logistics Corp"
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "scan_image",
+   "file": "data/synthetic/sparrow_invoice_1/scan.jpg",
+   "expect": {
+    "score_against_truth": true
+   }
+  },
+  {
+   "base": "sparrow_invoice_1.pdf",
+   "scenario": "scan_pdf",
+   "file": "data/synthetic/sparrow_invoice_1/scan.pdf",
+   "expect": {
+    "score_against_truth": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,173 @@
+{
+ "reading_digital": {
+  "by_field": {
+   "vendor": [
+    9,
+    12
+   ],
+   "invoice_number": [
+    12,
+    12
+   ],
+   "invoice_date": [
+    12,
+    12
+   ],
+   "currency": [
+    12,
+    12
+   ],
+   "subtotal": [
+    7,
+    7
+   ],
+   "tax_amount": [
+    7,
+    7
+   ],
+   "total": [
+    12,
+    12
+   ]
+  },
+  "overall": [
+   71,
+   74
+  ],
+  "ms_per_doc": 12
+ },
+ "reading_scans": {
+  "scan_image": {
+   "by_field": {
+    "vendor": [
+     10,
+     12
+    ],
+    "invoice_number": [
+     10,
+     12
+    ],
+    "invoice_date": [
+     10,
+     12
+    ],
+    "currency": [
+     11,
+     12
+    ],
+    "subtotal": [
+     6,
+     7
+    ],
+    "tax_amount": [
+     6,
+     7
+    ],
+    "total": [
+     9,
+     12
+    ]
+   },
+   "overall": [
+    62,
+    74
+   ],
+   "ms_per_doc": 1539
+  },
+  "scan_pdf": {
+   "by_field": {
+    "vendor": [
+     10,
+     12
+    ],
+    "invoice_number": [
+     10,
+     12
+    ],
+    "invoice_date": [
+     10,
+     12
+    ],
+    "currency": [
+     11,
+     12
+    ],
+    "subtotal": [
+     6,
+     7
+    ],
+    "tax_amount": [
+     6,
+     7
+    ],
+    "total": [
+     9,
+     12
+    ]
+   },
+   "overall": [
+    62,
+    74
+   ],
+   "ms_per_doc": 1470
+  }
+ },
+ "detection": {
+  "duplicate_exact": [
+   12,
+   12
+  ],
+  "duplicate_renumbered": [
+   12,
+   12
+  ],
+  "same_number_new_amount": [
+   11,
+   11
+  ],
+  "missing_invoice_number": [
+   12,
+   12
+  ],
+  "po_match_ok": [
+   11,
+   12
+  ],
+  "po_overbilled": [
+   12,
+   12
+  ],
+  "po_wrong_vendor": [
+   12,
+   12
+  ],
+  "math_tampered_total": [
+   7,
+   7
+  ],
+  "vendor_taxid_swapped": [
+   3,
+   3
+  ],
+  "gstin_typo": [
+   1,
+   1
+  ]
+ },
+ "detection_misses": [
+  [
+   "po_match_ok",
+   "saeco.pdf",
+   "po_match=warn",
+   "VF1005193039",
+   49.99
+  ]
+ ],
+ "clean": {
+  "outcomes": {
+   "needs_review": 7,
+   "auto_approve": 5
+  },
+  "false_fails": []
+ }
+}

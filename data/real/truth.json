@@ -1,0 +1,15 @@
+{
+  "_note": "Hand-verified answer key for the 12 real invoices. Sources: the invoice2data repo answer files (invoice-x/invoice2data, tests/compare) cross-checked against the PDF text by eye; sparrow_invoice_1 comes from katanaml/sparrow and was keyed by hand from its text. Amounts are the grand total INCLUDING tax.",
+  "AmazonWebServices.pdf": {"vendor": ["Amazon Web Services"], "invoice_number": "42183017", "invoice_date": "2014-08-03", "currency": "USD", "total": 4.11},
+  "AzureInterior.pdf": {"vendor": ["Azure Interior"], "invoice_number": "INV/2023/03/0008", "invoice_date": "2023-03-20", "currency": "USD", "subtotal": 262.90, "tax_amount": 16.94, "total": 279.84},
+  "FlipkartInvoice.pdf": {"vendor": ["WS Retail Services", "Flipkart"], "invoice_number": "BLR_WFLD20151000982590", "invoice_date": "2015-10-20", "currency": "INR", "total": 319.00},
+  "NetpresseInvoice.pdf": {"vendor": ["NETPRESSE"], "invoice_number": "2022089083", "invoice_date": "2022-11-28", "currency": "EUR", "subtotal": 46.68, "tax_amount": 9.34, "total": 56.02},
+  "QualityHosting.pdf": {"vendor": ["QualityHosting"], "invoice_number": "30064443", "invoice_date": "2014-05-07", "currency": "EUR", "total": 34.73},
+  "SammyMaystoneLinesTest.pdf": {"vendor": ["Sammy Maystone"], "invoice_number": "invoice_number_1", "invoice_date": "2022-01-01", "currency": "USD", "total": 127.50},
+  "coolblue1.pdf": {"vendor": ["Coolblue"], "invoice_number": "993548900", "invoice_date": "2014-04-19", "currency": "EUR", "subtotal": 593.36, "tax_amount": 124.61, "total": 717.97},
+  "coolblue2.pdf": {"vendor": ["Coolblue"], "invoice_number": "992288600", "invoice_date": "2014-03-29", "currency": "EUR", "subtotal": 4053.67, "tax_amount": 851.27, "total": 4904.94},
+  "free_fiber.pdf": {"vendor": ["Free"], "invoice_number": "562044387", "invoice_date": "2015-07-02", "currency": "EUR", "subtotal": 24.99, "tax_amount": 5.00, "total": 29.99},
+  "oyo.pdf": {"vendor": ["OYO", "Oravel"], "invoice_number": "IBZY2087", "invoice_date": "2017-12-31", "currency": "INR", "total": 1939.00},
+  "saeco.pdf": {"vendor": ["e-Luscious", "Saeco"], "invoice_number": "VF1005193039", "invoice_date": "2022-09-08", "currency": "EUR", "subtotal": 41.31, "tax_amount": 8.68, "total": 49.99},
+  "sparrow_invoice_1.pdf": {"vendor": ["Chapman, Kim and Green"], "invoice_number": "61356291", "invoice_date": "2012-09-06", "invoice_date_alt": "2012-06-09", "currency": "USD", "subtotal": 192.81, "tax_amount": 19.28, "total": 212.09}
+}

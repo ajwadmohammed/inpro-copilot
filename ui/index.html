@@ -1,0 +1,1442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InPro Copilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================ tokens */
+  :root {
+    --canvas: #f2f3f5;  --surface: #ffffff;  --surface-2: #f7f8fa;  --surface-3: #eef0f3;
+    --ink: #1a1f27;     --ink-2: #4a5260;    --ink-3: #6e7683;
+    --line: #e3e6ea;    --line-2: #cdd2d9;
+    --primary: #1f2a37; --primary-hover: #2c3a4a; --on-primary: #ffffff;
+    --ok: #1d7a4e;   --ok-bg: #e7f4ed;   --ok-line: #b9dfca;
+    --warn: #935700; --warn-bg: #fbf1de; --warn-line: #ecd3a3;
+    --bad: #b42318;  --bad-bg: #fdeceb;  --bad-line: #f3c2bd;
+    --skip: #6e7683; --skip-bg: #eef0f3;
+    --focus: #3d6fb6;
+    --radius: 8px;
+    --shadow: 0 1px 2px rgba(16, 24, 40, .06);
+    --font: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: #0f1216;  --surface: #161a20;  --surface-2: #1b2027;  --surface-3: #222831;
+      --ink: #e7eaee;     --ink-2: #a9b1bc;    --ink-3: #7e8794;
+      --line: #262c35;    --line-2: #353c47;
+      --primary: #e7eaee; --primary-hover: #ffffff; --on-primary: #11151a;
+      --ok: #4cc38a;   --ok-bg: #11281d;   --ok-line: #1f4a35;
+      --warn: #e5a443; --warn-bg: #2b2111; --warn-line: #4f3b17;
+      --bad: #f2766b;  --bad-bg: #321614;  --bad-line: #5a2622;
+      --skip: #7e8794; --skip-bg: #222831;
+      --focus: #7aa7e6;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+  }
+
+  /* ============================================================ base */
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font: 400 14.5px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .muted { color: var(--ink-3); }
+  .sub { color: var(--ink-3); font-size: 13px; }
+  h1 { font-size: 22px; line-height: 1.25; margin: 0; letter-spacing: -0.01em; font-weight: 600; }
+  h2 { font-size: 14.5px; font-weight: 600; margin: 28px 0 10px; }
+  p { margin: 0; }
+  svg { flex: none; }
+
+  /* ============================================================ buttons: one system everywhere */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 14px;
+         border-radius: var(--radius); border: 1px solid var(--line-2); background: var(--surface); color: var(--ink);
+         font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; white-space: nowrap;
+         transition: background .12s, border-color .12s; }
+  .btn:hover { background: var(--surface-2); border-color: var(--ink-3); }
+  .btn-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+  .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn-approve { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .btn-approve:hover { background: color-mix(in srgb, var(--ok) 88%, #000); border-color: transparent; }
+  .btn-reject { color: var(--bad); border-color: var(--bad-line); }
+  .btn-reject:hover { background: var(--bad-bg); border-color: var(--bad); }
+  .btn-ghost { border-color: transparent; background: transparent; color: var(--ink-2); padding: 0 10px; }
+  .btn-ghost:hover { background: var(--surface-3); border-color: transparent; color: var(--ink); }
+  .btn-danger { color: var(--bad); }
+  .btn-sm { height: 30px; padding: 0 10px; font-size: 13px; }
+  .btn-block { width: 100%; }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+  @media (prefers-color-scheme: dark) { .btn-approve { color: #0b1a12; } }
+
+  /* ============================================================ form controls */
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .input, select.input, textarea.input { height: 38px; width: 100%; padding: 0 12px; border: 1px solid var(--line-2); border-radius: var(--radius);
+         background: var(--surface); transition: border-color .12s, box-shadow .12s; }
+  textarea.input { height: auto; min-height: 40px; padding: 9px 12px; resize: vertical; }
+  .input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent); }
+  .input::placeholder { color: var(--ink-3); }
+  .form-error { color: var(--bad); font-size: 13.5px; }
+
+  /* ============================================================ sign-in */
+  .login { min-height: 100%; display: grid; place-items: center; padding: 40px 16px; }
+  .login-box { width: 100%; max-width: 400px; }
+  .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; font-weight: 600; font-size: 16px; }
+  .login-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 28px; box-shadow: var(--shadow); }
+  .login-card h1 { font-size: 20px; margin-bottom: 4px; }
+  .login-card form { display: grid; gap: 16px; margin-top: 22px; }
+  .demo { margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  .demo-head { padding: 14px 18px 10px; font-size: 13px; color: var(--ink-2); }
+  .demo-head b { color: var(--ink); font-weight: 600; }
+  .demo-row { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-top: 1px solid var(--line); }
+  .demo-row div { flex: 1; min-width: 0; }
+  .demo-row b { font-weight: 600; font-size: 14px; }
+  .login-foot { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); text-align: center; }
+  .login.split { grid-template-columns: minmax(0, 540px) minmax(0, 400px); gap: 72px; justify-content: center; align-content: center; }
+  .pitch h1 { font-size: 36px; line-height: 1.12; letter-spacing: -0.028em; font-weight: 600; margin: 34px 0 14px; max-width: 20ch; }
+  .pitch > p { color: var(--ink-2); font-size: 15.5px; line-height: 1.55; max-width: 48ch; }
+  .evidence { margin-top: 30px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); }
+  .ev-head { padding: 11px 16px; font-size: 12.5px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
+  .ev-row { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .ev-row:last-child { border-bottom: 0; }
+  .ev-label { font-size: 13px; font-weight: 600; }
+  .ev-vals { display: grid; gap: 4px; min-width: 0; }
+  .ev-vals > span { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .ev-vals svg { width: 12px; height: 12px; flex: none; }
+  .ev-ok svg { color: var(--ok); } .ev-bad svg { color: var(--bad); }
+  .ev-vals code { font: 500 12.5px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ev-ok code { color: var(--ink-3); }
+  .ev-vals mark { background: var(--bad-bg); color: var(--bad); border-radius: 2px; padding: 0 1px; }
+  .pitch > p.credit { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 60ch; }
+  .demo.first { margin-top: 0; }
+  .login-card.secondary { margin-top: 16px; padding: 22px 24px; box-shadow: none; }
+  .login-card.secondary h1 { font-size: 15px; font-weight: 600; }
+  .login-card.secondary form { margin-top: 16px; gap: 12px; }
+
+  /* ============================================================ app shell */
+  .shell { display: grid; grid-template-columns: 236px 1fr; height: 100%; }
+  .side { background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 18px 18px 14px; font-weight: 600; font-size: 15.5px; text-decoration: none; }
+  .brand-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
+  .brand small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); margin-top: -2px; }
+  nav.menu { padding: 6px 10px; display: grid; gap: 2px; }
+  .menu a { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 7px; text-decoration: none; color: var(--ink-2); font-weight: 500; }
+  .menu a:hover { background: var(--surface-3); color: var(--ink); }
+  .menu a[aria-current="page"] { background: var(--surface-3); color: var(--ink); box-shadow: inset 2px 0 0 var(--primary); }
+  .menu .count { margin-left: auto; font-size: 12px; font-weight: 600; background: var(--warn-bg); color: var(--warn); border-radius: 99px; padding: 0 8px; line-height: 20px; }
+  .menu-label { font-size: 12px; color: var(--ink-3); padding: 14px 20px 4px; }
+  .side-foot { margin-top: auto; border-top: 1px solid var(--line); padding: 14px; display: grid; gap: 10px; }
+  .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-3); display: grid; place-items: center; font-weight: 600; font-size: 12.5px; color: var(--ink-2); flex: none; }
+  .who div b { display: block; font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .who div span { display: block; font-size: 12px; color: var(--ink-3); }
+  .side-actions { display: flex; gap: 4px; }
+  .reader { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); padding: 0 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+
+  main { min-width: 0; min-height: 0; overflow-y: auto; }
+  .page { max-width: 1160px; margin: 0 auto; padding: 28px 32px 64px; }
+  .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .page-head p { color: var(--ink-2); margin-top: 4px; max-width: 64ch; }
+  .page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ============================================================ panels and tables */
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+  .page > .panel + .panel { margin-top: 16px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .panel-head h2 { margin: 0; }
+  .panel-body { padding: 18px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-weight: 600; font-size: 12.5px; color: var(--ink-3); padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); white-space: nowrap; }
+  th:first-child { border-top-left-radius: 10px; } th:last-child { border-top-right-radius: 10px; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tr.click { cursor: pointer; }
+  tr.click:hover td { background: var(--surface-2); }
+  td.r, th.r { text-align: right; }
+  td.num, td.r { white-space: nowrap; }
+  td .verdict { white-space: nowrap; }
+  .cell-title { font-weight: 600; color: var(--ink); text-decoration: none; }
+  .empty { padding: 48px 24px; text-align: center; color: var(--ink-2); }
+  .empty p { margin-bottom: 16px; }
+
+  /* status, verdicts */
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; height: 24px; padding: 0 10px; border-radius: 99px; white-space: nowrap; border: 1px solid transparent; }
+  .p-pending  { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-line); }
+  .p-approved { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
+  .p-rejected { background: var(--bad-bg); color: var(--bad); border-color: var(--bad-line); }
+  .p-neutral  { background: var(--surface-3); color: var(--ink-2); }
+  .verdict { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13.5px; }
+  .v-ok { color: var(--ok); } .v-warn { color: var(--warn); } .v-bad { color: var(--bad); }
+
+  /* the queue summary */
+  .summary { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; padding: 16px 18px; }
+  .bar { flex: 1 1 260px; display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--surface-3); }
+  .bar i { display: block; height: 100%; }
+  .legend { display: flex; gap: 6px 20px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .seg { display: inline-flex; background: var(--surface-3); border-radius: 9px; padding: 3px; gap: 2px; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .seg button { border: 0; background: transparent; height: 30px; padding: 0 12px; border-radius: 7px; cursor: pointer; color: var(--ink-2); font-weight: 500; font-size: 13.5px; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  .seg small { margin-left: 6px; color: var(--ink-3); font-weight: 500; }
+  .search { position: relative; flex: 0 1 300px; }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
+  .search .input { padding-left: 34px; }
+
+  .dropzone { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; background: color-mix(in srgb, var(--canvas) 80%, transparent); }
+  .dropzone.on { display: grid; }
+  .dropzone div { border: 2px dashed var(--ink-3); border-radius: 16px; padding: 44px 64px; background: var(--surface); font-weight: 600; text-align: center; }
+  .dropzone div span { display: block; font-weight: 400; color: var(--ink-2); margin-top: 4px; }
+  .note-line { font-size: 12.5px; color: var(--ink-3); margin-top: 14px; }
+
+  /* ============================================================ invoice review */
+  .review { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+  .review-top { display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: var(--surface); border-bottom: 1px solid var(--line); min-width: 0; }
+  .crumb { color: var(--ink-3); font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .crumb b { color: var(--ink); font-weight: 600; }
+  .grow { flex: 1; }
+  .review-body { display: grid; grid-template-columns: minmax(400px, 480px) 1fr; min-height: 0; }
+  .detail { overflow-y: auto; background: var(--surface); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .detail-body { padding: 22px 24px 18px; flex: 1; }
+  .amount { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin: 12px 0 10px; }
+  .amount small { font-size: 14px; font-weight: 500; color: var(--ink-3); margin-left: 6px; letter-spacing: 0; }
+  .facts { color: var(--ink-2); font-size: 13.5px; margin-top: 4px; }
+
+  .advice { border-radius: 10px; padding: 14px 16px; margin-top: 18px; border: 1px solid; }
+  .advice.ok { background: var(--ok-bg); border-color: var(--ok-line); }
+  .advice.warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .advice.bad { background: var(--bad-bg); border-color: var(--bad-line); }
+  .advice .verdict { font-size: 15px; }
+  .advice p { margin-top: 6px; }
+  .advice ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 13.5px; }
+
+  /* the auditor's margin: a tick, a flag or a cross beside each check */
+  .checks { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .checks li { display: grid; grid-template-columns: 26px 1fr; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .checks .name { font-weight: 600; font-size: 14px; }
+  .checks .msg { color: var(--ink-2); font-size: 13.5px; }
+  .mark { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; margin-top: 1px; }
+  .m-pass { background: var(--ok-bg); color: var(--ok); }
+  .m-warn { background: var(--warn-bg); color: var(--warn); }
+  .m-fail { background: var(--bad-bg); color: var(--bad); }
+  .m-skip { background: var(--skip-bg); color: var(--skip); }
+
+  dl.fields { margin: 0; display: grid; grid-template-columns: 136px 1fr; border-top: 1px solid var(--line); font-size: 14px; }
+  dl.fields dt, dl.fields dd { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  dl.fields dt { color: var(--ink-3); }
+  dl.fields dd { font-weight: 500; overflow-wrap: anywhere; }
+  .missing { color: var(--ink-3); font-weight: 400; font-style: italic; }
+  .notes { font-size: 13px; color: var(--ink-2); margin-top: 10px; display: grid; gap: 4px; }
+
+  details.trace-box summary { cursor: pointer; font-weight: 600; font-size: 14.5px; margin: 28px 0 10px; list-style: none; display: flex; align-items: center; gap: 8px; }
+  details.trace-box summary::-webkit-details-marker { display: none; }
+  details.trace-box summary svg { transition: transform .15s; }
+  details.trace-box[open] summary svg { transform: rotate(90deg); }
+  ol.trace { margin: 0; padding: 0; list-style: none; border-left: 2px solid var(--line); margin-left: 6px; }
+  ol.trace li { padding: 0 0 12px 16px; position: relative; font-size: 13.5px; }
+  ol.trace li::before { content: ""; position: absolute; left: -6px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink-3); }
+  ol.trace b { font-weight: 600; }
+  ol.trace .t { color: var(--ink-3); font-size: 12.5px; }
+
+  ul.hist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  ul.hist li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  ul.hist .actor { font-weight: 600; }
+  ul.hist .when { color: var(--ink-3); font-size: 12.5px; display: block; }
+
+  .decide { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); padding: 14px 24px 16px; display: grid; gap: 10px; }
+  .decide .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stamp { border: 1px solid; border-radius: var(--radius); padding: 10px 12px; font-size: 13.5px; }
+  .stamp.ok { background: var(--ok-bg); border-color: var(--ok-line); }
+  .stamp.ok b { color: var(--ok); }
+  .stamp.bad { background: var(--bad-bg); border-color: var(--bad-line); }
+  .stamp.bad b { color: var(--bad); }
+  .stamp.flash { animation: settle 1.2s ease-out 1; }
+  @keyframes settle { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink-3) 30%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
+  .hint { font-size: 13px; color: var(--ink-2); display: flex; gap: 8px; align-items: flex-start; }
+  .hint svg { margin-top: 2px; color: var(--ink-3); }
+
+  .docpane { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--surface-3); }
+  .docbar { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 20px; border-bottom: 1px solid var(--line); background: var(--surface); font-size: 13.5px; color: var(--ink-2); }
+  .docbar b { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .doc { flex: 1; min-height: 0; overflow: auto; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .doc img { max-width: min(100%, 900px); height: auto; background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(16,24,40,.12), 0 0 0 1px rgba(16,24,40,.06); }
+
+  /* ============================================================ misc pages */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .metric { padding: 18px; }
+  .metric .label { font-size: 13px; color: var(--ink-3); }
+  .metric .value { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin-top: 2px; }
+  .meter { height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; margin-top: 12px; }
+  .meter i { display: block; height: 100%; background: var(--ink-2); }
+  .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+  .inline-actions { display: flex; gap: 4px; justify-content: flex-end; }
+  .kv { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; font-size: 14px; }
+  .kv dt { color: var(--ink-3); } .kv dd { margin: 0; }
+  .remaining { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+  .remaining .meter { width: 80px; margin: 0; }
+
+  dialog { border: 1px solid var(--line); border-radius: 12px; padding: 0; background: var(--surface); color: var(--ink); width: min(440px, calc(100vw - 32px)); box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(10, 14, 20, .45); }
+  dialog form { display: grid; gap: 14px; padding: 22px; }
+  dialog .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+  .toast { position: fixed; right: 20px; bottom: 20px; max-width: min(420px, calc(100vw - 40px)); background: var(--surface); color: var(--ink);
+           border: 1px solid var(--line-2); border-left: 4px solid var(--ink-2); border-radius: var(--radius); padding: 12px 14px; font-size: 14px; z-index: 40; box-shadow: 0 8px 24px rgba(0,0,0,.14); }
+  .toast.ok { border-left-color: var(--ok); } .toast.bad { border-left-color: var(--bad); }
+  .toast[hidden] { display: none; }
+
+  /* ============================================================ overview */
+  /* flow palette: validated for colour-vision deficiency in both modes (amber never sits next to red) */
+  :root { --f-clear: #1d7a4e; --f-wait: #c48a12; --f-people: #3d63a8; --f-stop: #b42318; }
+  @media (prefers-color-scheme: dark) { :root { --f-clear: #36a072; --f-wait: #c08a1f; --f-people: #6b8bd6; --f-stop: #e2503f; } }
+  .hero { padding: 26px 26px 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: end; }
+  .hero-label { font-size: 13.5px; color: var(--ink-2); grid-column: 1 / -1; }
+  .hero-value { font-size: 52px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+  .hero-value small { font-size: 22px; font-weight: 500; color: var(--ink-3); margin-right: 6px; letter-spacing: 0; }
+  .hero-also { color: var(--ink-2); font-size: 14px; margin-top: 10px; }
+  .hero-side { text-align: right; color: var(--ink-2); font-size: 13.5px; }
+  .hero-side b { display: block; font-size: 26px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+  .hero-side .fine { display: block; margin-top: 4px; font-size: 12px; color: var(--ink-3); }
+  .flow { padding: 0 26px 24px; }
+  .flow-title { font-size: 13.5px; color: var(--ink-2); margin-bottom: 10px; }
+  .flowbar { display: flex; gap: 2px; height: 14px; }
+  .flowbar i { display: block; height: 100%; min-width: 4px; border-radius: 0; cursor: default; }
+  .flowbar i:first-child { border-radius: 4px 0 0 4px; } .flowbar i:last-child { border-radius: 0 4px 4px 0; }
+  .flowbar i:only-child { border-radius: 4px; }
+  .flowbar i:focus-visible { outline-offset: 3px; }
+  .flowkey { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+  .flowkey div { border-top: 2px solid var(--line); padding-top: 10px; font-size: 13.5px; color: var(--ink-2); }
+  .flowkey b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 20px; font-weight: 600; }
+  .flowkey .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .two { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; align-items: start; }
+  .ledger { list-style: none; margin: 0; padding: 0; }
+  .ledger li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .ledger li:last-child { border-bottom: 0; }
+  .ledger a { text-decoration: none; }
+  .ledger .amt { font-weight: 600; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ledger .why { grid-column: 1 / -1; color: var(--ink-2); font-size: 13.5px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; grid-column: 1 / -1; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 500; background: var(--bad-bg); color: var(--bad); border: 1px solid var(--bad-line); white-space: nowrap; }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-line); }
+  .chip.neutral { background: var(--surface-3); color: var(--ink-2); border-color: var(--line); }
+  .statement { margin: 0; }
+  .statement div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .statement div:last-child { border-bottom: 0; }
+  .statement dt { color: var(--ink-2); font-size: 13.5px; } .statement dd { margin: 0; font-weight: 600; font-size: 15px; text-align: right; white-space: nowrap; }
+  .statement .fine { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); }
+  .rank { list-style: none; margin: 0; padding: 8px 18px 14px; display: grid; gap: 10px; }
+  .rank li { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 12px; align-items: center; font-size: 13.5px; }
+  .rank .track { display: flex; align-items: center; gap: 8px; }
+  .rank .bar-h { height: 8px; border-radius: 0 4px 4px 0; background: var(--f-stop); min-width: 4px; }
+  .rank .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; padding: 6px 9px; border-radius: 6px; max-width: 280px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .tip[hidden] { display: none; }
+
+  /* ============================================================ inbox */
+  .channel { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--line); align-items: start; }
+  .channel:last-child { border-bottom: 0; }
+  .channel-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--surface-3); display: grid; place-items: center; color: var(--ink-2); }
+  .channel b { font-weight: 600; }
+  .channel p { color: var(--ink-2); font-size: 13.5px; margin-top: 2px; }
+  .path { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--surface-3); border-radius: 5px; padding: 2px 6px; overflow-wrap: anywhere; color: var(--ink); }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+  .live .dot { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+  .live.off .dot { background: var(--ink-3); box-shadow: none; }
+  .from b { font-weight: 600; display: block; } .from span { color: var(--ink-3); font-size: 12.5px; }
+  .story { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
+  .story li { display: flex; gap: 8px; } .story b { color: var(--ink); font-weight: 600; min-width: 18px; }
+  .source-line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+
+  /* ============================================================ fraud lab */
+  .score { display: flex; gap: 6px 22px; flex-wrap: wrap; align-items: baseline; font-size: 13px; color: var(--ink-2); }
+  .score b { font-size: 22px; font-weight: 600; color: var(--ink); margin-right: 5px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .lab { display: grid; grid-template-columns: minmax(330px, 390px) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .lab-step { padding: 18px 18px 8px; }
+  .lab-step + .lab-step { padding-top: 10px; }
+  .lab-step h2 { margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; }
+  .lab-step h2 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .pick { position: relative; display: block; }
+  .pick input { position: absolute; opacity: 0; pointer-events: none; }
+  .pick .card { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; background: var(--surface); transition: border-color .12s, background .12s; }
+  .pick .card:hover { border-color: var(--line-2); background: var(--surface-2); }
+  .pick input:checked + .card { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .pick input:focus-visible + .card { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .pick img { width: 38px; height: 52px; object-fit: cover; object-position: top; border-radius: 3px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+  .pick b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pick span { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tricks { border-top: 1px solid var(--line); }
+  .trick { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .trick:last-child { border-bottom: 0; }
+  .trick input[type=radio] { margin: 4px 0 0; accent-color: var(--ink); width: 15px; height: 15px; }
+  .trick b { font-weight: 600; font-size: 14px; }
+  .trick p { color: var(--ink-2); font-size: 13px; margin-top: 1px; }
+  .trick .input { margin-top: 9px; height: 34px; font-size: 13.5px; }
+  .lab-go { padding: 14px 18px 18px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
+  .outcome { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 20px 22px 16px; }
+  .outcome .ring { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+  .outcome .ring svg { width: 22px; height: 22px; }
+  .outcome.bad .ring { background: var(--bad-bg); color: var(--bad); } .outcome.warn .ring { background: var(--warn-bg); color: var(--warn); } .outcome.ok .ring { background: var(--ok-bg); color: var(--ok); }
+  .outcome .word { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  .outcome.bad .word { color: var(--bad); } .outcome.warn .word { color: var(--warn); } .outcome.ok .word { color: var(--ok); }
+  .outcome .sub { font-size: 13.5px; }
+  .why { padding: 0 22px 16px; font-size: 14px; }
+  .why .by { color: var(--ink-2); }
+  .why .by b { color: var(--ink); }
+  .why q { display: block; quotes: none; margin-top: 8px; padding: 10px 12px; border-left: 3px solid var(--line-2); background: var(--surface-2); border-radius: 0 6px 6px 0; color: var(--ink-2); font-size: 13.5px; }
+  .mailhead { margin: 0 22px 16px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
+  .mailhead div { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--line); }
+  .mailhead div:last-child { border-bottom: 0; }
+  .mailhead dt { color: var(--ink-3); } .mailhead dd { margin: 0; overflow-wrap: anywhere; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px 22px 20px; background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .sheet { margin: 0; min-width: 0; }
+  .sheet figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .sheet figcaption a { font-weight: 500; color: var(--ink-2); font-size: 12.5px; }
+  .paper { position: relative; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px rgba(16,24,40,.14), 0 0 0 1px rgba(16,24,40,.07); overflow: hidden; }
+  .paper img { display: block; width: 100%; height: auto; }
+  .paper.blank { aspect-ratio: 1 / 1.33; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--ink-3); font-size: 13px; background: var(--surface); box-shadow: none; border: 1.5px dashed var(--line-2); }
+  .hit { position: absolute; border: 2px solid var(--bad); border-radius: 3px; background: rgba(180, 35, 24, .10); animation: hit-in .55s cubic-bezier(.2, .8, .2, 1) both .15s; }
+  .hit.was { border: 1.5px dashed #6e7683; background: rgba(110, 118, 131, .08); animation: none; }
+  @keyframes hit-in { from { transform: scale(2.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .loupe { margin-top: 10px; height: 58px; border-radius: 6px; background-color: #fff; background-repeat: no-repeat; box-shadow: 0 0 0 1px var(--line); }
+  .loupe.forged { box-shadow: 0 0 0 2px var(--bad-line); }
+  .diff { margin-top: 8px; font: 500 12.5px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace; overflow-wrap: anywhere; }
+  .diff mark { background: var(--bad-bg); color: var(--bad); border-radius: 2px; padding: 0 1px; }
+  .diff .old mark { background: var(--surface-3); color: var(--ink-2); text-decoration: line-through; }
+  .diff small { display: block; font: 400 12px/1.4 var(--font); color: var(--ink-3); margin-bottom: 2px; }
+  .checkrow { display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 22px 4px; }
+  .checkrow .chip { animation: chip-in .28s ease-out both; }
+  @keyframes chip-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .depth { padding: 10px 22px 20px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
+  .depth b { color: var(--ink); font-weight: 600; }
+  .lab-intro { padding: 20px 22px 18px; color: var(--ink-2); font-size: 14px; }
+
+  /* the blinking text cursor: only where you can actually type */
+  body { caret-color: transparent; }
+  input, textarea, select, [contenteditable="true"] { caret-color: auto; }
+
+  /* ============================================================ small screens */
+  @media (max-width: 960px) {
+    .shell { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+    .side { flex-direction: row; align-items: center; border-right: 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+    .brand { padding: 10px 14px; white-space: nowrap; } .brand small { display: none; }
+    .panel { overflow-x: auto; }
+    .panel table { min-width: 560px; }
+    nav.menu { display: flex; padding: 6px; } .menu-label, .reader { display: none; }
+    .menu a { white-space: nowrap; }
+    .side-foot { margin: 0 0 0 auto; border: 0; padding: 6px 10px; display: flex; }
+    .who div { display: none; }
+    .page { padding: 20px 16px 48px; }
+    .review { display: block; height: auto; }
+    .review-top { position: sticky; top: 0; z-index: 2; flex-wrap: wrap; }
+    .review-body { display: block; }
+    .detail { border-right: 0; overflow: visible; display: block; }
+    .docpane { min-height: 70vh; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .hide-sm { display: none; }
+    .search { flex: 1 1 100%; }
+    .two { grid-template-columns: 1fr; }
+    .flowkey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .hero { grid-template-columns: 1fr; } .hero-side { text-align: left; }
+    .hero-value { font-size: 40px; }
+    .rank li { grid-template-columns: 120px minmax(0, 1fr); }
+    .channel { grid-template-columns: 36px minmax(0, 1fr); } .channel > :last-child { grid-column: 2; }
+    .lab { grid-template-columns: 1fr; }
+    .login.split { grid-template-columns: minmax(0, 440px); gap: 28px; }
+    .pitch h1 { font-size: 28px; margin-top: 22px; }
+    .evidence { display: none; }
+    .compare { gap: 12px; padding: 14px 16px 16px; }
+  }
+  @media (max-width: 520px) { .picks { grid-template-columns: 1fr; } .compare { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<input id="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.webp" multiple hidden>
+<div class="dropzone" id="dropzone" aria-hidden="true"><div>Drop to upload<span>PDF, photo or scan</span></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="pwDialog" aria-labelledby="pwTitle">
+  <form id="pwForm">
+    <h1 id="pwTitle" style="font-size:18px">Change your password</h1>
+    <div class="field"><label for="pwCur">Current password</label><input class="input" id="pwCur" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label for="pwNew">New password</label><input class="input" id="pwNew" type="password" autocomplete="new-password" required>
+      <span class="sub">At least 10 characters, with upper- and lower-case letters and a number.</span></div>
+    <div class="field"><label for="pwNew2">Repeat new password</label><input class="input" id="pwNew2" type="password" autocomplete="new-password" required></div>
+    <p class="form-error" id="pwErr" hidden></p>
+    <div class="row"><button class="btn" type="button" id="pwCancel">Cancel</button><button class="btn btn-primary" type="submit">Change password</button></div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ------------------------------------------------------------ icons (inline, inherit colour) */
+const svg = (d, s = 16, w = 1.8) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const I = {
+  logo: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14.5l2 2 4-4.5"/>', 16, 2),
+  inbox: svg('<path d="M4 13l2.5-7h11L20 13"/><path d="M4 13v6h16v-6h-5a3 3 0 0 1-6 0z"/>'),
+  vendor: svg('<path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-6h6v6"/>'),
+  po: svg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/>'),
+  activity: svg('<path d="M4 12h4l2-6 4 12 2-6h4"/>'),
+  ai: svg('<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>'),
+  users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.8 2.8 2.6 3 5.2"/>'),
+  upload: svg('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>'),
+  back: svg('<path d="M15 6l-6 6 6 6"/>'),
+  next: svg('<path d="M9 6l6 6-6 6"/>'),
+  ext: svg('<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v6H4V6h6"/>'),
+  key: svg('<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l2 2M15 8l2 2"/>'),
+  out: svg('<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>'),
+  search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>'),
+  info: svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>'),
+  lock: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
+  check: svg('<path d="M5 12.5l4.2 4.2L19 7"/>', 14, 2.6),
+  cross: svg('<path d="M6 6l12 12M18 6L6 18"/>', 14, 2.6),
+  flag: svg('<path d="M12 5v9M12 18.5v.5"/>', 14, 2.6),
+  dash: svg('<path d="M6 12h12"/>', 14, 2.6),
+  chev: svg('<path d="M9 6l6 6-6 6"/>', 14, 2.2),
+  overview: svg('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+  mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6 8.5-6"/>'),
+  folder: svg('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
+  file: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>'),
+  refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'),
+  flask: svg('<path d="M9 3h6M10 3v6.5L4.6 18.2A1.9 1.9 0 0 0 6.2 21h11.6a1.9 1.9 0 0 0 1.6-2.8L14 9.5V3"/><path d="M7.4 15h9.2"/>'),
+  shield: svg('<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
+};
+
+const OUTCOME = {
+  auto_approve: { label: "Recommend approve", cls: "ok",   icon: I.check },
+  needs_review: { label: "Needs your review", cls: "warn", icon: I.flag },
+  reject:       { label: "Recommend reject",  cls: "bad",  icon: I.cross },
+};
+const MARK = { pass: ["m-pass", I.check, "Passed"], warn: ["m-warn", I.flag, "Needs a look"], fail: ["m-fail", I.cross, "Failed"], skip: ["m-skip", I.dash, "Not checked"] };
+const CHECK_NAME = { completeness: "Required fields", math: "Arithmetic", duplicate: "Duplicates", vendor: "Vendor", tax_id: "Tax ID", po_match: "Purchase order", bank: "Bank account", sender: "Sender" };
+const STEP_NAME = { read: "Read the document", extract: "Extract the fields", decide: "Decide" };
+const STATUS_TXT = { pending: "Waiting for review", approved: "Approved", rejected: "Rejected" };
+const ROLE_TXT = { admin: "Admin", approver: "Approver", viewer: "Viewer", service: "Integration" };
+const ACTION_TXT = {
+  learned: "Remembered", demo_emails: "Loaded demo e-mails",
+  signed_in: "Signed in", signed_out: "Signed out", login_failed: "Failed sign-in", account_locked: "Account locked",
+  password_changed: "Changed password", user_created: "Created user", user_updated: "Updated user",
+  uploaded: "Uploaded", received: "Received", extracted: "Read the invoice", checked: "Ran the checks",
+  auto_approve: "Recommended approve", needs_review: "Sent for review", reject: "Recommended reject",
+  approved: "Approved", rejected: "Rejected", confirmed: "Confirmed decision", vendor_saved: "Saved vendor",
+  po_saved: "Saved purchase order", demo_reset: "Reset demo data",
+};
+
+/* ------------------------------------------------------------ formatting */
+function money(v, cur) {
+  if (v == null) return null;
+  try { return new Intl.NumberFormat(undefined, { style: "currency", currency: cur || "USD", currencyDisplay: "code" }).format(v).replace(/ /g, " "); }
+  catch { return Number(v).toLocaleString(undefined, { minimumFractionDigits: 2 }) + (cur ? " " + cur : ""); }
+}
+function prettyBank(v) {
+  if (!v) return v;
+  const [acct, ifsc] = String(v).split("/").map(x => x.trim());
+  const a = /^[A-Z]{2}\d{2}[A-Z0-9]{8,}$/.test(acct) ? acct.replace(/(.{4})/g, "$1 ").trim() : acct;
+  return ifsc ? `${a} (IFSC ${ifsc})` : a;
+}
+const plain = v => v == null ? null : Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function when(ts) { const d = new Date(ts); return isNaN(d) ? (ts || "") : d.toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }); }
+const initials = n => String(n || "?").split(/\s+/).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+const pct = (a, b) => b ? Math.min(100, Math.round(100 * a / b)) : 0;
+
+let toastTimer;
+function toast(msg, kind = "") { const t = $("#toast"); t.textContent = msg; t.className = "toast " + kind; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 7000); }
+
+/* ------------------------------------------------------------ talking to the server */
+let ME = null, CFG = null, HEALTH = null;
+const can = p => !!ME && ME.permissions.includes(p);
+
+async function api(path, opts = {}) {
+  const o = { ...opts, headers: { ...(opts.headers || {}) }, credentials: "same-origin" };
+  if (o.method && o.method !== "GET") o.headers["X-InPro-CSRF"] = "1";          // required for every change
+  if (o.json !== undefined) { o.body = JSON.stringify(o.json); o.headers["Content-Type"] = "application/json"; delete o.json; }
+  let r;
+  try { r = await fetch(path, o); } catch { throw new Error("Cannot reach the server. Check that it is running."); }
+  if (r.status === 401 && !path.startsWith("/api/auth/")) { ME = null; showLogin("Your session has ended. Please sign in again."); throw new Error("Please sign in."); }
+  if (!r.ok) { let d = ""; try { d = (await r.json()).detail; } catch {} if (Array.isArray(d)) d = d.map(x => x.msg).join("; "); throw new Error(d || `Request failed (${r.status})`); }
+  return r.json();
+}
+
+/* ============================================================ sign-in screen */
+function showLogin(message = "") {
+  document.title = "Sign in · InPro Copilot";
+  const demo = CFG && CFG.demo;
+  let framed = false; try { framed = window.self !== window.top; } catch { framed = true; }
+  // the evidence card: three of the eight checks, shown the way the review screen shows them
+  const ev = (label, good, bad, chip) => `<div class="ev-row"><span class="ev-label">${label}</span>
+      <span class="ev-vals"><span class="ev-ok">${I.check}<code>${good}</code></span><span class="ev-bad">${I.cross}<code>${bad}</code></span></span>
+      <span class="chip">${chip}</span></div>`;
+  $("#root").innerHTML = `
+  <div class="login ${demo ? "split" : ""}">
+    ${demo ? `<section class="pitch" aria-label="About InPro Copilot">
+      <div class="login-brand"><span class="brand-mark">${I.logo}</span>InPro Copilot</div>
+      <h1>Catches the invoice that should not be paid.</h1>
+      <p>Every invoice is read, put through eight checks and given a recommendation with its reasons, before anyone approves it. The decisions come from plain, explainable code; AI only helps read messy documents.</p>
+      <div class="evidence" aria-label="Examples of what the checks catch">
+        <div class="ev-head">Three of the eight checks, on real invoices</div>
+        ${ev("Bank account", "NL50 INGB 0683 2513 09", "NL<mark>86</mark> INGB 0683 <mark>5846 32</mark>", "Account changed")}
+        ${ev("Sender", "billing@azure-interior.com", "billing@azure-interior<mark>s</mark>.com", "Look-alike domain")}
+        ${ev("Arithmetic", "593.36 + 124.61 = 717.97", "593.36 + 124.61 = <mark>796.77</mark>", "Doesn't add up")}
+      </div>
+      <p class="credit">An independent prototype by Mohammed Ajwad MR, built around InPro's invoice approvals. Not affiliated with Novigo Solutions.</p>
+    </section>` : ""}
+    <div class="login-box">
+    ${demo ? "" : `<div class="login-brand"><span class="brand-mark">${I.logo}</span>InPro Copilot</div>`}
+    ${framed ? `<div class="advice warn" style="margin:0 0 16px">
+      <div class="verdict v-warn">${I.info}Open the app in its own tab</div>
+      <p style="font-size:13.5px">This page is shown inside another website, where browsers do not keep you signed in.</p>
+      <p style="margin-top:10px"><a class="btn btn-sm" href="${esc(location.href.split("#")[0])}" target="_blank" rel="noopener">${I.ext}Open InPro Copilot</a></p></div>` : ""}
+    ${demo ? `<div class="demo first">
+      <div class="demo-head"><b>Try it with a demo account.</b> Each one sees the app with a different role.</div>
+      ${CFG.demo_accounts.map(a => `<div class="demo-row"><span class="avatar">${esc(initials(a.name))}</span><div><b>${esc(a.name)}</b><div class="sub">${esc(a.note)}</div></div><button class="btn btn-sm ${a.role === "admin" ? "btn-primary" : ""}" type="button" data-email="${esc(a.email)}">Sign in</button></div>`).join("")}
+    </div>` : ""}
+    <div class="login-card ${demo ? "secondary" : ""}">
+      <h1>${demo ? "Or sign in with an account" : "Sign in"}</h1>
+      ${demo ? `<p class="muted">Demo password for all three: <span class="num" style="white-space:nowrap">${esc(CFG.demo_password)}</span></p>` : `<p class="muted">AI pre-review for invoice approvals</p>`}
+      <form id="loginForm" novalidate>
+        <div class="field"><label for="email">Work email</label><input class="input" id="email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="password">Password</label><input class="input" id="password" type="password" autocomplete="current-password" required></div>
+        <p class="form-error" id="loginErr" ${message ? "" : "hidden"}>${esc(message)}</p>
+        <button class="btn ${demo ? "" : "btn-primary"} btn-block" type="submit" id="loginBtn">Sign in</button>
+      </form>
+    </div>
+    ${CFG && CFG.public ? `<p class="login-foot" style="text-align:left;margin-top:14px">This is a public demo: everyone who opens it sees the same sample data, and it starts fresh whenever the demo restarts. Please don't upload confidential invoices.</p>` : ""}
+    <p class="login-foot">${I.lock.replace('width="16" height="16"', 'width="12" height="12"')} ${CFG && CFG.public ? "Repeated wrong passwords are slowed down." : "Accounts lock after 5 wrong passwords."} Sessions end after 8 hours without activity.</p>
+  </div></div>`;
+  const form = $("#loginForm");
+  $$("[data-email]").forEach(b => b.onclick = () => { $("#email").value = b.dataset.email; $("#password").value = CFG.demo_password; b.textContent = "Signing in…"; form.requestSubmit(); });
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const btn = $("#loginBtn"), err = $("#loginErr");
+    const email = $("#email").value.trim(), password = $("#password").value;
+    if (!email || !password) { err.textContent = "Enter your email and password."; err.hidden = false; return; }
+    btn.disabled = true; btn.textContent = "Signing in…"; err.hidden = true;
+    try { await api("/api/auth/login", { method: "POST", json: { email, password } }); await boot(); }
+    catch (ex) { err.textContent = ex.message; err.hidden = false; btn.disabled = false; btn.textContent = "Sign in"; $$("[data-email]").forEach(b => b.textContent = "Sign in"); }
+  };
+  if (!demo) $("#email").focus();          // demo: people click an account, so no blinking cursor waiting in a box
+}
+
+/* ============================================================ app shell */
+function shell() {
+  const u = ME.user;
+  const limit = u.approval_limit != null ? `, limit ${plain(u.approval_limit)}` : "";
+  $("#root").innerHTML = `
+  <div class="shell">
+    <aside class="side">
+      <a class="brand" href="#/overview"><span class="brand-mark">${I.logo}</span><span>InPro Copilot<small>Invoice pre-review</small></span></a>
+      <nav class="menu" aria-label="Main">
+        <a href="#/overview" data-nav="overview">${I.overview}Overview</a>
+        <a href="#/invoices" data-nav="invoices">${I.file}Invoices<span class="count" id="pendingCount" hidden></span></a>
+        <a href="#/inbox" data-nav="inbox">${I.inbox}Inbox</a>
+        <a href="#/lab" data-nav="lab">${I.flask}Fraud lab</a>
+        <a href="#/vendors" data-nav="vendors">${I.vendor}Vendors</a>
+        <a href="#/pos" data-nav="pos">${I.po}Purchase orders</a>
+        <a href="#/activity" data-nav="activity">${I.activity}Activity</a>
+        <a href="#/ai" data-nav="ai">${I.ai}AI usage</a>
+        ${can("manage") ? `<a href="#/users" data-nav="users">${I.users}Users</a>` : ""}
+      </nav>
+      <div class="side-foot">
+        <div class="reader" id="reader"></div>
+        <div class="who"><span class="avatar">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><span>${esc(ROLE_TXT[u.role] || u.role)}${esc(limit)}</span></div></div>
+        <div class="side-actions">
+          ${ME.auth ? `<button class="btn btn-ghost btn-sm" id="pwBtn" type="button">${I.key}Password</button>
+          <button class="btn btn-ghost btn-sm" id="outBtn" type="button">${I.out}Sign out</button>` : ""}
+        </div>
+      </div>
+    </aside>
+    <main id="main" tabindex="-1"></main>
+  </div>`;
+  if ($("#outBtn")) $("#outBtn").onclick = async () => { try { await api("/api/auth/logout", { method: "POST" }); } catch {} ME = null; showLogin(); };
+  if ($("#pwBtn")) $("#pwBtn").onclick = openPassword;
+  const r = $("#reader");
+  if (HEALTH) {
+    const on = HEALTH.mode !== "rules";
+    r.innerHTML = `<span class="dot" style="background:${on ? "var(--ok)" : "var(--ink-3)"}"></span>${on ? "AI reader on" : "Rules reader only"}${HEALTH.ocr ? "" : ", no OCR"}`;
+    r.title = on ? "AI models in order: " + HEALTH.ai_models.map(m => m.provider + " " + m.model).join(", ") : "No AI key configured";
+  }
+}
+
+async function refreshCount() {
+  try { const s = await api("/api/stats"); const c = $("#pendingCount"); if (c) { c.textContent = s.by_status.pending; c.hidden = !s.by_status.pending; } } catch {}
+}
+
+function setNav(key) { $$(".menu a").forEach(a => a.setAttribute("aria-current", a.dataset.nav === key ? "page" : "false")); }
+const MAIN = () => $("#main");
+
+/* ============================================================ invoices (the queue) */
+let filter = "pending", query = "";
+
+async function invoicesPage() {
+  setNav("invoices"); document.title = "Invoices · InPro Copilot";
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head">
+      <div><h1>Invoices</h1><p>Every invoice is read, checked and given a recommendation with its reasons. You make the final call.</p></div>
+      <div class="page-actions">${can("upload") ? `<button class="btn btn-primary" id="uploadBtn" type="button">${I.upload}Upload invoices</button>` : ""}</div>
+    </div>
+    <div id="queue"></div></div>`;
+  if ($("#uploadBtn")) $("#uploadBtn").onclick = () => $("#file").click();
+  await refreshQueue();
+}
+
+async function refreshQueue() {
+  let stats, rows;
+  try { [stats, rows] = await Promise.all([api("/api/stats"), api("/api/invoices" + (query ? "?q=" + encodeURIComponent(query) : ""))]); }
+  catch (e) { toast(e.message, "bad"); return; }
+  const box = $("#queue"); if (!box) return;
+  const s = stats.by_status, total = stats.total || 0;
+  const seg = (n, c) => `<i style="width:${total ? 100 * n / total : 0}%;background:var(${c})"></i>`;
+  const who = b => { const p = [b.checks ? `${b.checks} by the checks` : "", b.person ? `${b.person} by a person` : ""].filter(Boolean); return p.length ? ` <span class="muted">(${p.join(", ")})</span>` : ""; };
+  const visible = rows.filter(r => filter === "all" || r.status === filter);
+  const count = st => rows.filter(r => st === "all" || r.status === st).length;
+  const c = $("#pendingCount"); if (c) { c.textContent = s.pending; c.hidden = !s.pending; }
+
+  box.innerHTML = `
+    ${total ? `<div class="panel summary">
+      <div class="bar" role="img" aria-label="${s.approved} approved, ${s.pending} waiting, ${s.rejected} rejected">${seg(s.approved, "--ok")}${seg(s.pending, "--warn")}${seg(s.rejected, "--bad")}</div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--warn)"></span><b>${s.pending}</b> waiting for a person</span>
+        <span><span class="dot" style="background:var(--ok)"></span><b>${s.approved}</b> approved${who(stats.approved_by)}</span>
+        <span><span class="dot" style="background:var(--bad)"></span><b>${s.rejected}</b> rejected${who(stats.rejected_by)}</span>
+      </div></div>` : ""}
+    <div class="panel" style="margin-top:16px">
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Show">
+          ${[["pending", "Needs review"], ["approved", "Approved"], ["rejected", "Rejected"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${filter === k}">${l}<small>${count(k)}</small></button>`).join("")}
+        </div>
+        <div class="search">${I.search}<label class="sr" for="q">Search invoices</label><input class="input" id="q" type="search" placeholder="Search vendor or invoice number" value="${esc(query)}"></div>
+      </div>
+      ${visible.length ? `<table><thead><tr><th>Vendor</th><th>Invoice</th><th class="hide-sm">Date</th><th class="r">Amount</th><th>AI recommendation</th><th class="hide-sm">Status</th></tr></thead><tbody>
+        ${visible.map(r => { const o = OUTCOME[r.ai_outcome] || OUTCOME.needs_review; return `<tr class="click" data-id="${r.id}">
+          <td><a class="cell-title" href="#/invoice/${r.id}">${esc(r.vendor || "Vendor not found")}</a><div class="sub">${r.lab ? '<span class="chip neutral" style="height:18px;margin-right:6px">Fraud lab</span>' : ""}${esc(r.filename)}</div></td>
+          <td class="num">${r.invoice_number ? esc(r.invoice_number) : '<span class="muted">Not found</span>'}</td>
+          <td class="num hide-sm">${r.invoice_date ? esc(r.invoice_date) : '<span class="muted">Not found</span>'}</td>
+          <td class="r num">${r.total != null ? esc(money(r.total, r.currency)) : '<span class="muted">Not found</span>'}</td>
+          <td><span class="verdict v-${o.cls}">${o.icon}${o.label}</span>${r.flags ? `<div class="sub">${r.flags} ${r.flags === 1 ? "issue" : "issues"} found</div>` : ""}</td>
+          <td class="hide-sm"><span class="pill p-${r.status}">${STATUS_TXT[r.status]}</span></td></tr>`; }).join("")}
+      </tbody></table>`
+      : `<div class="empty">${total
+          ? `<p>${query ? "No invoice matches that search." : filter === "pending" ? "Nothing is waiting for review." : "No invoices here."}</p>`
+          : `<p>No invoices yet. ${can("upload") ? "Upload a PDF or photo of an invoice to see it checked." : "Invoices appear here once an approver uploads them."}</p>
+             ${can("manage") ? `<button class="btn" id="seed" type="button">Load demo data (12 sample invoices)</button>` : ""}`}</div>`}
+    </div>
+    <div class="note-line">${can("upload") ? "Tip: drop PDF or photo files anywhere on this page to upload them. " : ""}${can("manage") && total ? `<button class="btn btn-ghost btn-sm btn-danger" id="reset" type="button">Reset demo data</button>` : ""}</div>`;
+
+  $$(".seg button", box).forEach(b => b.onclick = () => { filter = b.dataset.f; refreshQueue(); });
+  $$("tr.click", box).forEach(tr => tr.onclick = e => { if (e.target.tagName !== "A") location.hash = "#/invoice/" + tr.dataset.id; });
+  const q = $("#q"); let qt; q.oninput = () => { clearTimeout(qt); qt = setTimeout(() => { query = q.value.trim(); refreshQueue().then(() => { const n = $("#q"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }); }, 250); };
+  const seed = $("#seed"); if (seed) seed.onclick = async () => { seed.disabled = true; seed.textContent = "Reading 12 invoices…"; try { const r = await api("/api/demo/seed", { method: "POST" }); toast(!r.seeded ? r.message : (r.skipped && r.skipped.length ? `Demo loaded, but ${r.skipped.length} scanned example skipped: ${r.skipped[0].reason}` : "Demo loaded: 12 invoices read and checked."), "ok"); filter = "all"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
+  const reset = $("#reset"); if (reset) reset.onclick = async () => { if (!confirm("Remove every invoice and its history? Users, the AI cache and sign-in history are kept.")) return; try { const r = await api("/api/demo/reset", { method: "POST" }); toast(r.reseeded ? "Back to the starting demo: the sample invoices and e-mails are loaded again." : "All invoices removed.", "ok"); filter = r.reseeded ? "all" : "pending"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
+}
+
+async function uploadFiles(files) {
+  if (!files.length || !can("upload")) return;
+  const btn = $("#uploadBtn"); if (btn) btn.disabled = true;
+  let last = null, done = 0;
+  for (const f of files) {
+    if (btn) btn.innerHTML = `${I.upload}Reading ${done + 1} of ${files.length}…`;
+    const fd = new FormData(); fd.append("file", f);
+    try { last = await api("/api/invoices", { method: "POST", body: fd }); done++; }
+    catch (e) { toast(`${f.name}: ${e.message}`, "bad"); }
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = `${I.upload}Upload invoices`; }
+  if (!done) return;
+  if (files.length === 1 && last) { location.hash = "#/invoice/" + last.id; toast("Read and checked. The recommendation is on the left.", "ok"); }
+  else { filter = "all"; toast(`${done} invoice${done > 1 ? "s" : ""} read and checked.`, "ok"); route(); }
+}
+
+/* ============================================================ invoice review */
+async function reviewPage(id, opts = {}) {
+  setNav("invoices");
+  const main = MAIN();
+  if (!opts.keep) main.innerHTML = '<div class="page"><p class="muted">Loading…</p></div>';
+  let inv;
+  try { inv = await api("/api/invoices/" + id); }
+  catch (e) { main.innerHTML = `<div class="page"><a class="btn btn-ghost" href="#/invoices">${I.back}Invoices</a><h1 style="margin-top:16px">Invoice not found</h1><p class="muted">${esc(e.message)}</p></div>`; return; }
+  const f = inv.fields || {}, d = inv.decision || {}, o = OUTCOME[inv.ai_outcome] || OUTCOME.needs_review, you = inv.you || {};
+  document.title = `${f.vendor || inv.filename} · InPro Copilot`;
+  const val = (v, fmt) => v == null || v === "" ? '<span class="missing">Not found</span>' : esc(fmt ? fmt(v) : v);
+  const isPdf = /\.pdf$/i.test(inv.filename);
+  const pending = inv.status === "pending";
+  const byAI = String(inv.decided_by || "").startsWith("AI");
+  const src = inv.source || {};
+  const sCheck = (inv.checks || []).find(c => c.name === "sender");
+  const sKind = sCheck && sCheck.details && sCheck.details.kind;
+  const senderChip = sKind && SENDER_CHIP[sKind] ? `<span class="chip ${SENDER_CHIP[sKind][0]}">${SENDER_CHIP[sKind][1]}</span>` : "";
+  const canApprove = you.can_decide && you.within_limit && inv.status !== "approved";
+  const canReject = you.can_decide && inv.status !== "rejected";
+
+  let hint = "";
+  if (!you.can_decide) hint = `${I.info}<span>You can view this invoice. Approvers and admins make decisions.</span>`;
+  else if (!you.within_limit && inv.status !== "approved") hint = `${I.info}<span>This invoice is above your approval limit of ${esc(plain(you.approval_limit))}. You can reject it, or leave it for an approver with a higher limit.</span>`;
+
+  main.innerHTML = `
+  <div class="review">
+    <div class="review-top">
+      <a class="btn btn-ghost btn-sm" href="#/invoices">${I.back}Invoices</a>
+      <span class="crumb"><b>${esc(f.vendor || "Vendor not found")}</b> &nbsp;${esc(f.invoice_number ? "Invoice " + f.invoice_number : inv.filename)}</span>
+      <span class="grow"></span>
+      <span class="pill p-${inv.status}">${STATUS_TXT[inv.status]}</span>
+      <button class="btn btn-sm" id="next" type="button">Next to review${I.next}</button>
+    </div>
+    <div class="review-body">
+      <section class="detail" aria-label="Review">
+        <div class="detail-body">
+          <h1>${esc(f.vendor || "Vendor not found")}</h1>
+          <div class="facts num">Invoice ${esc(f.invoice_number || "number not found")}${f.invoice_date ? ", dated " + esc(f.invoice_date) : ""}</div>
+          ${src.lab ? `<div class="source-line">${I.flask}<span>${src.role === "genuine" ? "Genuine copy put on file by the Fraud lab" : `Forged in the Fraud lab by ${esc(src.by || "a visitor")}: ${esc(src.trick_title || src.trick || "")}`}</span><span class="chip neutral">Test</span></div>` : ""}
+          ${src.channel === "email" ? `<div class="source-line">${I.mail}<span>By e-mail from <b>${esc(src.sender_name || "")}</b> ${esc(src.sender || "")}</span>${senderChip}</div>
+            ${src.subject ? `<div class="source-line" style="margin-top:2px"><span class="muted">Subject: ${esc(src.subject)}</span></div>` : ""}`
+          : src.channel === "folder" ? `<div class="source-line">${I.folder}<span>Picked up from the watched folder</span></div>`
+          : src.by && !src.lab ? `<div class="source-line">${I.upload}<span>Uploaded by ${esc(src.by)}</span></div>` : ""}
+          <div class="amount num">${f.total != null ? esc(plain(f.total)) : "Total not found"}<small>${esc(f.currency || "")}</small></div>
+
+          <div class="advice ${o.cls}">
+            <div class="verdict v-${o.cls}">${o.icon}${o.label}<span class="sub" style="font-weight:400">&nbsp;${esc(d.confidence || "")} confidence</span></div>
+            <p>${esc((d.summary || "").replace(/^(Recommend \w+|Needs HUMAN REVIEW): ?/, ""))}</p>
+            ${(d.reasons || []).length > 1 ? `<ul>${d.reasons.slice(1).map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
+          </div>
+
+          <h2>What the checks found</h2>
+          <ul class="checks">
+            ${(inv.checks || []).map(c => { const m = MARK[c.status]; return `<li><span class="mark ${m[0]}" title="${m[2]}">${m[1]}</span><div><div class="name">${CHECK_NAME[c.name] || esc(c.name)}<span class="sr">: ${m[2]}</span></div><div class="msg">${esc(c.message)}</div></div></li>`; }).join("")}
+          </ul>
+
+          <h2>What was read from the document</h2>
+          <dl class="fields">
+            <dt>Vendor</dt><dd>${val(f.vendor)}</dd>
+            <dt>Invoice number</dt><dd class="num">${val(f.invoice_number)}</dd>
+            <dt>Invoice date</dt><dd class="num">${val(f.invoice_date)}</dd>
+            <dt>Subtotal</dt><dd class="num">${val(f.subtotal, plain)}</dd>
+            <dt>Tax</dt><dd class="num">${val(f.tax_amount, plain)}</dd>
+            <dt>Total</dt><dd class="num">${val(f.total, plain)} ${esc(f.currency || "")}</dd>
+            <dt>Seller tax ID</dt><dd class="num">${val(f.tax_id)}</dd>
+            <dt>Purchase order</dt><dd class="num">${val(f.po_number)}</dd>
+            <dt>Pay to (bank)</dt><dd class="num">${val(f.bank_account, prettyBank)}</dd>
+          </dl>
+          <div class="notes">
+            ${(f.notes || []).map(n => `<span>${esc(n)}</span>`).join("")}
+            <span>Read by ${f.extractor === "llm" ? "the AI model, with every value verified against the document" : f.extractor === "rules+ai" ? "the layout rules and an AI model together, with every AI value verified against the document" : "the layout rules (no AI request was needed)"}${inv.read_method && inv.read_method.includes("ocr") ? ", using text recognition because the file is a scan or photo" : ""}.</span>
+          </div>
+
+          <details class="trace-box"><summary>${I.chev}How the recommendation was reached</summary>
+            <ol class="trace">${(inv.trace || []).map(t => `<li><b>${esc(t.step === "check" ? (CHECK_NAME[t.tool] || t.tool) : (STEP_NAME[t.step] || t.step))}</b> <span class="t">${esc(t.step === "check" ? "check" : t.tool)}${t.ms ? `, ${t.ms} ms` : ""}</span><div>${esc(t.summary)}</div></li>`).join("")}</ol>
+          </details>
+
+          <h2>Approval history</h2>
+          <ul class="hist">${(inv.audit || []).map(a => `<li><span class="actor">${esc(a.actor === "system" ? "System" : a.actor)}</span> ${esc((ACTION_TXT[a.action] || a.action.replace(/_/g, " ")).toLowerCase())}${a.detail ? ": " + esc(a.detail) : ""}<span class="when">${esc(when(a.ts))}</span></li>`).join("")}</ul>
+        </div>
+
+        <div class="decide">
+          ${pending ? "" : `<div class="stamp ${inv.status === "approved" ? "ok" : "bad"}${opts.flash ? " flash" : ""}" role="status">
+            <b>${inv.status === "approved" ? "Approved" : "Rejected"}</b> ${byAI ? "automatically by the checks" : "by " + esc(inv.decided_by || "a person")}${inv.decided_at ? ", " + esc(when(inv.decided_at)) : ""}.
+            ${inv.human_note ? `<div class="sub" style="margin-top:4px">Comment: ${esc(inv.human_note)}</div>` : ""}
+          </div>`}
+          ${hint ? `<div class="hint">${hint}</div>` : ""}
+          ${(canApprove || canReject) ? `
+            <label class="sr" for="note">Comment</label>
+            <textarea class="input" id="note" rows="1" placeholder="${pending ? "Comment for the record (optional)" : "Reason for changing the decision (optional)"}"></textarea>
+            <div class="row">
+              ${canApprove ? `<button class="btn btn-approve" id="approve" type="button">${I.check}${pending ? "Approve" : "Approve instead"}</button>` : ""}
+              ${canReject ? `<button class="btn btn-reject" id="reject" type="button">${I.cross}${pending ? "Reject" : "Reject instead"}</button>` : ""}
+            </div>` : ""}
+        </div>
+      </section>
+
+      <section class="docpane" aria-label="Original document">
+        <div class="docbar"><b>${esc(inv.filename)}</b><span class="sub">${isPdf ? `${inv.pages || 1} page${(inv.pages || 1) > 1 ? "s" : ""}` : "image"}</span><span class="grow"></span>
+          <a class="btn btn-ghost btn-sm" href="/api/invoices/${inv.id}/file" target="_blank" rel="noopener">${I.ext}Open original</a></div>
+        <div class="doc">${isPdf ? Array.from({ length: inv.pages || 1 }, (_, i) => `<img src="/api/invoices/${inv.id}/page/${i}.png" alt="Invoice page ${i + 1}" loading="lazy">`).join("") : `<img src="/api/invoices/${inv.id}/file" alt="Scanned invoice ${esc(inv.filename)}">`}</div>
+      </section>
+    </div>
+  </div>`;
+
+  const decide = async (approve, btn) => {
+    $$(".decide button").forEach(b => b.disabled = true);
+    btn.textContent = "Saving…";
+    try {
+      await api(`/api/invoices/${id}/decision`, { method: "POST", json: { approve, note: ($("#note") || {}).value?.trim() || null } });
+      toast(approve ? "Invoice approved. It now counts under Approved." : "Invoice rejected. It now counts under Rejected.", approve ? "ok" : "bad");
+      refreshCount();
+      reviewPage(id, { flash: true, keep: true });
+    } catch (e) { toast("Not saved: " + e.message, "bad"); reviewPage(id, { keep: true }); }
+  };
+  if ($("#approve")) $("#approve").onclick = e => decide(true, e.currentTarget);
+  if ($("#reject")) $("#reject").onclick = e => decide(false, e.currentTarget);
+  $("#next").onclick = async () => {
+    const rows = await api("/api/invoices?status=pending").catch(() => []);
+    const n = rows.find(r => r.id !== Number(id));
+    if (n) location.hash = "#/invoice/" + n.id; else toast("Nothing else is waiting for review.");
+  };
+}
+
+/* ============================================================ tooltips (hover and keyboard focus) */
+const tipEl = Object.assign(document.createElement("div"), { className: "tip", hidden: true });
+document.body.appendChild(tipEl);
+function showTip(el) { const r = el.getBoundingClientRect(); tipEl.textContent = el.dataset.tip; tipEl.hidden = false;
+  const w = tipEl.offsetWidth; tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + "px"; tipEl.style.top = (r.top - tipEl.offsetHeight - 8) + "px"; }
+document.addEventListener("mouseover", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); });
+document.addEventListener("mouseout", e => { if (e.target.closest("[data-tip]")) tipEl.hidden = true; });
+document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); });
+document.addEventListener("focusout", () => { tipEl.hidden = true; });
+
+const amounts = obj => Object.entries(obj || {}).map(([c, v]) => money(v, c === "?" ? undefined : c));
+const CATCH_ICON = { duplicate: "Duplicate", math: "Numbers", vendor: "Spoofed vendor", tax_id: "Tax ID", po_match: "Over-billing", bank: "Bank changed", sender: "Fake sender", completeness: "Missing field" };
+
+/* ============================================================ overview */
+async function overviewPage() {
+  setNav("overview"); document.title = "Overview · InPro Copilot";
+  let o;
+  try { o = await api("/api/overview"); } catch (e) { toast(e.message, "bad"); return; }
+  const f = o.flow, n = o.invoices;
+  const prot = Object.entries(o.protected);
+  const [heroCur, heroVal] = prot[0] || ["", 0];
+  const heroTxt = prot.length ? money(heroVal, heroCur) : "0";
+  const heroParts = heroTxt.match(/^([A-Z]{3})\s?(.*)$/) || [null, "", heroTxt];
+  const seg = (k, v, color, label) => v ? `<i style="flex:${v};background:var(${color})" tabindex="0" role="img" aria-label="${v} ${label}" data-tip="${v} of ${n} invoices: ${label}"></i>` : "";
+  const maxCatch = Math.max(1, ...Object.values(o.by_check));
+  const t = o.time;
+
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Overview</h1><p>What the copilot has done so far: what it stopped before payment, what it cleared on its own, and what it cost.</p></div>
+      <div class="page-actions"><a class="btn" href="#/lab">${I.flask}Try to fool the checks</a><a class="btn" href="#/invoices">${I.file}Open the invoice queue</a></div></div>
+    ${n ? `
+    <section class="panel" aria-label="Summary">
+      <div class="hero">
+        <div class="hero-label">Value of invoices stopped before payment</div>
+        <div><div class="hero-value">${heroParts[1] ? `<small>${esc(heroParts[1])}</small>` : ""}${esc(heroParts[2])}</div>
+          <div class="hero-also">${prot.length > 1 ? "plus " + amounts(Object.fromEntries(prot.slice(1))).map(esc).join(" and ") + ". " : ""}${o.caught_total} invoice${o.caught_total === 1 ? "" : "s"} with a hard failure, each with its reason below.</div></div>
+        <div class="hero-side"><b class="num">${t.saved_hours} h</b>of checking time saved<span class="fine" data-tip="Cleared invoices take no one's time. Change the two figures with INPRO_MANUAL_MINUTES and INPRO_REVIEW_MINUTES." tabindex="0">at ${t.manual_minutes} min by hand vs ${t.assisted_minutes} min with the copilot</span></div>
+      </div>
+      <div class="flow">
+        <div class="flow-title">Where the ${n} invoice${n === 1 ? "" : "s"} went</div>
+        <div class="flowbar">${seg("c", f.cleared, "--f-clear", "cleared automatically by the checks")}${seg("w", f.waiting, "--f-wait", "waiting for a person")}${seg("p", f.people, "--f-people", "decided by a person")}${seg("s", f.stopped, "--f-stop", "stopped by the checks")}</div>
+        <div class="flowkey">
+          <div><b><span class="sw" style="background:var(--f-clear)"></span>${f.cleared}</b>Cleared automatically</div>
+          <div><b><span class="sw" style="background:var(--f-wait)"></span>${f.waiting}</b>Waiting for a person</div>
+          <div><b><span class="sw" style="background:var(--f-people)"></span>${f.people}</b>Decided by a person${f.people ? ` <span class="muted">(${f.people_approved} approved, ${f.people_rejected} rejected)</span>` : ""}</div>
+          <div><b><span class="sw" style="background:var(--f-stop)"></span>${f.stopped}</b>Stopped by the checks</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="two">
+      <section class="panel" aria-label="What was caught">
+        <div class="panel-head"><h2>What the checks caught</h2><span class="sub">${o.caught_total} invoice${o.caught_total === 1 ? "" : "s"}</span></div>
+        ${o.caught.length ? `<ul class="ledger">${o.caught.map(c => `<li>
+            <a class="cell-title" href="#/invoice/${c.id}">${esc(c.vendor || "Unknown vendor")}</a>
+            <span class="amt">${c.total != null ? esc(money(c.total, c.currency)) : ""}</span>
+            <div class="chips">${c.checks.map(k => `<span class="chip">${I.cross}${esc(CATCH_ICON[k] || k)}</span>`).join("")}${c.status === "approved" ? '<span class="chip neutral">Approved by a person anyway</span>' : ""}</div>
+            <div class="why">${esc(c.message)}</div></li>`).join("")}</ul>`
+          : `<div class="empty"><p>Nothing caught yet. Every invoice so far passed the hard checks.</p></div>`}
+      </section>
+      <div>
+        <section class="panel" aria-label="Time and cost">
+          <div class="panel-head"><h2>Time and cost</h2></div>
+          <dl class="statement">
+            <div><dt>Cleared without anyone's time</dt><dd class="num">${t.auto_share}%</dd></div>
+            <div><dt>Typical time to a person's decision<span class="fine">median, from arrival to approve or reject</span></dt><dd class="num">${t.median_decision_minutes == null ? '<span class="muted" style="font-weight:400;font-size:13px">no decisions yet</span>' : t.median_decision_minutes < 120 ? t.median_decision_minutes + " min" : (t.median_decision_minutes / 60).toFixed(1) + " h"}</dd></div>
+            <div><dt>AI cost this month</dt><dd class="num">$${o.ai.month_cost_usd.toFixed(4)}</dd></div>
+            <div><dt>AI cost per invoice</dt><dd class="num">$${o.ai.cost_per_invoice_usd.toFixed(5)}</dd></div>
+            ${o.lab && o.lab.tries ? `<div><dt>Forgeries stopped in the Fraud lab<span class="fine">tests, kept out of every figure above</span></dt><dd class="num">${o.lab.stopped} of ${o.lab.tries}</dd></div>` : ""}
+            <div><dt>Arrived by e-mail or folder<span class="fine">no one had to upload them</span></dt><dd class="num">${(o.channels.email || 0) + (o.channels.folder || 0)} of ${n}</dd></div>
+          </dl>
+        </section>
+        <section class="panel" style="margin-top:16px" aria-label="Which checks caught what">
+          <div class="panel-head"><h2>Which checks did the catching</h2></div>
+          ${Object.keys(o.by_check).length ? `<ul class="rank">${Object.entries(o.by_check).map(([k, v]) => `<li><span>${esc(CHECK_NAME[k] || k)}</span>
+            <span class="track"><span class="bar-h" style="width:${Math.max(4, 100 * v / maxCatch)}%" tabindex="0" data-tip="${v} invoice${v === 1 ? "" : "s"} failed the ${esc((CHECK_NAME[k] || k).toLowerCase())} check"></span><span class="v">${v}</span></span></li>`).join("")}</ul>`
+            : `<div class="empty"><p>No failed checks yet.</p></div>`}
+        </section>
+      </div>
+    </div>`
+    : `<section class="panel"><div class="empty"><p>No invoices yet. Upload some on the Invoices page, send them to the Inbox, or load the demo.</p>
+        <a class="btn btn-primary" href="#/invoices">Go to Invoices</a></div></section>`}
+  </div>`;
+}
+
+/* ============================================================ fraud lab: try to fool the checks */
+const LAB = { base: "coolblue", trick: "scam", values: {}, last: null, busy: false, data: null };
+const LAB_OUT = {
+  reject: { cls: "bad", icon: I.cross, word: "Stopped", sub: "before anyone could pay it", pill: ["p-rejected", "Stopped"] },
+  needs_review: { cls: "warn", icon: I.flag, word: "Held for a person", sub: "it cannot be paid until someone approves it", pill: ["p-pending", "Held for a person"] },
+  auto_approve: { cls: "ok", icon: I.check, word: "Got through", sub: "the checks found nothing wrong", pill: ["p-approved", "Got through"] },
+};
+const CHIP_FOR = { pass: ["ok", I.check], warn: ["warn", I.flag], fail: ["", I.cross], skip: ["neutral", I.dash] };
+const listNames = names => { const n = names.map(k => CHECK_NAME[k] || k); return n.length > 1 ? n.slice(0, -1).join(", ") + " and " + n[n.length - 1] : (n[0] || ""); };
+
+/* mark what changed: the common start and end stay plain, the middle is highlighted */
+function diffMark(from, to) {
+  from = String(from || ""); to = String(to || "");
+  let i = 0; while (i < from.length && i < to.length && from[i] === to[i]) i++;
+  let j = 0; while (j < from.length - i && j < to.length - i && from[from.length - 1 - j] === to[to.length - 1 - j]) j++;
+  const mid = to.slice(i, to.length - j);
+  return esc(to.slice(0, i)) + (mid ? `<mark>${esc(mid)}</mark>` : "") + esc(to.slice(to.length - j));
+}
+
+async function labPage() {
+  setNav("lab"); document.title = "Fraud lab · InPro Copilot";
+  try { LAB.data = await api("/api/lab"); }
+  catch (e) { MAIN().innerHTML = `<div class="page"><h1>Fraud lab</h1><p class="form-error" style="margin-top:12px">${esc(e.message)}</p></div>`; return; }
+  const d = LAB.data;
+  if (!d.bases.find(b => b.key === LAB.base)) LAB.base = d.bases[0].key;
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head">
+      <div><h1>Fraud lab</h1><p>Try to get a fake invoice past the checks. Pick a real invoice and a trick: the lab forges the document the way a fraudster would and sends it through the same checks as every other invoice. The result is whatever the checks decide.</p></div>
+      <div class="score" id="score" aria-label="Attempts so far"></div>
+    </div>
+    <div class="lab">
+      <section class="panel" aria-label="Build a fake invoice">
+        <div class="lab-step"><h2><span class="n">1</span>The invoice</h2>
+          <div class="picks" role="radiogroup" aria-label="Invoice">${d.bases.map(b => `<label class="pick">
+            <input type="radio" name="labBase" value="${b.key}" ${b.key === LAB.base ? "checked" : ""}>
+            <span class="card"><img src="/api/lab/base/${b.key}.png?small=1" alt="" loading="lazy" width="38" height="52"><span style="min-width:0"><b>${esc(b.vendor)}</b><span>${esc(b.country)}</span><span class="num">${esc(money(b.total, b.currency))}</span></span></span>
+          </label>`).join("")}</div></div>
+        <div class="lab-step"><h2><span class="n">2</span>The trick</h2><div class="tricks" id="tricks" role="radiogroup" aria-label="Trick"></div></div>
+        <div class="lab-go">
+          <button class="btn btn-primary btn-block" id="forge" type="button" ${can("upload") ? "" : "disabled"}>Forge it and run the checks</button>
+          <p class="sub">${can("upload") ? "The forgery is filed like any invoice, so you can open it in the queue afterwards." : "Viewers can look but not send invoices. Sign in as Priya or Rahul to try a trick."}</p>
+        </div>
+      </section>
+      <section class="panel" id="labResult" aria-live="polite" aria-label="Result"></section>
+    </div>
+    <section class="panel" style="margin-top:16px" aria-label="Attempts so far" id="labRecent"></section>
+  </div>`;
+  $$('input[name="labBase"]').forEach(r => r.onchange = () => { LAB.base = r.value; labTricks(); labResult(); });
+  $("#forge").onclick = labForge;
+  labTricks(); labResult(); labScore();
+}
+
+function labTricks() {
+  const d = LAB.data, base = d.bases.find(b => b.key === LAB.base);
+  if (!base.tricks.includes(LAB.trick)) LAB.trick = base.tricks[0];
+  const box = $("#tricks");
+  box.innerHTML = d.tricks.filter(t => base.tricks.includes(t.key)).map(t => `<label class="trick">
+      <input type="radio" name="labTrick" value="${t.key}" ${t.key === LAB.trick ? "checked" : ""}>
+      <span><b>${esc(t.title)}</b><p>${esc(t.text)}</p>
+        ${t.input && t.key === LAB.trick ? `<span class="sub" style="display:block;margin-top:9px">${esc(t.input.label)}</span><input class="input" style="margin-top:4px" id="labValue" maxlength="${t.input.max}" aria-label="${esc(t.input.label)}" placeholder="${esc(t.input.placeholder)}" value="${esc(LAB.values[t.key] || "")}" autocomplete="off" spellcheck="false">` : ""}
+      </span></label>`).join("");
+  $$('input[name="labTrick"]', box).forEach(r => r.onchange = () => { LAB.trick = r.value; labTricks(); });
+  const v = $("#labValue"); if (v) v.oninput = () => { LAB.values[LAB.trick] = v.value; };
+}
+
+function labScore() {
+  const s = LAB.data.score;
+  $("#score").innerHTML = s.tries ? `<div><b>${s.tries}</b>attempt${s.tries === 1 ? "" : "s"}</div><div><b>${s.stopped}</b>stopped</div><div><b>${s.review}</b>held for a person</div><div><b>${s.through}</b>got through</div>` : "";
+  const rec = LAB.data.recent, box = $("#labRecent");
+  box.hidden = !rec.length;
+  if (!rec.length) return;
+  box.innerHTML = `<div class="panel-head"><h2>Attempts so far</h2><span class="sub">newest first</span></div>
+    <table><thead><tr><th>When</th><th>Invoice</th><th>Trick</th><th>Result</th><th class="hide-sm">Caught by</th></tr></thead><tbody>
+    ${rec.map(r => { const o = LAB_OUT[r.outcome] || LAB_OUT.needs_review; return `<tr class="click" data-id="${r.id}">
+      <td class="num">${esc(when(r.at))}</td><td><a class="cell-title" href="#/invoice/${r.id}">${esc(r.vendor || "")}</a>${r.by ? `<div class="sub">by ${esc(r.by)}</div>` : ""}</td>
+      <td>${esc(r.trick || "")}</td><td><span class="pill ${o.pill[0]}">${o.pill[1]}</span></td>
+      <td class="hide-sm">${r.caught_by.length ? esc(listNames(r.caught_by)) : '<span class="muted">Nothing failed outright</span>'}</td></tr>`; }).join("")}
+    </tbody></table>`;
+  $$("tr.click", box).forEach(tr => tr.onclick = e => { if (e.target.tagName !== "A") location.hash = "#/invoice/" + tr.dataset.id; });
+}
+
+function labSheets(r) {
+  const base = LAB.data.bases.find(b => b.key === LAB.base);
+  const page = r && r.marks.length ? r.marks[0].page : 0;
+  const box = (m, cls) => `<span class="hit ${cls}" style="left:${m.x * 100}%;top:${m.y * 100}%;width:${m.w * 100}%;height:${m.h * 100}%"></span>`;
+  const marks = r ? r.marks.filter(m => m.page === page) : [];
+  const genuine = `/api/lab/base/${base.key}.png?page=${page}`;
+  const forged = r ? `/api/invoices/${r.invoice_id}/page/${page}.png` : "";
+  const ch = r ? r.change : null, docChange = ch && ch.what && !["Nothing", "Sender"].includes(ch.what);
+  const loupe = (src, cls) => marks.length ? `<div class="loupe ${cls}" data-src="${src}" data-x="${marks[0].x + marks[0].w / 2}" data-y="${marks[0].y + marks[0].h / 2}" data-w="${marks[0].w}" role="img" aria-label="Close-up of the changed spot"></div>` : "";
+  return `<div class="compare">
+    <figure class="sheet"><figcaption><span>Genuine</span><span class="sub" style="font-weight:400">${esc(base.vendor)}</span></figcaption>
+      <div class="paper"><img src="${genuine}" alt="The genuine invoice from ${esc(base.vendor)}">${marks.map(m => box(m, "was")).join("")}</div>
+      ${r ? loupe(genuine, "") : ""}
+      ${docChange ? `<div class="diff old"><small>${esc(ch.what)} on the genuine invoice</small>${diffMark(ch.to, ch.from)}</div>` : ""}</figure>
+    <figure class="sheet"><figcaption><span>${r && r.trick === "duplicate" ? "Sent again" : "Forged"}</span>${r ? `<a href="#/invoice/${r.invoice_id}">Open the full review</a>` : ""}</figcaption>
+      ${r ? `<div class="paper"><img src="${forged}" alt="The forged copy">${marks.map(m => box(m, "")).join("")}</div>${loupe(forged, "forged")}
+        ${docChange ? `<div class="diff"><small>${esc(ch.what)} on the forgery</small>${diffMark(ch.from, ch.to)}</div>`
+          : ch && ch.what === "Nothing" ? `<div class="diff"><small>An identical copy of the genuine file</small></div>` : ""}`
+        : `<div class="paper blank">${LAB.busy ? "Forging the document…" : "The forged copy appears here, with the change marked."}</div>`}</figure>
+  </div>`;
+}
+
+function labLoupes() {
+  $$(".loupe[data-src]").forEach(el => {
+    const img = new Image();
+    img.onload = () => {
+      const lw = el.clientWidth, lh = el.clientHeight;
+      const scale = Math.min(4.5, Math.max(1.6, 0.6 / Math.max(+el.dataset.w, 0.06)));
+      const iw = lw * scale, ih = iw * img.naturalHeight / img.naturalWidth;
+      const x = Math.min(0, Math.max(lw - iw, lw / 2 - (+el.dataset.x) * iw));
+      const y = Math.min(0, Math.max(lh - ih, lh / 2 - (+el.dataset.y) * ih));
+      el.style.backgroundImage = `url("${el.dataset.src}")`;
+      el.style.backgroundSize = `${iw}px ${ih}px`;
+      el.style.backgroundPosition = `${x}px ${y}px`;
+    };
+    img.src = el.dataset.src;
+  });
+}
+
+function labResult() {
+  const box = $("#labResult"); if (!box) return;
+  const r = LAB.last && LAB.last.base === LAB.base ? LAB.last : null;
+  if (!r) {
+    box.innerHTML = `<div class="lab-intro">${LAB.busy ? "Forging and checking…" : "Pick an invoice and a trick, then forge it. Your fake appears next to the genuine invoice, with what changed marked on the page."}</div>${labSheets(null)}`;
+    return;
+  }
+  const o = LAB_OUT[r.outcome] || LAB_OUT.needs_review;
+  const secs = (r.ms / 1000).toFixed(r.ms < 1000 ? 2 : 1);
+  const hit = r.target_hits.find(h => h.status === "fail") || r.target_hits[0];
+  const failMsg = (r.checks.find(c => c.status === "fail" && r.caught_by.includes(c.name)) || {}).message;
+  const ch = r.change || {};
+  const sender = ch.sender || (ch.what === "Sender" ? ch.to : null);
+  const realDomain = ch.real_domain || null;
+  let depth = "";
+  if (r.alone === null) depth = "Duplicates can only be caught by comparing with invoices already received. The genuine invoice was on file, so this is exactly the check that should catch it.";
+  else if (r.alone.outcome === "reject") depth = `<b>Even with no earlier invoices on file</b>, ${esc(listNames(r.alone.caught_by))} would still have stopped it on ${r.alone.caught_by.length > 1 ? "their" : "its"} own.`;
+  else if (r.alone.outcome === "needs_review") depth = "<b>With no earlier invoices on file</b>, it would still have been held for a person.";
+  else depth = "<b>With no earlier invoices on file</b>, it would have got through: here it was the invoice history that caught it.";
+  box.innerHTML = `
+    <div class="outcome ${o.cls}"><span class="ring">${o.icon}</span>
+      <div><div class="word">${o.word}</div><div class="sub">${o.sub}. Checked in ${secs} s.</div></div></div>
+    <div class="why">
+      ${r.caught_by.length ? `<div class="by">Caught by <b>${esc(listNames(r.caught_by))}</b></div>`
+        : r.warned.length ? `<div class="by">Flagged by <b>${esc(listNames(r.warned.filter(n => n !== "completeness")))}</b></div>` : `<div class="by">No check objected.</div>`}
+      <q>${esc((hit && hit.message) || failMsg || r.summary.replace(/^(Recommend \w+|Needs HUMAN REVIEW): ?/, ""))}</q>
+    </div>
+    ${sender ? `<dl class="mailhead">
+      <div><dt>From</dt><dd>${esc(r.vendor)} &lt;${realDomain ? esc(sender.split("@")[0]) + "@" + diffMark(realDomain, sender.split("@")[1]) : esc(sender)}&gt;</dd></div>
+      ${realDomain ? `<div><dt>Real</dt><dd class="muted">${esc(realDomain)}</dd></div>` : ""}
+      <div><dt>Subject</dt><dd>${esc(r.trick === "scam" ? "URGENT: updated bank details" : "Invoice")}</dd></div></dl>` : ""}
+    ${labSheets(r)}
+    <div class="checkrow" aria-label="All eight checks">${r.checks.map((c, i) => { const [cls, icon] = CHIP_FOR[c.status] || CHIP_FOR.skip;
+      return `<span class="chip ${cls}" style="animation-delay:${i * 55}ms" tabindex="0" data-tip="${esc(c.message)}">${icon}${esc(CHECK_NAME[c.name] || c.name)}</span>`; }).join("")}</div>
+    <div class="depth"><div>${depth}</div>${r.baseline_added ? `<div class="muted">The genuine invoice was put on file first, as if it had arrived last week.</div>` : ""}</div>`;
+  labLoupes();
+}
+
+async function labForge() {
+  if (LAB.busy) return;
+  const btn = $("#forge");
+  LAB.busy = true; LAB.last = null; btn.disabled = true; btn.textContent = "Forging and checking…"; labResult();
+  try {
+    const value = (LAB.values[LAB.trick] || "").trim();
+    LAB.last = await api("/api/lab/forge", { method: "POST", json: { base: LAB.base, trick: LAB.trick, value: value || null } });
+    try { const d = await api("/api/lab"); LAB.data.score = d.score; LAB.data.recent = d.recent; } catch {}
+  } catch (e) { toast(e.message, "bad"); }
+  LAB.busy = false; btn.disabled = false; btn.textContent = "Forge it and run the checks";
+  labResult(); labScore(); refreshCount();
+  if (LAB.last && matchMedia("(max-width: 960px)").matches) $("#labResult").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ============================================================ inbox: e-mail and watched folder */
+const SENDER_CHIP = {
+  known: ["ok", "Verified sender"], new: ["neutral", "New sender"], lookalike: ["bad", "Look-alike domain"],
+  free_mail: ["warn", "Free e-mail account"], unknown: ["warn", "Address not on file"], reply_to: ["warn", "Replies go elsewhere"],
+};
+async function inboxPage() {
+  setNav("inbox"); document.title = "Inbox · InPro Copilot";
+  let d;
+  try { d = await api("/api/intake"); } catch (e) { toast(e.message, "bad"); return; }
+  const imap = d.imap;
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Inbox</h1><p>${d.public ? "Invoices that arrive by e-mail are read and checked by themselves, and the sender is verified too: look-alike domains, free e-mail accounts and replies redirected elsewhere are flagged."
+        : "Invoices that arrive by e-mail or land in the watched folder are read and checked by themselves. For e-mails, the sender is verified too: look-alike domains, free e-mail accounts and replies redirected elsewhere are flagged."}</p></div>
+      <div class="page-actions">
+        ${can("upload") && !d.public ? `<button class="btn" id="scanNow" type="button">${I.refresh}Check now</button>` : ""}
+        ${can("upload") ? `
+        <button class="btn" id="emlBtn" type="button">${I.mail}Add a saved e-mail</button>` : ""}
+        <input id="emlFile" type="file" accept=".eml,message/rfc822" multiple hidden>
+      </div></div>
+
+    <section class="panel" aria-label="How invoices arrive">
+      ${d.public ? `<div class="channel">
+        <span class="channel-icon">${I.mail}</span>
+        <div><b>Saved e-mails</b><p>Save an invoice e-mail from Outlook or Gmail as a file (.eml) and add it here. The attachment is checked, and so is the sender.</p></div>
+        <span></span>
+      </div>
+      <div class="channel">
+        <span class="channel-icon">${I.inbox}</span>
+        <div><b>One invoice address per company</b><p>The next step: each company gets a single address, like invoices@yourcompany, that suppliers send to. Nobody connects a personal mailbox, and every e-mail goes through the same sender check.</p></div>
+        <span class="live off"><span class="dot"></span>Planned</span>
+      </div>` : `<div class="channel">
+        <span class="channel-icon">${I.folder}</span>
+        <div><b>Watched folder</b><p>Save PDFs, photos or e-mails (.eml) here, or point a scanner at it. Processed files move to <span class="path">processed</span>.</p>
+          <p style="margin-top:8px"><span class="path">${esc(d.folder)}</span></p></div>
+        <span class="live ${d.running ? "" : "off"}"><span class="dot"></span>${d.running ? `Checked every ${Math.round(d.interval_seconds)} s` : "Not watching"}${d.last_run ? `, last ${esc(when(d.last_run))}` : ""}</span>
+      </div>
+      <div class="channel">
+        <span class="channel-icon">${I.mail}</span>
+        <div><b>Mailbox</b>${imap.configured
+          ? `<p>Unread messages in <b>${esc(imap.folder)}</b> of ${esc(imap.user)} are fetched from ${esc(imap.host)}.</p>`
+          : `<p>Not connected. To read a real mailbox (Gmail, Zoho or a company mail server), add <span class="path">INPRO_IMAP_HOST</span>, <span class="path">INPRO_IMAP_USER</span> and <span class="path">INPRO_IMAP_PASSWORD</span> (an app password) to .env.</p>`}
+          ${d.last_error ? `<p class="form-error" style="margin-top:6px">${esc(d.last_error)}</p>` : ""}</div>
+        <span class="live ${imap.configured ? "" : "off"}"><span class="dot"></span>${imap.configured ? "Connected" : "Off"}</span>
+      </div>`}
+      ${can("manage") ? `<div class="channel">
+        <span class="channel-icon">${I.shield}</span>
+        <div><b>Try it with three demo e-mails</b>
+          <ol class="story"><li><b>1</b>Azure Interior sends its real invoice from azure-interior.com.</li>
+            <li><b>2</b>A fraudster re-sends the same invoice from azure-interiors.com, asking for payment to a new bank account.</li>
+            <li><b>3</b>A supplier sends an invoice from a Gmail address.</li></ol></div>
+        <button class="btn" id="demoMail" type="button">Send demo e-mails</button>
+      </div>` : ""}
+    </section>
+
+    <section class="panel" style="margin-top:16px" aria-label="Received">
+      <div class="panel-head"><h2>Received</h2><span class="sub">${d.log.length} item${d.log.length === 1 ? "" : "s"}</span></div>
+      ${d.log.length ? `<table><thead><tr><th>Received</th><th>From</th><th class="hide-sm">Subject and file</th><th>Result</th></tr></thead><tbody>
+        ${d.log.map(r => { const sc = r.sender_check && SENDER_CHIP[r.sender_check.kind]; const o = OUTCOME[r.ai_outcome];
+          return `<tr ${r.invoice_id ? `class="click" data-id="${r.invoice_id}"` : ""}>
+          <td class="sub num" style="white-space:nowrap">${esc(when(r.ts))}</td>
+          <td class="from">${r.sender ? `<b>${esc(r.sender_name || r.sender)}</b><span>${esc(r.sender)}</span>` : `<b>${r.channel === "folder" ? "Watched folder" : "Mailbox"}</b>`}
+            ${sc ? `<div class="chips" style="margin-top:6px"><span class="chip ${sc[0]}" data-tip="${esc(r.sender_check.message)}" tabindex="0">${sc[0] === "ok" ? I.check : sc[0] === "bad" ? I.cross : I.flag}${sc[1]}</span>${r.bank_check && r.bank_check.status === "fail" ? `<span class="chip" data-tip="${esc(r.bank_check.message)}" tabindex="0">${I.cross}Bank account changed</span>` : ""}</div>` : ""}</td>
+          <td class="hide-sm">${r.subject ? `<div>${esc(r.subject)}</div>` : ""}<div class="sub">${esc(r.filename || "no attachment")}</div></td>
+          <td>${r.invoice_id && o ? `<span class="verdict v-${o.cls}">${o.icon}${o.label}</span><div class="sub">${esc(r.vendor || "")}${r.total != null ? " " + esc(money(r.total, r.currency)) : ""}</div>`
+             : r.status === "error" ? `<span class="verdict v-bad">${I.cross}Could not read</span><div class="sub">${esc(r.note || "")}</div>` : `<span class="sub">${esc(r.note || r.status)}</span>`}</td></tr>`; }).join("")}
+      </tbody></table>` : `<div class="empty"><p>${d.public ? "Nothing received yet. Add a saved e-mail" : "Nothing received yet. Drop a PDF or a saved e-mail into the watched folder"}${can("manage") ? ", or send the demo e-mails" : ""}.</p></div>`}
+    </section></div>`;
+
+  $$("tr.click").forEach(tr => tr.onclick = () => location.hash = "#/invoice/" + tr.dataset.id);
+  const busy = (b, txt) => { b.disabled = true; b.dataset.label = b.innerHTML; b.textContent = txt; };
+  if ($("#scanNow")) $("#scanNow").onclick = async e => { busy(e.currentTarget, "Checking…"); try { const r = await api("/api/intake/scan", { method: "POST" }); toast(r.results.length ? `${r.results.length} new item${r.results.length > 1 ? "s" : ""} processed.` : "Nothing new in the folder or mailbox.", "ok"); } catch (ex) { toast(ex.message, "bad"); } refreshCount(); inboxPage(); };
+  if ($("#emlBtn")) $("#emlBtn").onclick = () => $("#emlFile").click();
+  $("#emlFile").onchange = async e => {
+    const files = [...e.target.files]; e.target.value = "";
+    for (const f of files) { const fd = new FormData(); fd.append("file", f);
+      try { const r = await api("/api/intake/email", { method: "POST", body: fd }); toast(`${f.name}: ${r.results.map(x => x.status).join(", ")}`, "ok"); } catch (ex) { toast(`${f.name}: ${ex.message}`, "bad"); } }
+    refreshCount(); inboxPage();
+  };
+  if ($("#demoMail")) $("#demoMail").onclick = async e => { busy(e.currentTarget, "Sending…"); try { const r = await api("/api/demo/emails", { method: "POST" }); const n = r.results.filter(x => x.status === "processed").length; toast(n ? `${n} demo e-mail${n > 1 ? "s" : ""} received and checked.` : "The demo e-mails were already received.", "ok"); } catch (ex) { toast(ex.message, "bad"); } refreshCount(); inboxPage(); };
+}
+
+/* ============================================================ vendors */
+async function vendorsPage() {
+  setNav("vendors"); document.title = "Vendors · InPro Copilot";
+  let rows = [];
+  try { rows = await api("/api/vendors"); } catch (e) { toast(e.message, "bad"); }
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Vendors</h1><p>The approved-vendor list, with what is on file for each: tax ID, the bank account they are paid to, and the domains they e-mail from. An invoice that changes any of these is stopped. Bank accounts and domains are remembered automatically the first time a person approves an invoice.</p></div></div>
+    ${can("manage") ? `<div class="panel"><div class="panel-head"><h2>Add a vendor</h2></div><div class="panel-body">
+      <form id="vForm" class="form-row">
+        <div class="field"><label for="vName">Vendor name</label><input class="input" id="vName" required maxlength="200" placeholder="e.g. Coastal Supplies Pvt Ltd"></div>
+        <div class="field"><label for="vTax">Tax ID (GSTIN / VAT)</label><input class="input" id="vTax" maxlength="40" placeholder="Optional"></div>
+        <div class="field"><label for="vBank">Bank account (IBAN, or account / IFSC)</label><input class="input" id="vBank" maxlength="60" placeholder="Optional"></div>
+        <div class="field"><label for="vDom">E-mail domains</label><input class="input" id="vDom" maxlength="300" placeholder="e.g. coolblue.nl"></div>
+        <div><button class="btn btn-primary" type="submit">Add vendor</button></div>
+      </form></div></div>` : ""}
+    <div class="panel">
+      ${rows.length ? `<table><thead><tr><th>Vendor</th><th>Tax ID</th><th>Bank account</th><th class="hide-sm">E-mail domains</th></tr></thead><tbody>
+        ${rows.map(v => `<tr><td class="cell-title">${esc(v.name)}</td><td class="num">${v.tax_id ? esc(v.tax_id) : '<span class="muted">None</span>'}</td>
+          <td class="num">${v.bank_account ? esc(prettyBank(v.bank_account)) : '<span class="muted">Learned on first approval</span>'}</td>
+          <td class="hide-sm">${v.email_domains ? v.email_domains.split(",").map(d => `<span class="chip neutral">${esc(d)}</span>`).join(" ") : '<span class="muted">-</span>'}</td></tr>`).join("")}
+      </tbody></table>` : `<div class="empty"><p>No approved vendors yet.</p></div>`}
+    </div></div>`;
+  const form = $("#vForm");
+  if (form) form.onsubmit = async e => { e.preventDefault(); try { await api("/api/vendors", { method: "POST", json: { name: $("#vName").value.trim(), tax_id: $("#vTax").value.trim() || null, bank_account: $("#vBank").value.trim() || null, email_domains: $("#vDom").value.trim() || null } }); toast("Vendor added.", "ok"); vendorsPage(); } catch (ex) { toast(ex.message, "bad"); } };
+}
+
+/* ============================================================ purchase orders */
+async function posPage() {
+  setNav("pos"); document.title = "Purchase orders · InPro Copilot";
+  let rows = [];
+  try { rows = await api("/api/purchase-orders"); } catch (e) { toast(e.message, "bad"); }
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Purchase orders</h1><p>Invoices that cite a PO are matched against it: billing more than what is left on the order is a hard stop.</p></div></div>
+    ${can("manage") ? `<div class="panel"><div class="panel-head"><h2>Add a purchase order</h2></div><div class="panel-body">
+      <form id="poForm" class="form-row">
+        <div class="field"><label for="poNum">PO number</label><input class="input" id="poNum" required maxlength="40" placeholder="PO-1001"></div>
+        <div class="field"><label for="poVendor">Vendor</label><input class="input" id="poVendor" required maxlength="200"></div>
+        <div class="field"><label for="poAmt">Amount</label><input class="input num" id="poAmt" type="number" min="0.01" step="0.01" required></div>
+        <div class="field"><label for="poCur">Currency</label><select class="input" id="poCur"><option>INR</option><option>EUR</option><option>USD</option><option>AED</option><option>GBP</option></select></div>
+        <div><button class="btn btn-primary" type="submit">Add PO</button></div>
+      </form></div></div>` : ""}
+    <div class="panel">
+      ${rows.length ? `<table><thead><tr><th>PO number</th><th>Vendor</th><th class="r">Ordered</th><th class="r">Invoiced (approved)</th><th class="r">Remaining</th></tr></thead><tbody>
+        ${rows.map(p => { const rem = p.amount - (p.invoiced || 0); return `<tr><td class="cell-title num">${esc(p.po_number)}</td><td>${esc(p.vendor)}</td>
+          <td class="r num">${esc(money(p.amount, p.currency))}</td><td class="r num">${esc(money(p.invoiced || 0, p.currency))}</td>
+          <td class="r"><div class="remaining num">${esc(money(rem, p.currency))}<span class="meter" title="${pct(p.invoiced || 0, p.amount)}% used"><i style="width:${pct(p.invoiced || 0, p.amount)}%"></i></span></div></td></tr>`; }).join("")}
+      </tbody></table>` : `<div class="empty"><p>No purchase orders yet.</p></div>`}
+    </div></div>`;
+  const form = $("#poForm");
+  if (form) form.onsubmit = async e => { e.preventDefault(); try { await api("/api/purchase-orders", { method: "POST", json: { po_number: $("#poNum").value.trim(), vendor: $("#poVendor").value.trim(), amount: Number($("#poAmt").value), currency: $("#poCur").value } }); toast("Purchase order saved.", "ok"); posPage(); } catch (ex) { toast(ex.message, "bad"); } };
+}
+
+/* ============================================================ activity */
+let actFilter = "all";
+async function activityPage() {
+  setNav("activity"); document.title = "Activity · InPro Copilot";
+  let rows = [];
+  try { rows = await api("/api/activity?limit=300"); } catch (e) { toast(e.message, "bad"); }
+  const groups = {
+    all: () => true,
+    decisions: a => ["approved", "rejected", "confirmed"].includes(a.action),
+    ai: a => a.actor === "AI",
+    security: a => !a.invoice_id && /sign|login|locked|password|user_/.test(a.action),
+    intake: a => /intake/i.test(a.actor) || a.action === "learned",
+  };
+  const shown = rows.filter(groups[actFilter]);
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Activity</h1><p>The audit trail: every upload, AI step, decision, sign-in and change, with who did it and when. Entries cannot be edited.</p></div></div>
+    <div class="panel">
+      <div class="toolbar"><div class="seg" role="group" aria-label="Show">
+        ${[["all", "Everything"], ["decisions", "Decisions"], ["ai", "AI steps"], ["intake", "Inbox and learning"], ["security", "Sign-ins and users"]].map(([k, l]) => `<button type="button" data-a="${k}" aria-pressed="${actFilter === k}">${l}</button>`).join("")}
+      </div></div>
+      ${shown.length ? `<table><thead><tr><th>When</th><th>Who</th><th>What</th><th class="hide-sm">Invoice</th></tr></thead><tbody>
+        ${shown.map(a => `<tr><td class="num sub" style="white-space:nowrap">${esc(when(a.ts))}</td><td><b style="font-weight:600">${esc(a.actor === "system" ? "System" : a.actor)}</b></td>
+          <td>${esc(ACTION_TXT[a.action] || a.action.replace(/_/g, " "))}${a.detail ? `<div class="sub">${esc(a.detail)}</div>` : ""}</td>
+          <td class="hide-sm">${a.invoice_id ? `<a class="cell-title" href="#/invoice/${a.invoice_id}">${esc(a.vendor || a.filename || "#" + a.invoice_id)}</a>` : '<span class="muted">-</span>'}</td></tr>`).join("")}
+      </tbody></table>` : `<div class="empty"><p>No activity yet.</p></div>`}
+    </div></div>`;
+  $$("[data-a]").forEach(b => b.onclick = () => { actFilter = b.dataset.a; activityPage(); });
+}
+
+/* ============================================================ AI usage */
+async function aiPage() {
+  setNav("ai"); document.title = "AI usage · InPro Copilot";
+  let u;
+  try { u = await api("/api/ai/usage"); } catch (e) { toast(e.message, "bad"); return; }
+  const modeTxt = { rules: "Rules only (no AI key configured)", hybrid: "Rules first, AI only when needed", ai: "AI on every invoice" }[u.mode] || u.mode;
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>AI usage</h1><p>What the AI reader is, how often it was asked, and what it cost. The free rules reader handles complete, consistent invoices on its own; repeated documents are answered from the cache.</p></div>
+      <div class="page-actions">${can("manage") && u.models.length ? `<button class="btn" id="testAi" type="button">Test AI connection</button>` : ""}</div></div>
+    <div class="grid-2">
+      <div class="panel metric"><div class="label">Requests today</div><div class="value num">${u.today.calls} <span class="sub">of ${u.limits.daily_requests} allowed</span></div><div class="meter"><i style="width:${pct(u.today.calls, u.limits.daily_requests)}%"></i></div></div>
+      <div class="panel metric"><div class="label">Estimated cost this month</div><div class="value num">$${u.month.cost_usd.toFixed(4)} <span class="sub">of $${u.limits.monthly_budget_usd.toFixed(2)} budget</span></div><div class="meter"><i style="width:${pct(u.month.cost_usd, u.limits.monthly_budget_usd)}%"></i></div></div>
+    </div>
+    <div class="panel" style="margin-top:16px"><div class="panel-head"><h2>Setup</h2></div><div class="panel-body">
+      <dl class="kv">
+        <dt>Reading mode</dt><dd>${esc(modeTxt)}</dd>
+        <dt>Models, in order</dt><dd>${u.models.length ? u.models.map((m, i) => `${i + 1}. ${esc(m.provider)} ${esc(m.model)} <span class="pill p-neutral">${m.free ? "free tier" : "paid"}</span>`).join("<br>") : '<span class="muted">None. Add GEMINI_API_KEY or GROQ_API_KEY to .env.</span>'}</dd>
+        <dt>This month</dt><dd class="num">${u.month.calls} requests, ${(u.month.input_tokens + u.month.output_tokens).toLocaleString()} tokens</dd>
+        <dt>Cached documents</dt><dd class="num">${u.cached_documents} (re-reading them costs nothing)</dd>
+      </dl>
+      <div id="testOut"></div>
+    </div></div>
+    <div class="panel" style="margin-top:16px"><div class="panel-head"><h2>By model, this month</h2></div>
+      ${u.by_model.length ? `<table><thead><tr><th>Provider</th><th>Model</th><th class="r">Requests</th><th class="r">Tokens</th><th class="r">Estimated cost</th></tr></thead><tbody>
+        ${u.by_model.map(m => `<tr><td>${esc(m.provider)}</td><td class="num">${esc(m.model)}</td><td class="r num">${m.calls}</td><td class="r num">${(m.tokens || 0).toLocaleString()}</td><td class="r num">$${(m.cost_usd || 0).toFixed(4)}</td></tr>`).join("")}
+      </tbody></table>` : `<div class="empty"><p>No AI requests yet this month.</p></div>`}
+    </div></div>`;
+  const t = $("#testAi");
+  if (t) t.onclick = async () => {
+    t.disabled = true; t.textContent = "Testing…";
+    try { const r = await api("/api/ai/test", { method: "POST" }); $("#testOut").innerHTML = `<ul class="checks" style="margin-top:16px">${r.map(x => `<li><span class="mark ${x.ok ? "m-pass" : "m-fail"}">${x.ok ? I.check : I.cross}</span><div><div class="name">${esc(x.provider)} ${esc(x.model)}</div><div class="msg">${esc(x.detail)}</div></div></li>`).join("")}</ul>`; }
+    catch (e) { toast(e.message, "bad"); }
+    t.disabled = false; t.textContent = "Test AI connection";
+  };
+}
+
+/* ============================================================ users (admin) */
+async function usersPage() {
+  setNav("users"); document.title = "Users · InPro Copilot";
+  if (!can("manage")) { MAIN().innerHTML = `<div class="page"><h1>Users</h1><p class="muted">Only admins can manage users.</p></div>`; return; }
+  let rows = [];
+  try { rows = await api("/api/users"); } catch (e) { toast(e.message, "bad"); }
+  MAIN().innerHTML = `<div class="page">
+    <div class="page-head"><div><h1>Users</h1><p>Who can sign in and what they may do. Viewers can only look; approvers approve up to their limit; admins can do everything. There is no public sign-up: accounts are created here.</p></div></div>
+    <div class="panel"><div class="panel-head"><h2>Add a user</h2></div><div class="panel-body">
+      <form id="uForm" class="form-row">
+        <div class="field"><label for="uName">Full name</label><input class="input" id="uName" required maxlength="80"></div>
+        <div class="field"><label for="uEmail">Work email</label><input class="input" id="uEmail" type="email" required maxlength="200"></div>
+        <div class="field"><label for="uRole">Role</label><select class="input" id="uRole"><option value="approver">Approver</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
+        <div class="field"><label for="uLimit">Approval limit</label><input class="input num" id="uLimit" type="number" min="0" step="1" placeholder="No limit"></div>
+        <div class="field"><label for="uPw">Temporary password</label><input class="input" id="uPw" type="password" autocomplete="new-password" required></div>
+        <div><button class="btn btn-primary" type="submit">Add user</button></div>
+      </form>
+      <p class="sub" style="margin-top:10px">Passwords need at least 10 characters with upper- and lower-case letters and a number. Ask the person to change it after their first sign-in.</p>
+    </div></div>
+    <div class="panel">
+      <table><thead><tr><th>Name</th><th>Role</th><th class="r">Approval limit</th><th class="hide-sm">Last sign-in</th><th>Status</th><th></th></tr></thead><tbody>
+      ${rows.map(u => `<tr><td><span class="cell-title">${esc(u.name)}</span><div class="sub">${esc(u.email)}</div></td>
+        <td>${esc(ROLE_TXT[u.role] || u.role)}</td>
+        <td class="r num">${u.role === "approver" ? (u.approval_limit != null ? esc(plain(u.approval_limit)) : "No limit") : '<span class="muted">-</span>'}</td>
+        <td class="hide-sm sub">${u.last_login ? esc(when(u.last_login)) : "Never"}</td>
+        <td>${!u.active ? '<span class="pill p-neutral">Disabled</span>' : u.locked ? '<span class="pill p-rejected">Locked</span>' : '<span class="pill p-approved">Active</span>'}</td>
+        <td><div class="inline-actions">${u.id === ME.user.id ? '<span class="sub">You</span>' : `
+          <button class="btn btn-ghost btn-sm" data-act="pw" data-id="${u.id}" type="button">Reset password</button>
+          <button class="btn btn-ghost btn-sm${u.active ? " btn-danger" : ""}" data-act="toggle" data-id="${u.id}" data-active="${u.active ? 1 : 0}" type="button">${u.active ? "Disable" : "Enable"}</button>`}</div></td></tr>`).join("")}
+      </tbody></table>
+    </div></div>`;
+  $("#uForm").onsubmit = async e => {
+    e.preventDefault();
+    const lim = $("#uLimit").value;
+    try { await api("/api/users", { method: "POST", json: { name: $("#uName").value.trim(), email: $("#uEmail").value.trim(), role: $("#uRole").value, approval_limit: lim === "" ? null : Number(lim), password: $("#uPw").value } }); toast("User added. They can sign in now.", "ok"); usersPage(); }
+    catch (ex) { toast(ex.message, "bad"); }
+  };
+  $$("[data-act]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.id;
+    try {
+      if (b.dataset.act === "toggle") { await api(`/api/users/${id}`, { method: "PATCH", json: { active: b.dataset.active !== "1" } }); toast(b.dataset.active === "1" ? "User disabled and signed out." : "User enabled.", "ok"); }
+      else { const pw = prompt("New temporary password (at least 10 characters, upper- and lower-case letters and a number):"); if (!pw) return; await api(`/api/users/${id}`, { method: "PATCH", json: { password: pw } }); toast("Password reset. The user was signed out everywhere.", "ok"); }
+      usersPage();
+    } catch (ex) { toast(ex.message, "bad"); }
+  });
+}
+
+/* ============================================================ change password */
+function openPassword() {
+  const d = $("#pwDialog"); $("#pwForm").reset(); $("#pwErr").hidden = true; d.showModal(); $("#pwCur").focus();
+}
+$("#pwCancel").onclick = () => $("#pwDialog").close();
+$("#pwForm").onsubmit = async e => {
+  e.preventDefault();
+  const err = $("#pwErr");
+  if ($("#pwNew").value !== $("#pwNew2").value) { err.textContent = "The two new passwords are different."; err.hidden = false; return; }
+  try { await api("/api/auth/password", { method: "POST", json: { current: $("#pwCur").value, new: $("#pwNew").value } }); $("#pwDialog").close(); toast("Password changed. Other devices were signed out.", "ok"); }
+  catch (ex) { err.textContent = ex.message; err.hidden = false; }
+};
+
+/* ============================================================ routing and start-up */
+function route() {
+  if (!ME) return;
+  const h = location.hash;
+  const m = h.match(/^#\/invoice\/(\d+)/);
+  if (m) return reviewPage(m[1]);
+  if (h.startsWith("#/invoices")) return invoicesPage();
+  if (h.startsWith("#/inbox")) return inboxPage();
+  if (h.startsWith("#/lab")) return labPage();
+  if (h.startsWith("#/vendors")) return vendorsPage();
+  if (h.startsWith("#/pos")) return posPage();
+  if (h.startsWith("#/activity")) return activityPage();
+  if (h.startsWith("#/ai")) return aiPage();
+  if (h.startsWith("#/users")) return usersPage();
+  return overviewPage();
+}
+window.addEventListener("hashchange", route);
+$("#file").onchange = e => { uploadFiles([...e.target.files]); e.target.value = ""; };
+
+// drag and drop anywhere on the Invoices page
+let dragDepth = 0;
+const onInvoices = () => ME && can("upload") && location.hash.startsWith("#/invoices");
+window.addEventListener("dragenter", e => { if (!onInvoices() || ![...(e.dataTransfer?.types || [])].includes("Files")) return; dragDepth++; $("#dropzone").classList.add("on"); });
+window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#dropzone").classList.remove("on"); });
+window.addEventListener("dragover", e => { if (onInvoices()) e.preventDefault(); });
+window.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; $("#dropzone").classList.remove("on"); if (onInvoices()) uploadFiles([...e.dataTransfer.files]); });
+
+async function boot() {
+  try { CFG = await api("/api/auth/config"); } catch (e) { $("#root").innerHTML = `<div class="login"><div class="login-box"><div class="login-card"><h1>Server not reachable</h1><p class="muted" style="margin-top:8px">${esc(e.message)}</p></div></div></div>`; return; }
+  try { ME = await api("/api/auth/me"); } catch { ME = null; }
+  if (!ME || !ME.user) { ME = null; return showLogin(); }
+  try { HEALTH = await api("/api/health"); } catch { HEALTH = null; }
+  shell();
+  refreshCount();
+  route();
+}
+boot();
+</script>
+</body>
+</html>

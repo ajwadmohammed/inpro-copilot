@@ -1,0 +1,12 @@
+.env
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.db
+uploads/
+eval/setup_report.json
+_sync/
+eval/*_log.txt
+inbox/
+dist/

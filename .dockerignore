@@ -1,0 +1,14 @@
+.env
+.venv/
+venv/
+**/__pycache__/
+.pytest_cache/
+*.db
+uploads/
+inbox/
+_sync/
+.git/
+.github/
+tests/
+eval/results*.json
+eval/*_log.txt

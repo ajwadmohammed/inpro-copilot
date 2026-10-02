@@ -1,0 +1,504 @@
+{
+ "mode": "rules",
+ "models": [],
+ "reading": {
+  "digital": {
+   "by_field": {
+    "vendor": [
+     9,
+     12
+    ],
+    "invoice_number": [
+     12,
+     12
+    ],
+    "invoice_date": [
+     12,
+     12
+    ],
+    "currency": [
+     12,
+     12
+    ],
+    "subtotal": [
+     7,
+     7
+    ],
+    "tax_amount": [
+     7,
+     7
+    ],
+    "total": [
+     12,
+     12
+    ]
+   },
+   "overall": [
+    71,
+    74
+   ],
+   "ms_per_doc": 8,
+   "ai_asked": 0,
+   "documents": 12
+  },
+  "scan_image": {
+   "by_field": {
+    "vendor": [
+     10,
+     12
+    ],
+    "invoice_number": [
+     10,
+     12
+    ],
+    "invoice_date": [
+     10,
+     12
+    ],
+    "currency": [
+     11,
+     12
+    ],
+    "subtotal": [
+     6,
+     7
+    ],
+    "tax_amount": [
+     6,
+     7
+    ],
+    "total": [
+     9,
+     12
+    ]
+   },
+   "overall": [
+    62,
+    74
+   ],
+   "ms_per_doc": 1469,
+   "ai_asked": 0,
+   "documents": 12
+  },
+  "scan_pdf": {
+   "by_field": {
+    "vendor": [
+     10,
+     12
+    ],
+    "invoice_number": [
+     10,
+     12
+    ],
+    "invoice_date": [
+     10,
+     12
+    ],
+    "currency": [
+     11,
+     12
+    ],
+    "subtotal": [
+     6,
+     7
+    ],
+    "tax_amount": [
+     6,
+     7
+    ],
+    "total": [
+     9,
+     12
+    ]
+   },
+   "overall": [
+    62,
+    74
+   ],
+   "ms_per_doc": 1486,
+   "ai_asked": 0,
+   "documents": 12
+  }
+ },
+ "reading_details": [
+  {
+   "set": "digital",
+   "doc": "AzureInterior.pdf",
+   "field": "vendor",
+   "truth": [
+    "Azure Interior"
+   ],
+   "rules": "Global Wholesaler",
+   "ai": null,
+   "final": "Global Wholesaler",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "digital",
+   "doc": "NetpresseInvoice.pdf",
+   "field": "vendor",
+   "truth": [
+    "NETPRESSE"
+   ],
+   "rules": "ALEXINUX",
+   "ai": null,
+   "final": "ALEXINUX",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "digital",
+   "doc": "saeco.pdf",
+   "field": "vendor",
+   "truth": [
+    "e-Luscious",
+    "Saeco"
+   ],
+   "rules": "Factuuradres Afleveradres",
+   "ai": null,
+   "final": "Factuuradres Afleveradres",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "AmazonWebServices.pdf",
+   "field": "invoice_date",
+   "truth": "2014-08-03",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "AmazonWebServices.pdf",
+   "field": "total",
+   "truth": 4.11,
+   "rules": 4.14,
+   "ai": null,
+   "final": 4.14,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "AzureInterior.pdf",
+   "field": "vendor",
+   "truth": [
+    "Azure Interior"
+   ],
+   "rules": "Global Wholesaler",
+   "ai": null,
+   "final": "Global Wholesaler",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "AzureInterior.pdf",
+   "field": "invoice_date",
+   "truth": "2023-03-20",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "FlipkartInvoice.pdf",
+   "field": "invoice_number",
+   "truth": "BLR_WFLD20151000982590",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "NetpresseInvoice.pdf",
+   "field": "vendor",
+   "truth": [
+    "NETPRESSE"
+   ],
+   "rules": "| PUBLICATION ANNONCE LEGALE",
+   "ai": null,
+   "final": "| PUBLICATION ANNONCE LEGALE",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "QualityHosting.pdf",
+   "field": "currency",
+   "truth": "EUR",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "QualityHosting.pdf",
+   "field": "total",
+   "truth": 34.73,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "SammyMaystoneLinesTest.pdf",
+   "field": "invoice_number",
+   "truth": "invoice_number_1",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "coolblue2.pdf",
+   "field": "subtotal",
+   "truth": 4053.67,
+   "rules": 4.0,
+   "ai": null,
+   "final": 4.0,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "coolblue2.pdf",
+   "field": "tax_amount",
+   "truth": 851.27,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_image",
+   "doc": "oyo.pdf",
+   "field": "total",
+   "truth": 1939.0,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "AmazonWebServices.pdf",
+   "field": "invoice_date",
+   "truth": "2014-08-03",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "AmazonWebServices.pdf",
+   "field": "total",
+   "truth": 4.11,
+   "rules": 4.14,
+   "ai": null,
+   "final": 4.14,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "AzureInterior.pdf",
+   "field": "vendor",
+   "truth": [
+    "Azure Interior"
+   ],
+   "rules": "Global Wholesaler",
+   "ai": null,
+   "final": "Global Wholesaler",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "AzureInterior.pdf",
+   "field": "invoice_date",
+   "truth": "2023-03-20",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "FlipkartInvoice.pdf",
+   "field": "invoice_number",
+   "truth": "BLR_WFLD20151000982590",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "NetpresseInvoice.pdf",
+   "field": "vendor",
+   "truth": [
+    "NETPRESSE"
+   ],
+   "rules": "| PUBLICATION ANNONCE LEGALE",
+   "ai": null,
+   "final": "| PUBLICATION ANNONCE LEGALE",
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "QualityHosting.pdf",
+   "field": "currency",
+   "truth": "EUR",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "QualityHosting.pdf",
+   "field": "total",
+   "truth": 34.73,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "SammyMaystoneLinesTest.pdf",
+   "field": "invoice_number",
+   "truth": "invoice_number_1",
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "coolblue2.pdf",
+   "field": "subtotal",
+   "truth": 4053.67,
+   "rules": 4.0,
+   "ai": null,
+   "final": 4.0,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "coolblue2.pdf",
+   "field": "tax_amount",
+   "truth": 851.27,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  },
+  {
+   "set": "scan_pdf",
+   "doc": "oyo.pdf",
+   "field": "total",
+   "truth": 1939.0,
+   "rules": null,
+   "ai": null,
+   "final": null,
+   "final_ok": false,
+   "rules_ok": false
+  }
+ ],
+ "detection": {
+  "duplicate_exact": [
+   12,
+   12
+  ],
+  "duplicate_renumbered": [
+   12,
+   12
+  ],
+  "same_number_new_amount": [
+   11,
+   11
+  ],
+  "missing_invoice_number": [
+   12,
+   12
+  ],
+  "po_match_ok": [
+   11,
+   12
+  ],
+  "po_overbilled": [
+   12,
+   12
+  ],
+  "po_wrong_vendor": [
+   12,
+   12
+  ],
+  "math_tampered_total": [
+   7,
+   7
+  ],
+  "bank_changed": [
+   7,
+   7
+  ],
+  "iban_typo": [
+   5,
+   5
+  ],
+  "vendor_taxid_swapped": [
+   3,
+   3
+  ],
+  "gstin_typo": [
+   1,
+   1
+  ]
+ },
+ "detection_misses": [
+  [
+   "po_match_ok",
+   "saeco.pdf",
+   "po_match=warn",
+   "VF1005193039",
+   49.99
+  ]
+ ],
+ "clean": {
+  "outcomes": {
+   "needs_review": 5,
+   "auto_approve": 7
+  },
+  "false_fails": []
+ },
+ "seconds": 37.2
+}

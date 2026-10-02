@@ -1,0 +1,111 @@
+"""Bank-account fraud check and e-mail sender verification."""
+import pytest
+
+from inpro_copilot import bank, sender
+from inpro_copilot.checks import Context, check_bank, check_sender
+from inpro_copilot.models import InvoiceFields
+
+COOL = "NL50INGB0683251309"
+
+
+def f(**kw):
+    base = dict(vendor="Coolblue B.V.", invoice_number="993548900", total=717.97, bank_account=COOL)
+    base.update(kw)
+    return InvoiceFields(**base)
+
+
+@pytest.mark.parametrize("iban,ok", [(COOL, True), ("NL50 INGB 0683 2513 09", True), ("FR7610107002450061705231739", True),
+                                     ("NL50INGB0683251300", False), ("NL91ABNA0417164300", True), ("DE30507500940000048567", True)])
+def test_iban_checksum(iban, ok):
+    assert bank.iban_valid(iban) is ok
+
+
+def test_make_iban_builds_valid_checksums():
+    assert bank.make_iban("NL", "ABNA0417164300") == "NL91ABNA0417164300"
+
+
+def test_ocr_repair_of_check_digits():
+    assert bank.find_ibans("IBAN NLSOINGB0683251309") == [COOL]
+
+
+def test_same_account_compares_numbers_and_ifsc():
+    assert bank.same_account("NL50 INGB 0683 2513 09", COOL)
+    assert bank.same_account("00030340067212 / HDFC0000003", "00030340067212/HDFC0000003")
+    assert not bank.same_account("00030340067212 / HDFC0000003", "00030340067212 / ICIC0000003")
+
+
+def test_bank_changed_is_a_hard_failure():
+    ctx = Context(vendors=[{"name": "Coolblue", "bank_account": COOL}])
+    assert check_bank(f(), ctx).status == "pass"
+    r = check_bank(f(bank_account=bank.make_iban("NL", "INGB0683584632")), ctx)
+    assert r.status == "fail" and "changed" in r.message and r.details["kind"] == "changed"
+
+
+def test_invalid_iban_fails_but_only_warns_on_a_scan():
+    bad = f(bank_account="NL50INGB0683251300")
+    assert check_bank(bad, Context()).status == "fail"
+    assert check_bank(bad, Context(ocr=True)).status == "warn"
+
+
+def test_change_is_caught_from_history_when_nothing_is_on_file():
+    hist = [{"id": 3, "status": "approved", "fields": f().to_dict(), "file_hash": "x"}]
+    other = bank.make_iban("NL", "RABO0123456789")
+    assert check_bank(f(bank_account=other), Context(history=hist)).status == "fail"
+    assert check_bank(f(), Context(history=hist)).status == "pass"
+
+
+def test_account_shared_with_another_vendor_is_flagged():
+    ctx = Context(vendors=[{"name": "Coolblue", "bank_account": COOL}])
+    r = check_bank(f(vendor="Brand New Traders Pvt Ltd"), ctx)
+    assert r.status == "warn" and r.details["kind"] == "shared"
+
+
+def test_first_bank_details_for_known_vendor_need_one_confirmation():
+    r = check_bank(f(), Context(vendors=[{"name": "Coolblue", "bank_account": None}]))
+    assert r.status == "warn" and r.details["kind"] == "new"
+
+
+@pytest.mark.parametrize("dom,verdict", [("coolblue.nl", "known"), ("mail.coolblue.nl", "known"), ("coolbiue.nl", "lookalike"),
+                                         ("coo1blue.nl", "lookalike"), ("coolblue-invoices.com", "lookalike"),
+                                         ("cоolblue.nl", "lookalike"), ("example.org", "unknown")])
+def test_lookalike_domains(dom, verdict):
+    assert sender.compare(dom, {"coolblue.nl"})[0] == verdict
+
+
+def test_sender_check():
+    ctx = lambda addr, doms="coolblue.nl": Context(vendors=[{"name": "Coolblue", "email_domains": doms}],
+                                                   source={"channel": "email", "sender": addr})
+    assert check_sender(f(), Context()).status == "skip"
+    assert check_sender(f(), ctx("facturen@coolblue.nl")).status == "pass"
+    assert check_sender(f(), ctx("facturen@coolbiue.nl")).status == "fail"
+    assert check_sender(f(), ctx("coolblue.billing@gmail.com")).status == "warn"
+    assert check_sender(f(), ctx("x@somewhere-else.com")).status == "warn"
+
+
+def test_sender_compared_with_website_printed_on_invoice_when_nothing_on_file():
+    c = Context(source={"channel": "email", "sender": "billing@azure-interiors.com"}, doc_text="Azure Interior www.azure-interior.com")
+    r = check_sender(InvoiceFields(vendor="Azure Interior"), c)
+    assert r.status == "fail" and r.details["imitates"] == "azure-interior.com"
+
+
+def test_learning_on_approval(tmp_path):
+    from inpro_copilot.api import ROOT
+    from inpro_copilot.pipeline import Pipeline
+    from inpro_copilot.store import Store
+    st = Store()
+    st.add_vendor("Coolblue", "NL810433941B01")                       # no bank account on file yet
+    p = Pipeline(st, tmp_path, extractor="rules")
+    first = p.process(ROOT / "data/real/coolblue1.pdf", source={"channel": "email", "sender": "facturen@coolblue.nl", "subject": "Factuur"})
+    assert next(c for c in first["checks"] if c["name"] == "bank")["status"] == "warn"
+    p.human_decision(first["id"], True, "Priya")
+    v = st.vendors()[0]
+    assert v["bank_account"] == COOL and v["email_domains"] == "coolblue.nl"
+    fraud = p.process(ROOT / "data/synthetic/coolblue2/bank_changed.pdf")
+    assert next(c for c in fraud["checks"] if c["name"] == "bank")["status"] == "fail" and fraud["ai_outcome"] == "reject"
+
+
+def test_reply_to_pointing_elsewhere():
+    c = Context(vendors=[{"name": "Coolblue", "email_domains": "coolblue.nl"}],
+                source={"channel": "email", "sender": "facturen@coolblue.nl", "reply_to": "payments@quick-mail.net"})
+    r = check_sender(f(), c)
+    assert r.status == "warn" and r.details["kind"] == "reply_to"
