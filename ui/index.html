@@ -1799,7 +1799,7 @@ async function posPage() {
       </div></td></tr>`;
   };
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Purchase orders</h1><p>Every order starts as a request: accounts payable asks, procurement prepares it, a manager approves it. No one can open a purchase order alone. An invoice that quotes an order is checked against it: billing more than what is left is stopped, and procurement confirms delivery before payment. An order placed outside the app is recorded from its invoice and approved the same way.</p></div>
+    <div class="page-head"><div><h1>Purchase orders</h1><p>Every order starts as a request: accounts payable asks, procurement prepares it, a manager approves it. No one can open a purchase order alone. An invoice that quotes an order is checked against it: billing more than what is left on the order is flagged before payment. An order placed outside the app is recorded from its invoice and approved the same way.</p></div>
       <div class="page-actions">${can("request") ? `<button class="btn btn-primary" id="reqBtn" type="button">${I.po}Request a purchase</button>` : ""}</div></div>
     <datalist id="vendorNames">${vendors.filter(v => v.status !== "rejected").map(v => `<option value="${esc(v.name)}"></option>`).join("")}</datalist>
     ${can("request") ? `<div class="panel" id="reqNew" hidden><div class="panel-head"><h2>Request a purchase</h2><span class="sub">Procurement prepares it, a manager approves it</span></div><div class="panel-body">
@@ -1879,10 +1879,10 @@ async function activityPage() {
   try { rows = await api("/api/activity?limit=300"); } catch (e) { toast(e.message, "bad"); }
   const groups = {
     all: () => true,
-    decisions: a => ["approved", "rejected", "confirmed"].includes(a.action) && a.actor !== "AI",
+    decisions: a => ["approved", "rejected", "confirmed", "reviewed"].includes(a.action) && a.actor !== "AI",
     ai: a => a.actor === "AI",
     security: a => !a.invoice_id && /sign|login|locked|password|user_|switched/.test(a.action),
-    changes: a => /^po_/.test(a.action) || ["learned", "edited", "vendor_proposed", "vendor_verified", "vendor_rejected", "vendor_saved", "receipt_confirmed", "receipt_problem"].includes(a.action),
+    changes: a => /^po_/.test(a.action) || ["learned", "edited", "vendor_proposed", "vendor_verified", "vendor_approved", "vendor_rejected", "vendor_saved", "receipt_confirmed", "receipt_problem"].includes(a.action),
   };
   const shown = rows.filter(groups[actFilter]);
   MAIN().innerHTML = `<div class="page">
@@ -1943,7 +1943,7 @@ async function usersPage() {
   let rows = [];
   try { rows = await api("/api/users"); } catch (e) { toast(e.message, "bad"); }
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Users</h1><p>Who can sign in and what they may do. Accounts payable uploads and corrects invoices; procurement keeps purchase orders, confirms deliveries and verifies vendors; managers approve invoices (up to their limit, if one is set) and manage users. No role can both record and approve an invoice. There is no public sign-up: accounts are created here.</p></div></div>
+    <div class="page-head"><div><h1>Users</h1><p>Who can sign in and what they may do. Accounts payable uploads every invoice, reviews it first and adds new suppliers; procurement verifies new suppliers and prepares purchase orders; managers approve suppliers, orders and every invoice (up to their limit, if one is set) and manage users. No role can both record and approve an invoice. There is no public sign-up: accounts are created here.</p></div></div>
     <div class="panel"><div class="panel-head"><h2>Add a user</h2></div><div class="panel-body">
       <form id="uForm" class="form-row">
         <div class="field"><label for="uName">Full name</label><input class="input" id="uName" required maxlength="80"></div>

@@ -13,11 +13,13 @@ and only the right people may approve (and only up to their limit). So:
   * Every change request must carry a custom header, which a forged cross-site form cannot add (CSRF).
   * Three roles, split the way finance teams split the work (segregation of duties). The person who records an
     invoice never approves it, and the people who keep the vendor list never approve payments:
-            ap          - accounts payable: uploads invoices, corrects misread fields, proposes new vendors, requests purchases
-            procurement - prepares purchase requests, keeps purchase orders, confirms deliveries, verifies new vendors
-            approver    - manager: approves purchase requests and invoices (optionally up to a limit), manages users
+            ap          - accounts payable: uploads invoices and reviews each one first (approve or reject), adds new
+                          suppliers, requests purchases
+            procurement - verifies new suppliers, prepares purchase requests, records orders placed outside the app
+            approver    - manager: approves new suppliers, purchase requests and every invoice (optionally up to a
+                          limit), manages users
     No role can take an invoice from upload to approval alone. On top of that, nobody may approve an invoice
-    they uploaded or corrected, nor verify a vendor they proposed (workflow.py).
+    they uploaded or corrected, nor verify or approve a supplier they added or verified (workflow.py).
   * Integrations (Power Automate, SharePoint) use a service token instead of a password.
   * Logins, failed logins, lockouts, password and user changes go to the audit log.
 
@@ -121,9 +123,9 @@ def within_limit(user: dict[str, Any], amount: float | None) -> bool:
 
 DEMO_USERS = [
     # name, email, role, approval limit (None = no limit), what it shows in the demo; in the order of the invoice flow
-    ("Ananya Rao", "ananya@demo.inpro", "ap", None, "Accounts payable: uploads invoices, fixes misread fields, proposes new vendors"),
-    ("Vikram Pai", "vikram@demo.inpro", "procurement", None, "Procurement: purchase orders, confirms deliveries, verifies new vendors"),
-    ("Rahul Kamath", "rahul@demo.inpro", "approver", None, "Manager: approves or rejects invoices, manages users"),
+    ("Ananya Rao", "ananya@demo.inpro", "ap", None, "Accounts payable: uploads invoices, reviews each one first, adds new suppliers"),
+    ("Vikram Pai", "vikram@demo.inpro", "procurement", None, "Procurement: verifies new suppliers, prepares purchase orders"),
+    ("Rahul Kamath", "rahul@demo.inpro", "approver", None, "Manager: approves new suppliers and every invoice, manages users"),
 ]
 DEMO_DOMAIN = "@demo.inpro"
 
