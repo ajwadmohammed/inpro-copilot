@@ -4,7 +4,7 @@ The decision is a short, readable policy, not a black box:
 
   REJECT        - at least one hard failure (duplicate, arithmetic wrong,
                   spoofed vendor tax-ID, invalid GSTIN, over-billing a PO,
-                  changed or invalid bank account, look-alike sender domain).
+                  changed or invalid bank account).
   AUTO-APPROVE  - every safety check passed AND the amount is below the
                   auto-approval limit. (Missing evidence is never enough.)
   NEEDS REVIEW  - everything else. A human decides, with our reasons in front
@@ -19,12 +19,12 @@ from dataclasses import dataclass
 
 from .models import CheckResult, Decision, InvoiceFields
 
-HARD_FAIL_CHECKS = {"duplicate", "math", "vendor", "tax_id", "po_match", "bank", "sender"}
+HARD_FAIL_CHECKS = {"duplicate", "math", "vendor", "tax_id", "po_match", "bank"}
 MUST_PASS_FOR_AUTO = {"completeness", "math", "duplicate", "vendor"}
-MAY_SKIP_FOR_AUTO = {"tax_id", "po_match", "bank", "sender"}
+MAY_SKIP_FOR_AUTO = {"tax_id", "po_match", "bank"}
 # Which problem the one-line summary leads with: payment-fraud signals first, because they are the ones
 # that cost money if someone skims the summary and pays anyway.
-LEAD_ORDER = ["bank", "sender", "completeness", "vendor", "duplicate", "math", "po_match", "tax_id"]
+LEAD_ORDER = ["bank", "completeness", "vendor", "duplicate", "math", "po_match", "tax_id"]
 
 
 def _lead(checks: list[CheckResult]) -> list[CheckResult]:
@@ -48,7 +48,7 @@ def decide(fields: InvoiceFields, checks: list[CheckResult], policy: Policy | No
     hard = _lead([c for c in checks if c.status == "fail" and c.name in HARD_FAIL_CHECKS])
     if hard:
         return Decision(
-            "reject", "high" if len(hard) > 1 or hard[0].name in {"duplicate", "math", "bank", "sender"} else "medium",
+            "reject", "high" if len(hard) > 1 or hard[0].name in {"duplicate", "math", "bank"} else "medium",
             [c.message for c in hard] + [c.message for c in _lead([c for c in checks if c.status == "warn"])],
             "Recommend REJECT: " + hard[0].message + _more(len(hard) - 1),
         )
@@ -64,7 +64,7 @@ def decide(fields: InvoiceFields, checks: list[CheckResult], policy: Policy | No
     if not blockers and not too_big and not not_ok:
         ok = [c.message for c in checks if c.status == "pass"]
         return Decision("auto_approve", "high", ok,
-                        "Recommend APPROVE: every safety check passed and the amount is within the auto-approval limit.")
+                        "Recommend APPROVE: every safety check passed.")
 
     reasons = [c.message for c in _lead(blockers)]
     for c in _lead(not_ok):

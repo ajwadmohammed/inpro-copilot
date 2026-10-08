@@ -17,10 +17,9 @@ In an approval workflow, an invoice arrives and a person has to open it and ask 
 * Do the numbers add up?
 * Is this a vendor we actually work with? Is the tax number right?
 * Did we order this, and is the bill bigger than the order?
-* Is the bank account the one we always pay? Did this e-mail really come from the supplier?
+* Is the bank account the one we always pay?
 
-The last two are how most invoice fraud works: a fraudster sends a real-looking invoice from a look-alike e-mail
-address ("azure-interiors.com" instead of "azure-interior.com") and asks for payment to a "new" bank account.
+The last one is how most invoice fraud works: a real-looking invoice that asks for payment to a "new" bank account.
 
 That is slow, boring, and easy to get wrong when the pile is big. InPro already routes the invoice to the right
 approver. **Copilot does the checking first**, so the approver opens an invoice that already says
@@ -29,9 +28,9 @@ approver. **Copilot does the checking first**, so the approver opens an invoice 
 ## 2. What happens behind the scenes (5 steps)
 
 ```
-upload / e-mail / watched folder -> 1 READ -> 2 EXTRACT -> 3 CHECK (8 checks) -> 4 DECIDE -> 5 SAVE + AUDIT LOG
-                                                                                                 |
-                                         approved by a person -> remember the vendor's bank account and e-mail domain
+upload -> 1 READ -> 2 EXTRACT -> 3 CHECK (7 checks) -> 4 DECIDE -> 5 HAND-OFF to the right person + AUDIT LOG
+                                                                                  |
+                                         approved by a person -> remember the vendor's bank account
 ```
 
 1. **READ.** Turn the file into words with positions. If the PDF has real text, we read it directly
@@ -44,22 +43,23 @@ upload / e-mail / watched folder -> 1 READ -> 2 EXTRACT -> 3 CHECK (8 checks) ->
    * Every AI value passes a **grounding check**: if it is not literally printed on the document, it is
      thrown away, so the AI can't invent numbers. The two readings are merged and every disagreement is shown.
    * The vendor is matched to the approved-vendor list, so one supplier always has one name.
-3. **CHECK.** Eight small, plain-code checks. No AI here, so every result is repeatable and explainable:
+3. **CHECK.** Seven small, plain-code checks. No AI here, so every result is repeatable and explainable:
 
    | Check | What it asks |
    |---|---|
    | Required fields | Are the invoice number and total there? |
-   | Arithmetic | subtotal + tax = total? Do line items add up? |
+   | Arithmetic | subtotal + tax = total (counting printed shipping, handling, rounding or discount lines)? Do line items add up? |
    | Duplicates | Same file, same number, same number but new amount, near-identical number, same amount and date? |
    | Vendor | On the approved list? Does the tax ID match the one on file? |
    | Tax ID | Is the GSTIN (India) valid by its real checksum? UAE TRN / EU VAT format |
    | Purchase order | Is the bill larger than what's left on the PO? Right vendor and currency? |
    | Bank account | Is the IBAN valid (its two check digits)? Is it the account on file, or on this vendor's earlier approved invoices? Is it another vendor's account? |
-   | Sender | For e-mailed invoices: the supplier's real domain, a look-alike (`coo1blue.nl`, `azure-interiors.com`, Cyrillic letters), a free Gmail-type address, or a Reply-To that points elsewhere? |
 
-4. **DECIDE.** A written policy, not a guess:
-   *reject* if any hard check fails; *auto-approve* only if the core checks pass and the amount is under the limit
-   (default 50,000); otherwise *needs review*. Every outcome comes with one sentence of reasons.
+4. **RECOMMEND.** A written policy, not a guess:
+   *recommend reject* if any hard check fails; *recommend approve* only if the core checks pass and the amount is
+   under the limit (default 50,000); otherwise *needs your review*. Every recommendation comes with one sentence of
+   reasons. **The checks never approve or reject on their own**: every invoice is reviewed by accounts payable and
+   given its final approval by a manager (section 3a), and the recommendation is shown to both as pros and cons.
    On scans and photos, numbers that don't add up go to *needs review* ("compare with the image") instead of
    *reject*, because the photo reader can misread a digit; on digital PDFs they are a hard failure.
 5. **SAVE + AUDIT.** Everything is stored with a step-by-step trace ("how the recommendation was reached") and an
@@ -71,55 +71,92 @@ documents; the decisions come from transparent checks.
 ## 3. The screens
 
 * **Overview** (the first page after sign-in): the value of invoices stopped before payment, where every invoice
-  went (cleared automatically / waiting / decided by a person / stopped), what each check caught and why, checking
+  went (with accounts payable / with procurement / with the manager / approved / rejected), what each check caught and why, checking
   time saved, and AI cost per invoice.
+* **Upload**: drop an invoice (PDF or photo); it is read and checked straight away and opens for review.
 * **Invoices** and the **review screen**: same layout idea as InPro, approval history on the left, the original
-  document on the right, comment box and Approve / Reject at the bottom. Plus: AI verdict, per-check results,
-  extracted fields, where the invoice came from (e.g. "E-mail from billing@azure-interiors.com, look-alike domain"),
-  and the trace.
-* **Inbox**: the watched folder, the mailbox connection, and everything received, with the sender verdict for each e-mail.
-* **Fraud lab**: try to fool the checks yourself. Pick one of the real invoices and a trick (pay to a different
-  account, mistype the IBAN, raise the total, resubmit with a new number, change the tax ID, e-mail it from a
-  look-alike domain, or the full e-mail scam). The lab forges the PDF the way a fraudster would and sends it through
-  the same pipeline as every other invoice. It shows the genuine and forged pages side by side with the change marked
-  and a close-up, which checks fired, how long it took, and whether the trick's own check would have stopped it even
-  with no earlier invoices on file. Lab forgeries are kept out of the Overview figures.
-* **Vendors** (with tax ID, bank account and e-mail domains on file), **Purchase orders**, **Activity** (audit trail),
+  document on the right, and the decision of whoever's turn it is at the bottom (accounts payable: Approve / Reject;
+  procurement: verify the supplier; manager: approve the supplier or the order, then Approve / Reject). Plus: the AI
+  verdict, the review as **pros and cons** (what needs attention, what could not be checked, what looks good),
+  extracted fields, who uploaded it, the hand-off steps, and the trace.
+* **After every action** a page says what happened, who was told, and what is next for you (the next invoice to
+  review, upload another one). The **bell** next to the logo shows each person what reached their step and the
+  outcome of decisions that affect them, with a link to it; it updates on its own every 30 seconds.
+* **Where the problem is**: when an invoice fails a check, its review screen shows the proof. The problem value is
+  marked on a close-up of the document and set next to what it is compared with: the bank account on file, the
+  earlier invoice it repeats (both close-ups side by side), subtotal + tax for a wrong total, the tax ID on the vendor
+  record, or what is left on the purchase order. The changed characters are highlighted.
+* **Vendors** (with tax ID and bank account on file, and new ones waiting for procurement or a manager), **Purchase orders**, **Activity** (audit trail),
   **AI usage**, **Users**.
 
-Click **Load demo data** on the Invoices page to fill it with 12 examples built from real invoices, then
-**Send demo e-mails** on the Inbox page for the e-mail fraud story: the supplier's real invoice, the same invoice
-re-sent from a look-alike domain with a new bank account (stopped: duplicate, bank account changed, fake sender),
-and an invoice from a Gmail address (sent to a person).
+Click **Load demo data** on the Invoices page to fill it with 13 examples built from real invoices.
 
-## 3b. Invoices that arrive by themselves
+## 3a. Who does what: hand-offs and segregation of duties
 
-In real accounts payable nobody uploads invoices one by one, so the copilot also takes them in by itself:
+The copilot checks every invoice the moment it arrives. Then people decide, in this order, and the review page shows
+the whole path (received, checked, review, supplier, order, manager) with who did each step:
 
-* **Watched folder**: drop a PDF, a photo or a saved e-mail (.eml) into the `inbox` folder (or point a scanner at
-  it). Within about 20 seconds it is read, checked, filed, and moved to `inbox/processed`.
-* **A real mailbox** (optional): give an IMAP address and an app password in `.env` (Gmail and Zoho work this way;
-  see [API_SETUP.md](API_SETUP.md#8-connect-a-real-mailbox-optional-free)). Unread mail is fetched and every PDF/image
-  attachment becomes an invoice.
-* **The e-mail is evidence**: the sender, Reply-To and subject travel with the invoice and feed the sender check.
-* **Nothing twice**: every message and attachment gets a fingerprint, so re-scans and restarts are safe.
-* **It learns from approvals**: when a person approves an invoice, the vendor's bank account and e-mail domain are
-  remembered (only if the checks didn't object), so a later change stands out. Each "remembered" step is in the audit log.
+| Step | Who | What they do |
+|---|---|---|
+| Review the invoice | Accounts payable | Every invoice, first. The page shows what needs attention and what looks good, next to the document. **Approve** sends it on with an optional note for the manager. **Reject** needs a reason: the invoice is closed and never paid, its record is kept, and the upload page opens for the corrected invoice. Fields read wrongly can be corrected during the review (the first reading is kept and every change is logged); a number or date the document does not print is simply accepted with the approval. The supplier, the amount and the currency are needed to approve. |
+| Add a new supplier | Accounts payable | When the supplier is not on the vendor list, the review shows a card pre-filled from the invoice (name, tax ID with its check digit, bank account with its IBAN checksum); approving the invoice adds it as *waiting for procurement*. Until a manager approves the supplier, its invoices wait. |
+| Verify the supplier | Procurement | Confirms the supplier is real (by phone, on a known number) or rejects it with a reason. Never the person who added it. |
+| Approve the supplier | Manager | The supplier becomes active and payable only now; then the manager decides on the invoice. Never the person who added or verified it. |
+| Record the order | Procurement | Only when an invoice quotes a PO that is not on file because it was ordered outside the app (an *after-the-fact* order): the PO number, supplier and currency come pre-filled, the amount must come from the order itself (never from the invoice), and a reason is required. |
+| Approve the order | Manager | The same approval every order needs. Approving opens the PO under the number the supplier was given and the invoice moves on; rejecting it rejects the invoice too, because an order nobody approved is not paid. |
+| Confirm delivery | Procurement | Optional (`INPRO_REQUIRE_RECEIPT=1`): for invoices that cite a purchase order, the three-way match (order, invoice, delivery) before the manager decides. Off by default. |
+| Approve or reject | Manager | The final approval for every invoice, with the accounts payable note and the pros and cons in front of them. May approve at any step, even with fields missing or checks failing: what is still open is listed above the **Approve anyway** button, and the decision records exactly what the manager accepted. Nobody approves an invoice they uploaded or corrected, and a manager can be given an approval limit on the Users page; the manager also manages users. |
+
+Whoever's turn it is hears about it under the bell ("Waiting for your approval: invoice 30064443 from QualityHosting"),
+and the people a decision affects hear the outcome (the uploader and the reviewer when the manager approves or
+rejects; whoever added a supplier when it is verified, approved or rejected). Nobody is notified about their own action.
+
+Three roles, and no role can take an invoice from upload to payment alone: accounts payable reviews invoices but never
+gives the final approval, procurement verifies suppliers and records orders but never approves, managers approve but
+never record invoices or add suppliers. On top of the roles, the server refuses an approval by anyone who uploaded or
+corrected that invoice, and a supplier verification or approval by the person who added or verified it.
+Each person's **My tasks** list shows only what is waiting for them, and an empty list says when that role gets work.
+Once an invoice is decided, its page shows a short record (approved for payment or rejected, by whom, when, supplier,
+amount, order and delivery, who to pay) with the full review folded underneath, and changing the decision is one
+deliberate click away. An invoice uploaded by mistake (wrong file, a second copy, the supplier will re-issue) can be
+**removed** by accounts payable or a manager, with a reason, until a person has decided it: it leaves the queue and is
+never paid, but nothing is deleted, so the Activity log still shows who removed it and why.
+
+**Before the invoice: purchase requests.** The industry rule is that whoever needs something asks, procurement turns
+it into an order, and the order is approved before it is issued, so no single person controls a purchase. Here, on the
+Purchase orders page, accounts payable can *request a purchase* (what is needed, supplier, estimated amount, reason).
+Procurement prepares the order (confirms the supplier and the agreed price) or rejects it with a reason; a manager
+gives the final approval, within their limit and never on a request they made or prepared. Only then does it become a
+purchase order (numbered automatically), and an invoice that quotes it is matched against it. **No person can open a
+purchase order directly**: there is one way in, and an order placed outside the app is recorded from its invoice and
+approved the same way (see the table above). Orders already approved in the company's ERP can be loaded through the
+API with the integration token. Every step is in the Activity log.
+
+## 3b. How invoices get in
+
+* **Upload**: accounts payable drops PDFs or photos on the Upload page or the Invoices page (several at once is fine).
+* **From InPro**: a SharePoint or Power Automate step sends the scanned file to the API with the service token and
+  gets the verdict back (see section 8).
+* **It learns from approvals**: when a person approves an invoice, the vendor's bank account is remembered (only if
+  the checks didn't object), so a later change stands out. Each "remembered" step is in the audit log.
 
 ## 4. Sign-in and security
 
 An approval is only worth something if you know **who** approved, so the app has proper sign-in:
 
-* **No public sign-up.** An admin creates accounts on the Users page (a finance tool must not let strangers in).
-* **Roles:** *viewer* (look only, e.g. auditors), *approver* (upload, approve up to a personal **approval limit**,
-  reject anything), *admin* (everything, plus users, vendors, purchase orders).
+* **No public sign-up.** A manager creates accounts on the Users page (a finance tool must not let strangers in).
+* **Roles** (see 3a): *accounts payable*, *procurement* and *manager* (approves, optionally up to a personal
+  **approval limit**, and manages users). The rules are enforced by the server, not only
+  hidden in the screen: uploader or corrector cannot approve, whoever added a supplier cannot verify or approve it.
 * **Passwords** are stored only as salted scrypt hashes; 5 wrong attempts lock the account for 15 minutes.
 * **Sessions** use an HttpOnly, SameSite=Strict cookie and end after 8 hours without activity.
 * **Protections:** a required header against cross-site request forgery, strict security headers
   (Content-Security-Policy, no framing), every file and API call behind sign-in.
 * **Audit trail:** sign-ins, failed attempts, user changes and every decision appear on the Activity page.
 * **Integrations** (Power Automate / SharePoint) use a service token instead of a password.
-* In demo mode the sign-in page lists three demo accounts: Priya (admin), Rahul (approver, limit 500), Meera (viewer).
+* In demo mode the sign-in page has one button, **Open the demo**. You start as Ananya (accounts payable), where an
+  invoice starts; click your name to switch to Vikram (procurement) or Rahul (manager). The switch works only between
+  these demo accounts and is recorded in the Activity log.
   For production, "Sign in with Microsoft" (Entra ID) is the natural next step, since InPro customers already use Microsoft 365.
 
 ## 5. Put it online (free, opens anywhere)
@@ -135,13 +172,12 @@ country, and the app in its own Docker container (`Dockerfile`, `render.yaml`).
 * **Always awake.** Free services sleep after 15 minutes without visitors and take about a minute to wake.
   `.github/workflows/keep-awake.yml` opens the health page every 5 minutes, which fits inside Render's 750 free hours
   a month for one service.
-* **Free means small**: 0.1 CPU and 512 MB (the app uses about 180 MB), so pages and the Fraud lab answer in about
-  half a second instead of a twentieth.
+* **Free means small**: 0.1 CPU and 512 MB (the app uses about 180 MB), so pages answer in about half a second
+  instead of a twentieth.
 * **Alternative:** a Hugging Face Space (`deploy/hf_deploy.py`, `deploy_hf.bat`, or the manual
   "Deploy to Hugging Face" workflow). Since July 2026, Docker Spaces need a Hugging Face PRO plan.
 
-On the public demo: the three demo accounts are one click on the sign-in page and cannot be changed or locked by
-visitors, uploads and forgeries are rate-limited, the AI budget caps still apply, the server's folders are never
+On the public demo: the demo accounts are one click away and cannot be changed or locked by visitors, uploads are rate-limited, the AI budget caps still apply, the server's folders are never
 shown, and the demo story is loaded automatically whenever the server starts (the free disk is not permanent).
 
 ## 6. Run it on your computer (Windows)
@@ -155,8 +191,8 @@ python check_setup.py           (checks packages, Tesseract and every AI key)
 run.bat
 ```
 
-Open <http://localhost:8000>, sign in as Priya (the sign-in page fills it in for you), click **Load demo data** on
-the Invoices page and **Send demo e-mails** on the Inbox page, then open the Overview. Run the tests with `python -m pytest`.
+Open <http://localhost:8000> and click **Open the demo**. To load the sample invoices, switch to Rahul (manager)
+and click **Load demo data** on the Invoices page. Run the tests with `python -m pytest`.
 Mac/Linux: `source .venv/bin/activate`, `cp .env.example .env`, `./run.sh`.
 
 * **Scans and photos** need Tesseract: `winget install -e --id UB-Mannheim.TesseractOCR` on Windows
@@ -172,14 +208,17 @@ Data: **12 real invoices** (Dutch, French, German, US, Indian, English) from pub
 altering real invoices one way at a time (changed a total, removed the number, swapped a tax ID, replaced the bank
 account with another valid one, mistyped one IBAN digit ...) or by simulating scans (blur, tilt, noise, JPEG).
 Reading accuracy with AI measured on Windows, 1 October 2026; defect detection re-measured 2 October 2026 after the
-bank-account cases were added.
+bank-account cases were added; rules-only scan reading re-measured 3 October 2026 (dates such as "August 3°, 2014" on a
+noisy scan are now read, and a total misread once on a scan loses to the amount the page repeats); rules-only digital
+reading and defect detection re-measured 3 October 2026 after text inside pictures (a logo or a supplier block pasted
+as an image) started being read.
 
 | Test | Rules only (free, offline) | Rules + AI when needed |
 |---|---|---|
-| Reading digital PDFs (74 fields) | 71 / 74 = 95.9% | **72 / 74 = 97.3%** (AI asked on 4 of 12) |
-| Reading scanned photos (OCR) | 62 / 74 = 83.8% | **68 / 74 = 91.9%** |
-| Reading image-only PDFs | 62 / 74 = 83.8% | **68 / 74 = 91.9%** |
-| Catching the altered invoices (the *specific* expected check must fire) | **105 / 106 = 99.1%** | 93 / 94 = 98.9% (measured before the 12 bank cases were added) |
+| Reading digital PDFs (74 fields) | 72 / 74 = 97.3% | **72 / 74 = 97.3%** (AI asked on 4 of 12) |
+| Reading scanned photos (OCR) | 64 / 74 = 86.5% | **68 / 74 = 91.9%** |
+| Reading image-only PDFs | 64 / 74 = 86.5% | **68 / 74 = 91.9%** |
+| Catching the altered invoices (the *specific* expected check must fire) | **106 / 106 = 100%** | 93 / 94 = 98.9% (measured before the 12 bank cases were added) |
 | ... of which bank account changed / IBAN mistyped | 7 / 7 and 5 / 5 | |
 | Clean real invoices wrongly rejected | 0 of 12 | 0 of 12 |
 | AI cost for the whole benchmark (~170 documents) | $0 | **$0.06** first run, $0 on re-runs (cache) |
@@ -199,14 +238,12 @@ AI modes print requests, tokens, estimated cost, and every field where the AI ch
 
 **Honest caveats**
 
-* The reading rules were tuned while looking at these same 12 invoices, so their 95.9% is optimistic on invoices from
+* The reading rules were tuned while looking at these same 12 invoices, so their 97.3% is optimistic on invoices from
   new vendors. On unseen layouts the AI's share of the work will be larger than here.
 * 12 invoices is a small sample: one field is 1.4 percentage points.
 * Altered documents are controlled edits of real invoices, not real fraud. "Exact duplicate" is simply a file-hash match.
 * The one remaining miss: a vendor name that exists only inside a logo image.
 * Purchase orders, the approved-vendor list and the bank accounts on file are sample data.
-* The e-mail fraud cases are e-mails the app builds itself, and the mailbox reader is tested against a fake IMAP
-  server in the tests; it has not yet been run against a real company mailbox.
 * The "checking time saved" figure rests on two assumptions (7 minutes by hand, 2 with the copilot); the Overview
   prints them and they are settings.
 
@@ -219,17 +256,19 @@ POST /api/invoices   (the invoice file)  ->  JSON: fields, per-check results, re
 ```
 
 A Power Automate flow or SharePoint workflow step could call it when a document arrives, then route:
-auto-approve -> close; needs review -> send to the approver with the reasons attached; reject -> return to sender.
+every invoice then goes to the accounts payable review with the recommendation and its reasons attached, and a
+recommended reject can be flagged to the supplier straight away.
 Not tested against InPro internals. That would be the first thing to work out together.
 
 ## 9. Code map
 
 ```
 src/inpro_copilot/  reader.py (READ) | extractor_rules.py, smart_extract.py, extractor_llm.py, llm.py (EXTRACT)
-                    checks.py (CHECK) | bank.py (IBAN / account numbers) | sender.py (look-alike domains) | taxid.py
+                    checks.py (CHECK) | bank.py (IBAN / account numbers) | taxid.py
                     decision.py (DECIDE) | pipeline.py (incl. learning on approval) | store.py (SQLite) | api.py (FastAPI)
-                    intake.py (e-mail, folder, mailbox) | insights.py (Overview numbers) | lab.py (Fraud lab) | auth.py | demo.py
+                    workflow.py (hand-offs, segregation of duties)
+                    insights.py (Overview numbers) | evidence.py (where the problem is) | auth.py (sign-in, roles) | demo.py
 ui/index.html       the screens
-eval/               benchmark          tests/   154 tests          data/real   the 12 invoices
+eval/               benchmark          tests/   173 tests          data/real   the 12 invoices
 Dockerfile, render.yaml, .github/workflows/   hosting on Render, tests on every push, keep-awake ping
 ```

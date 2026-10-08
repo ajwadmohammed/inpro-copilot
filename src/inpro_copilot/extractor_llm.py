@@ -103,6 +103,11 @@ def _numbers_in(text: str) -> list[float]:
         v = parse_amount(m.group(0))
         if v is not None:
             vals.append(v)
+    # thousands written with a space ("6 204,19"): also count the joined reading, so a correct AI value is not discarded
+    for m in re.finditer(r"(?<![\d.,])\d{1,3}(?:[ \u00a0\u202f]\d{3})+[.,]\d{1,2}(?!\d)", text):
+        v = parse_amount(re.sub(r"\s", "", m.group(0)))
+        if v is not None:
+            vals.append(v)
     return vals
 
 
@@ -124,34 +129,34 @@ def ground_fields(f: InvoiceFields, text: str, ocr: bool = False) -> InvoiceFiel
         return _alnum(v) in flat or (ocr and len(_alnum(v)) >= 4 and ocr_fold(v) in folded)
 
     if f.invoice_number and not has_id(f.invoice_number):
-        f.notes.append(f"invoice number '{f.invoice_number}' not found in the document text - discarded")
+        f.notes.append(f"invoice number '{f.invoice_number}' not found in the document text, so it was discarded")
         f.invoice_number = None
     for name in ("subtotal", "tax_amount", "total"):
         v = getattr(f, name)
         if v is not None and not has_number(v):
-            f.notes.append(f"{name.replace('_', ' ')} {v:g} not found in the document text - discarded")
+            f.notes.append(f"{name.replace('_', ' ')} {v:g} not found in the document text, so it was discarded")
             setattr(f, name, None)
     if f.tax_id and not has_id(f.tax_id):
-        f.notes.append(f"tax id '{f.tax_id}' not found in the document text - discarded")
+        f.notes.append(f"tax id '{f.tax_id}' not found in the document text, so it was discarded")
         f.tax_id = None
     if f.po_number and not has_id(f.po_number):
-        f.notes.append(f"PO number '{f.po_number}' not found in the document text - discarded")
+        f.notes.append(f"PO number '{f.po_number}' not found in the document text, so it was discarded")
         f.po_number = None
     if f.bank_account and not has_id(f.bank_account.split("/")[0]):
-        f.notes.append(f"bank account '{f.bank_account}' not found in the document text - discarded")
+        f.notes.append(f"bank account '{f.bank_account}' not found in the document text, so it was discarded")
         f.bank_account = None
     if f.invoice_date and f.invoice_date not in all_dates(ocr_fix_numbers(text) if ocr else text) | all_dates(text):
-        f.notes.append(f"date {f.invoice_date} is not printed on the document - discarded")
+        f.notes.append(f"date {f.invoice_date} is not printed on the document, so it was discarded")
         f.invoice_date = None
     if f.vendor and fuzz.partial_ratio(f.vendor.lower(), text.lower()) < 85:
-        f.notes.append(f"vendor '{f.vendor}' not found in the document text - discarded")
+        f.notes.append(f"vendor '{f.vendor}' not found in the document text, so it was discarded")
         f.vendor = None
     kept = []
     for li in f.line_items:
         if li.amount is None or has_number(li.amount):
             kept.append(li)
         else:
-            f.notes.append(f"line item '{li.description[:30]}' amount {li.amount:g} not in the document - dropped")
+            f.notes.append(f"line item '{li.description[:30]}' amount {li.amount:g} is not in the document, so it was dropped")
     f.line_items = kept
     return f
 

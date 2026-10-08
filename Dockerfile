@@ -21,12 +21,10 @@ RUN mkdir -p /home/user/data
 # Public-demo settings. AI keys are NOT in the image: the host passes them in as secret environment variables.
 ENV INPRO_PUBLIC=1 \
     INPRO_DEMO_MODE=1 \
-    INPRO_INTAKE=0 \
     INPRO_COOKIE_SECURE=1 \
     INPRO_NO_DOTENV=1 \
     INPRO_DB=/home/user/data/inpro.db \
-    INPRO_UPLOADS=/home/user/data/uploads \
-    INPRO_INBOX_DIR=/home/user/data/inbox
+    INPRO_UPLOADS=/home/user/data/uploads
 
 # the host tells the app which port to use in $PORT (Render: 10000); 7860 otherwise
 EXPOSE 7860

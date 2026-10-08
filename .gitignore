@@ -8,5 +8,4 @@ uploads/
 eval/setup_report.json
 _sync/
 eval/*_log.txt
-inbox/
 dist/

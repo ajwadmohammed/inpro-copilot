@@ -17,8 +17,13 @@ from .decision import HARD_FAIL_CHECKS, LEAD_ORDER
 CATCH_LABEL = {
     "duplicate": "Duplicate invoice", "math": "Numbers don't add up", "vendor": "Spoofed vendor tax ID",
     "tax_id": "Invalid tax ID", "po_match": "Billed more than ordered", "bank": "Bank account changed or invalid",
-    "sender": "Fake sender", "completeness": "Required field missing",
+    "completeness": "Required field missing",
 }
+
+
+def _stage(r: dict[str, Any]) -> str:
+    from .workflow import stage_key
+    return stage_key(r)
 
 
 def _by_ai(r: dict[str, Any]) -> bool:
@@ -28,16 +33,17 @@ def _by_ai(r: dict[str, Any]) -> bool:
 def overview(store) -> dict[str, Any]:
     manual = env_float("INPRO_MANUAL_MINUTES", 7.0)
     assisted = env_float("INPRO_REVIEW_MINUTES", 2.0)
-    every = store.list_invoices()
-    # Fraud-lab forgeries are tests, not business: they get their own line instead of inflating the totals
-    lab = [r for r in every if (r.get("source") or {}).get("lab")]
-    rows = [r for r in every if not (r.get("source") or {}).get("lab")]
+    rows = store.list_invoices()
     n = len(rows)
 
-    cleared = [r for r in rows if r["status"] == "approved" and _by_ai(r)]
-    stopped = [r for r in rows if r["status"] == "rejected" and _by_ai(r)]
-    people = [r for r in rows if r["decided_by"] and not _by_ai(r)]
+    # Every invoice is decided by people: the copilot reads and checks it, accounts payable reviews it, a manager
+    # approves it. The flow shows where each invoice is now.
+    from .workflow import STAGE_ROLE
     waiting = [r for r in rows if r["status"] == "pending"]
+    at = Counter(STAGE_ROLE.get(_stage(r)) for r in waiting)
+    approved = [r for r in rows if r["status"] == "approved"]
+    rejected = [r for r in rows if r["status"] == "rejected"]
+    people = [r for r in rows if r["decided_by"] and not _by_ai(r)]
 
     # what the checks caught: every invoice with a hard failure, and which check caught it
     caught, by_check, protected = [], Counter(), defaultdict(float)
@@ -56,9 +62,9 @@ def overview(store) -> dict[str, Any]:
                        "message": fails[0]["message"], "status": r["status"], "uploaded_at": r["uploaded_at"]})
     caught.sort(key=lambda c: c["id"], reverse=True)
 
-    # time: everything checked by hand vs. the copilot (cleared invoices take no one's time)
+    # time: everything checked by hand vs. reviewing what the copilot already read and checked
     baseline = n * manual
-    with_copilot = (len(people) + len(waiting) + len(stopped)) * assisted
+    with_copilot = n * assisted
     saved_hours = max(0.0, baseline - with_copilot) / 60
 
     waits = []
@@ -68,22 +74,19 @@ def overview(store) -> dict[str, Any]:
         except (TypeError, ValueError):
             pass
 
-    channels = Counter(((r.get("source") or {}).get("channel") or "upload") for r in rows)
     u = store.usage_summary()
     return {
         "invoices": n,
-        "flow": {"cleared": len(cleared), "people": len(people), "stopped": len(stopped), "waiting": len(waiting),
-                 "people_approved": sum(1 for r in people if r["status"] == "approved"),
-                 "people_rejected": sum(1 for r in people if r["status"] == "rejected")},
+        "flow": {"ap": at["ap"], "procurement": at["procurement"], "manager": at["approver"],
+                 "approved": len(approved), "rejected": len(rejected),
+                 "rejected_by_ap": sum(1 for r in rejected if r["decided_by"] == (r.get("ap_review") or {}).get("by"))},
         "value": _sum_by_currency(rows),
         "protected": dict(sorted(protected.items(), key=lambda kv: -kv[1])),
         "caught": caught[:12], "caught_total": len(caught), "by_check": dict(by_check.most_common()),
         "time": {"manual_minutes": manual, "assisted_minutes": assisted, "saved_hours": round(saved_hours, 1),
                  "median_decision_minutes": round(statistics.median(waits), 1) if waits else None,
-                 "auto_share": round(100 * len(cleared) / n) if n else 0},
-        "channels": dict(channels),
-        "lab": {"tries": sum(1 for r in lab if (r.get("source") or {}).get("role") != "genuine"),
-                "stopped": sum(1 for r in lab if r["ai_outcome"] == "reject" and (r.get("source") or {}).get("role") != "genuine")},
+                 "decided_share": round(100 * (len(approved) + len(rejected)) / n) if n else 0},
+        "waiting_by_stage": dict(Counter(_stage(r) for r in waiting)),
         "ai": {"month_cost_usd": u["month"]["cost_usd"], "month_calls": u["month"]["calls"],
                "cost_per_invoice_usd": round(u["month"]["cost_usd"] / n, 5) if n else 0.0,
                "cached_documents": u["cached_documents"]},

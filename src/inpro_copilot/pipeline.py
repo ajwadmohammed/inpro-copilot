@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from .checks import Context, ALL_CHECKS, match_approved_vendor
+from .checks import ALL_CHECKS, Context, match_approved_vendor
 from .decision import Policy, decide
 from .extractor_llm import extract_fields_llm
 from .llm import configured_tiers
@@ -49,7 +49,7 @@ def _ms(t0: float) -> int:
 class Pipeline:
     def __init__(self, store: Store, upload_dir: str | Path, extractor: str = "auto",
                  policy: Policy | None = None, require_po: bool = False, llm_client: Any = None,
-                 ai_store: Store | None = None):
+                 ai_store: Store | None = None, require_receipt: bool = False):
         self.store = store
         self.upload_dir = Path(upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
@@ -58,6 +58,7 @@ class Pipeline:
         self.require_po = require_po
         self.llm_client = llm_client
         self.ai_store = ai_store or store      # where AI answers are cached and usage is counted
+        self.require_receipt = require_receipt  # PO invoices wait for procurement to confirm delivery (three-way match)
 
     def mode(self) -> str:
         """rules | hybrid | ai. 'auto' = hybrid when any AI key is configured, else rules."""
@@ -123,7 +124,7 @@ class Pipeline:
         # ---- 3. CHECK
         ctx = Context(history=self.store.history(), purchase_orders=self.store.purchase_orders(), vendors=self.store.vendors(),
                       file_hash=file_hash, doc_text=read.text, require_po=self.require_po, ocr="ocr" in read.method,
-                      source=source)
+                      receipt_required=self.require_receipt)
         checks = []
         for fn in ALL_CHECKS:
             t = time.perf_counter()
@@ -136,11 +137,8 @@ class Pipeline:
         trace.append({"step": "decide", "tool": "policy", "summary": f"{decision.outcome} ({decision.confidence} confidence)", "ms": 0})
 
         # ---- 5. SAVE (keep a private copy of the file) + AUDIT
+        # The checks recommend; people decide. Every invoice starts with the accounts payable review.
         status, by, at = "pending", None, None
-        if decision.outcome == "auto_approve":
-            status, by, at = "approved", "AI (auto-approved by policy)", now()
-        elif decision.outcome == "reject":
-            status, by, at = "rejected", "AI (recommended reject)", now()
         rec = {
             "filename": filename, "stored_path": "", "file_hash": file_hash, "read_method": read.method, "extractor": used,
             "fields": fields.to_dict(), "checks": [c.to_dict() for c in checks], "decision": decision.to_dict(),
@@ -148,25 +146,163 @@ class Pipeline:
             "source": source or ({"channel": "upload", "by": uploaded_by} if uploaded_by else None),
         }
         inv_id = self.store.add_invoice(rec)
+        self.store.set_doc_text(inv_id, read.text)          # kept so the checks can run again after a correction
         stored = self.upload_dir / f"{inv_id}_{Path(filename).name}"
         shutil.copyfile(path, stored)
         self.store._x("UPDATE invoices SET stored_path=? WHERE id=?", (str(stored), inv_id))
-        if source and source.get("lab"):
-            what = "genuine copy put on file first" if source.get("role") == "genuine" else f"forgery: {source.get('trick_title') or source.get('trick')}"
-            self.store.audit(inv_id, "Fraud lab", "received", f"{what}; made by {source.get('by') or 'a visitor'} ({filename})"
-                             + (f"; e-mailed from {source.get('sender')}" if source.get("sender") else ""))
-        elif source and source.get("channel") == "email":
-            self.store.audit(inv_id, "E-mail intake", "received", f"from {source.get('sender')}: \"{source.get('subject') or ''}\" ({filename})")
-        elif source and source.get("channel") == "folder":
-            self.store.audit(inv_id, "Folder intake", "received", f"file {filename}")
-        else:
-            self.store.audit(inv_id, uploaded_by or "system", "uploaded" if uploaded_by else "received", f"file {filename}")
+        self.store.audit(inv_id, uploaded_by or "system", "uploaded" if uploaded_by else "received", f"file {filename}")
         self.store.audit(inv_id, "AI", "extracted", f"{used} reader; {len(got)} fields")
         self.store.audit(inv_id, "AI", "checked", "; ".join(f"{c.name}={c.status}" for c in checks))
         self.store.audit(inv_id, "AI", decision.outcome, decision.summary)
         return self.store.get_invoice(inv_id)
 
-    def human_decision(self, inv_id: int, approve: bool, user: str = "reviewer", note: str | None = None) -> dict[str, Any]:
+    # ------------------------------------------------------------------ after the first reading
+    EDITABLE = {"vendor": str, "invoice_number": str, "invoice_date": "date", "currency": "currency", "subtotal": float,
+                "tax_amount": float, "total": float, "tax_id": str, "po_number": str, "bank_account": str}
+
+    def recheck(self, inv_id: int, actor: str = "AI", why: str = "", log_always: bool = True) -> dict[str, Any]:
+        """Run the checks again on the invoice as it stands now (after a correction, a new vendor, a delivery
+        confirmation ...). Only earlier invoices count as possible duplicates. A decision a PERSON made is kept;
+        a decision the checks made follows the new result, with one rule: the checks approve on their own only an
+        invoice nobody had to touch (that happens at upload). Once a person worked on it (corrected a field, added the
+        vendor, confirmed the delivery, recorded the order), a manager gives the final approval."""
+        inv = self.store.get_invoice(inv_id)
+        if inv is None:
+            raise KeyError(inv_id)
+        fields = InvoiceFields.from_dict(inv["fields"])
+        ctx = Context(history=self.store.history(before_id=inv_id), purchase_orders=self.store.purchase_orders(),
+                      vendors=self.store.vendors(), file_hash=inv["file_hash"], doc_text=self.store.doc_text(inv_id),
+                      self_id=inv_id, require_po=self.require_po, ocr="ocr" in (inv["read_method"] or ""),
+                      receipt_required=self.require_receipt, receipt=inv.get("receipt"), waiver=inv.get("waiver"))
+        checks = [fn(fields, ctx) for fn in ALL_CHECKS]
+        decision = decide(fields, checks, self.policy)
+        cols: dict[str, Any] = {"checks": [c.to_dict() for c in checks], "decision": decision.to_dict(), "ai_outcome": decision.outcome}
+        decided_by = str(inv.get("decided_by") or "")
+        if not decided_by or decided_by.startswith("AI"):
+            cols.update(status="pending", decided_by=None, decided_at=None)     # a manager decides
+        self.store.save_review(inv_id, **cols)
+        if decision.outcome != inv["ai_outcome"] or (why and log_always):
+            self.store.audit(inv_id, actor, "rechecked", (why + ": " if why else "") + decision.summary)
+        return self.store.get_invoice(inv_id)
+
+    def recheck_open(self, why: str = "") -> int:
+        """Re-run the checks on every invoice still waiting for someone (e.g. after a vendor was verified)."""
+        n = 0
+        for inv in self.store.list_invoices("pending"):
+            self.recheck(inv["id"], why=why, log_always=False)
+            n += 1
+        return n
+
+    def edit_fields(self, inv_id: int, changes: dict[str, Any], user: str, note: str | None = None) -> dict[str, Any]:
+        """A person corrects what was read. The first reading is kept, every change is logged (old -> new, who,
+        when), and the checks run again."""
+        from datetime import date
+        from .normalize import parse_amount
+        inv = self.store.get_invoice(inv_id)
+        if inv is None:
+            raise KeyError(inv_id)
+        fields = dict(inv["fields"])
+        edits = list(inv.get("edits") or [])
+        made = []
+        for k, raw in changes.items():
+            if k not in self.EDITABLE:
+                raise ValueError(f"'{k}' cannot be edited.")
+            kind = self.EDITABLE[k]
+            v: Any = None if raw in (None, "") else str(raw).strip()
+            if v is not None:
+                if kind is float:
+                    amt = parse_amount(v) if not isinstance(raw, (int, float)) else float(raw)
+                    if amt is None or amt < 0 or amt > 1e12:
+                        raise ValueError(f"{k.replace('_', ' ').capitalize()} must be a number, for example 1234.50.")
+                    v = round(float(amt), 2)
+                elif kind == "date":
+                    try:
+                        v = date.fromisoformat(v).isoformat()
+                    except ValueError:
+                        raise ValueError("Write the date as YYYY-MM-DD, for example 2026-10-02.")
+                elif kind == "currency":
+                    v = v.upper()
+                    if len(v) != 3 or not v.isalpha():
+                        raise ValueError("Currency is a three-letter code such as INR, EUR or USD.")
+                elif len(v) > 200:
+                    raise ValueError(f"{k.replace('_', ' ').capitalize()} is too long.")
+            if fields.get(k) != v:
+                made.append({"field": k, "from": fields.get(k), "to": v, "by": user, "at": now(), "note": note})
+                fields[k] = v
+        if not made:
+            return inv
+        original = inv.get("original_fields") or inv["fields"]
+        fields["notes"] = list(fields.get("notes") or []) + [f"{e['field'].replace('_', ' ')} corrected by {user}" for e in made]
+        self.store.save_review(inv_id, fields=fields, edits=edits + made, original_fields=original)
+        self.store.audit(inv_id, user, "edited", "; ".join(f"{e['field'].replace('_', ' ')}: {e['from']} -> {e['to']}" for e in made)
+                         + (f" ({note})" if note else ""))
+        return self.recheck(inv_id, actor="AI", why="checks run again after the correction")
+
+    def save_vendor(self, name: str, tax_id: str | None, bank_account: str | None, *, by: str, status: str,
+                    invoice_id: int | None = None) -> dict[str, Any]:
+        """Add a supplier (or update one). status 'pending' = proposed, waiting for procurement; 'verified' = checked by
+        procurement, waiting for a manager; 'approved' = active. An IBAN that fails its checksum is refused."""
+        from . import bank
+        acct = (bank_account or "").strip() or None
+        if acct:
+            number, ifsc = bank.parts(acct)
+            if bank.looks_like_iban(number) and not bank.iban_valid(number):
+                raise ValueError(f"IBAN {bank.pretty(number)} fails the IBAN checksum. Check it for a typo.")
+            acct = number + (f" / {ifsc}" if ifsc else "")
+        tax = (tax_id or "").strip() or None
+        if status == "pending":
+            self.store.add_vendor(name, tax, acct, status="pending", proposed_by=by)
+        elif status == "verified":
+            self.store.add_vendor(name, tax, acct, status="verified", proposed_by=by, verified_by=by)
+        else:
+            self.store.add_vendor(name, tax, acct, status="approved", verified_by=by)
+        self.store.audit(invoice_id, by, "vendor_proposed" if status == "pending" else "vendor_saved",
+                         ", ".join(x for x in (name, tax, acct) if x))
+        return next(v for v in self.store.vendors() if v["name"] == name)
+
+    def review(self, inv_id: int, user: str, approve: bool, note: str | None = None,
+               vendor: dict[str, Any] | None = None) -> dict[str, Any]:
+        """The accounts payable review, the first person-step for every invoice. Approving sends it on (a new supplier
+        is added right here, as a request procurement verifies and a manager approves); a missing invoice number or date
+        is accepted with the review, so nobody has to type what the document does not print. Rejecting closes the
+        invoice with the reason: it is never paid, and the record stays."""
+        from .checks import WAIVABLE
+        inv = self.store.get_invoice(inv_id)
+        if inv is None:
+            raise KeyError(inv_id)
+        if not approve:
+            self.store.save_review(inv_id, ap_review={"ok": False, "by": user, "at": now(), "note": note})
+            return self.human_decision(inv_id, False, user, note)
+        added = None
+        if vendor and vendor.get("name"):
+            f = inv["fields"] or {}
+            added = self.save_vendor(vendor["name"].strip(), vendor.get("tax_id"), vendor.get("bank_account"),
+                                     by=user, status="pending", invoice_id=inv_id)
+            from .checks import same_vendor
+            if not same_vendor(f.get("vendor"), added["name"], 85):         # the invoice names the supplier the same way
+                self.edit_fields(inv_id, {"vendor": added["name"]}, user, "supplier name as added to the vendor list")
+        missing = [k for k in WAIVABLE if not (self.store.get_invoice(inv_id)["fields"] or {}).get(k)]
+        if missing:
+            self.store.save_review(inv_id, waiver={"fields": missing, "by": user, "at": now(),
+                                                   "reason": note or "not printed on the invoice"})
+        self.store.save_review(inv_id, ap_review={"ok": True, "by": user, "at": now(), "note": note,
+                                                  "vendor_added": added["name"] if added else None})
+        self.store.audit(inv_id, user, "reviewed", "approved" + (f", new supplier {added['name']} added" if added else "")
+                         + (f": {note}" if note else ""))
+        if added:
+            self.recheck_open(f"supplier {added['name']} proposed")
+        return self.recheck(inv_id, actor="AI", why="approved by accounts payable")
+
+    def confirm_receipt(self, inv_id: int, ok: bool, user: str, note: str | None = None) -> dict[str, Any]:
+        """Procurement's part of the three-way match: were the goods or services actually received?"""
+        if self.store.get_invoice(inv_id) is None:
+            raise KeyError(inv_id)
+        self.store.save_review(inv_id, receipt={"ok": ok, "by": user, "at": now(), "note": note})
+        self.store.audit(inv_id, user, "receipt_confirmed" if ok else "receipt_problem", note or "")
+        return self.recheck(inv_id, actor="AI", why="delivery confirmed by procurement" if ok else "procurement reported a problem")
+
+    def human_decision(self, inv_id: int, approve: bool, user: str = "reviewer", note: str | None = None,
+                       open_items: list[str] | None = None) -> dict[str, Any]:
         inv = self.store.get_invoice(inv_id)
         if inv is None:
             raise KeyError(inv_id)
@@ -179,16 +315,16 @@ class Pipeline:
         self.store.set_status(inv_id, status, user, note)
         agreed = (inv["ai_outcome"] == "auto_approve" and approve) or (inv["ai_outcome"] == "reject" and not approve)
         overrode = inv["ai_outcome"] in ("auto_approve", "reject") and not agreed
-        self.store.audit(inv_id, user, status, (note or "") + (" [overrode AI recommendation]" if overrode else ""))
+        accepted = f"Approved with open items: {'; '.join(open_items)}. " if approve and open_items else ""
+        self.store.audit(inv_id, user, status, accepted + (note or "") + (" [overrode AI recommendation]" if overrode else ""))
         if approve:
             self._learn(inv, user)
         return self.store.get_invoice(inv_id)
 
     def _learn(self, inv: dict[str, Any], user: str) -> None:
-        """A person approved this invoice: remember its supplier's bank account and e-mail domain (if we had
-        none on file), so the next invoice that changes them is caught. Never learns from a failed check."""
+        """A person approved this invoice: remember its supplier's bank account (if we had none on file),
+        so the next invoice that changes it is caught. Never learns from a failed check."""
         from .checks import same_vendor
-        from .sender import FREE_MAIL, domain_of, registrable
         f = inv["fields"] or {}
         checks = {c["name"]: c for c in inv["checks"] or []}
         rec = next((v for v in self.store.vendors() if same_vendor(f.get("vendor"), v["name"], 85)), None)
@@ -197,9 +333,3 @@ class Pipeline:
         if f.get("bank_account") and not rec.get("bank_account") and checks.get("bank", {}).get("status") != "fail":
             self.store.set_vendor_bank(rec["name"], f["bank_account"])
             self.store.audit(inv["id"], user, "learned", f"bank account {f['bank_account']} saved for {rec['name']}")
-        src = inv.get("source") or {}
-        dom = registrable(domain_of(src.get("sender")))
-        if src.get("channel") == "email" and dom and dom not in FREE_MAIL and checks.get("sender", {}).get("status") != "fail":
-            if dom not in (rec.get("email_domains") or "").split(","):
-                self.store.add_vendor_domain(rec["name"], dom)
-                self.store.audit(inv["id"], user, "learned", f"e-mail domain {dom} saved for {rec['name']}")

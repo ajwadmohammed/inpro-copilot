@@ -49,14 +49,6 @@ KNOWN_BANK = {
     "AzureInterior.pdf": ("US1234567890", "US1234567890"),
     "oyo.pdf": ("00030340067212 / HDFC0000003", "00030340067212"),
 }
-# e-mail domains each supplier really uses (from the websites / addresses printed on the invoices)
-KNOWN_DOMAINS = {
-    "AzureInterior.pdf": "azure-interior.com", "QualityHosting.pdf": "qualityhosting.de", "oyo.pdf": "oyorooms.com",
-    "free_fiber.pdf": "free.fr", "FlipkartInvoice.pdf": "flipkart.com", "coolblue1.pdf": "coolblue.nl",
-    "coolblue2.pdf": "coolblue.nl", "NetpresseInvoice.pdf": "publicationannoncelegale.fr",
-}
-
-
 def fraud_account(printed: str) -> str:
     """A different, valid account in the same printed style (what a fraudster would send)."""
     from inpro_copilot.bank import compact, looks_like_iban, make_iban
@@ -224,7 +216,7 @@ def main() -> None:
         add(base, "scan_pdf", d / "scan.pdf", {"score_against_truth": True})
 
     json.dump({"known_tax_ids": KNOWN_TAX_IDS, "known_bank": {k: v[0] for k, v in KNOWN_BANK.items()},
-               "known_domains": KNOWN_DOMAINS, "cases": manifest}, open(OUT / "manifest.json", "w", encoding="utf-8"), indent=1)
+               "cases": manifest}, open(OUT / "manifest.json", "w", encoding="utf-8"), indent=1)
     from collections import Counter
     print(len(manifest), "test documents")
     for k, v in sorted(Counter(m["scenario"] for m in manifest).items()):

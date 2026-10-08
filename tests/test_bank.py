@@ -1,8 +1,8 @@
-"""Bank-account fraud check and e-mail sender verification."""
+"""Bank-account fraud check."""
 import pytest
 
-from inpro_copilot import bank, sender
-from inpro_copilot.checks import Context, check_bank, check_sender
+from inpro_copilot import bank
+from inpro_copilot.checks import Context, check_bank
 from inpro_copilot.models import InvoiceFields
 
 COOL = "NL50INGB0683251309"
@@ -65,29 +65,6 @@ def test_first_bank_details_for_known_vendor_need_one_confirmation():
     assert r.status == "warn" and r.details["kind"] == "new"
 
 
-@pytest.mark.parametrize("dom,verdict", [("coolblue.nl", "known"), ("mail.coolblue.nl", "known"), ("coolbiue.nl", "lookalike"),
-                                         ("coo1blue.nl", "lookalike"), ("coolblue-invoices.com", "lookalike"),
-                                         ("cоolblue.nl", "lookalike"), ("example.org", "unknown")])
-def test_lookalike_domains(dom, verdict):
-    assert sender.compare(dom, {"coolblue.nl"})[0] == verdict
-
-
-def test_sender_check():
-    ctx = lambda addr, doms="coolblue.nl": Context(vendors=[{"name": "Coolblue", "email_domains": doms}],
-                                                   source={"channel": "email", "sender": addr})
-    assert check_sender(f(), Context()).status == "skip"
-    assert check_sender(f(), ctx("facturen@coolblue.nl")).status == "pass"
-    assert check_sender(f(), ctx("facturen@coolbiue.nl")).status == "fail"
-    assert check_sender(f(), ctx("coolblue.billing@gmail.com")).status == "warn"
-    assert check_sender(f(), ctx("x@somewhere-else.com")).status == "warn"
-
-
-def test_sender_compared_with_website_printed_on_invoice_when_nothing_on_file():
-    c = Context(source={"channel": "email", "sender": "billing@azure-interiors.com"}, doc_text="Azure Interior www.azure-interior.com")
-    r = check_sender(InvoiceFields(vendor="Azure Interior"), c)
-    assert r.status == "fail" and r.details["imitates"] == "azure-interior.com"
-
-
 def test_learning_on_approval(tmp_path):
     from inpro_copilot.api import ROOT
     from inpro_copilot.pipeline import Pipeline
@@ -95,17 +72,17 @@ def test_learning_on_approval(tmp_path):
     st = Store()
     st.add_vendor("Coolblue", "NL810433941B01")                       # no bank account on file yet
     p = Pipeline(st, tmp_path, extractor="rules")
-    first = p.process(ROOT / "data/real/coolblue1.pdf", source={"channel": "email", "sender": "facturen@coolblue.nl", "subject": "Factuur"})
+    first = p.process(ROOT / "data/real/coolblue1.pdf", uploaded_by="Ananya")
     assert next(c for c in first["checks"] if c["name"] == "bank")["status"] == "warn"
     p.human_decision(first["id"], True, "Priya")
     v = st.vendors()[0]
-    assert v["bank_account"] == COOL and v["email_domains"] == "coolblue.nl"
+    assert v["bank_account"] == COOL
     fraud = p.process(ROOT / "data/synthetic/coolblue2/bank_changed.pdf")
     assert next(c for c in fraud["checks"] if c["name"] == "bank")["status"] == "fail" and fraud["ai_outcome"] == "reject"
 
 
-def test_reply_to_pointing_elsewhere():
-    c = Context(vendors=[{"name": "Coolblue", "email_domains": "coolblue.nl"}],
-                source={"channel": "email", "sender": "facturen@coolblue.nl", "reply_to": "payments@quick-mail.net"})
-    r = check_sender(f(), c)
-    assert r.status == "warn" and r.details["kind"] == "reply_to"
+def test_supplier_not_paid_by_transfer_flags_any_account():
+    ctx = Context(vendors=[{"name": "Coolblue", "bank_account": "Direct debit"}])
+    r = check_bank(f(), ctx)
+    assert r.status == "fail" and "not paid by bank transfer" in r.message and r.details["expected"] == "Direct debit"
+    assert check_bank(f(bank_account=None), ctx).status == "skip"

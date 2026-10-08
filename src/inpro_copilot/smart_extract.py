@@ -183,14 +183,14 @@ def merge(rules: InvoiceFields, ai: InvoiceFields, read: ReadResult | None = Non
         val = (a if a not in (None, "") else r) if prefer_ai else (r if r not in (None, "") else a)
         if r and a and str(r).strip().lower() != str(a).strip().lower():
             if not (k == "vendor" and same_vendor(r, a, 90)):
-                notes.append(f"{k.replace('_', ' ')}: rules read '{r}', AI read '{a}' - using the {'AI' if prefer_ai else 'rules'} reading")
+                notes.append(f"{k.replace('_', ' ')}: rules read '{r}', AI read '{a}'; using the {'AI' if prefer_ai else 'rules'} reading")
         setattr(out, k, val)
 
     # The AI may fill a missing invoice number only with a value that sits under an invoice-number
     # label. Otherwise it could hide a genuinely missing number behind an order or customer number.
     if read is not None and not rules.invoice_number and out.invoice_number and not _labelled_number(out.invoice_number, read):
         notes.append(f"AI suggested invoice number '{out.invoice_number}', but it is not next to an invoice-number "
-                     "label (it may be an order or customer number) - not used")
+                     "label (it may be an order or customer number), so it was not used")
         out.invoice_number = None
 
     r_ok, a_ok = _math_ok(rules), _math_ok(ai)

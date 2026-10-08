@@ -126,8 +126,7 @@ def main() -> None:
     if not args.quick:
         def fresh(base, po=None):
             st = Store()
-            st.add_vendor(TRUTH[base]["vendor"][0], tax.get(base), man.get("known_bank", {}).get(base),
-                          man.get("known_domains", {}).get(base))
+            st.add_vendor(TRUTH[base]["vendor"][0], tax.get(base), man.get("known_bank", {}).get(base))
             if po:
                 st.upsert_po(po["number"], po["vendor"], TRUTH[base]["currency"], po["amount"])
             return Pipeline(st, TMP / "uploads", extractor=mode, ai_store=cache)

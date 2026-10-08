@@ -83,9 +83,22 @@ _CUR = r"(?:rs\.?|inr|usd|eur|aed|gbp|[€$£₹])"
 _TOKEN = re.compile(r"-?\d[\d.,]*\d|\d")
 
 
+_SPACED = r"\d{1,3}(?:[ \u00a0\u202f]\d{3})+[.,]\d{2}(?!\d)"
+_SPACED_AFTER_CUR = re.compile(r"(" + _CUR + r"\s*)(" + _SPACED + r")", re.I)
+_SPACED_BEFORE_CUR = re.compile(r"(?<![\d.,])(" + _SPACED + r")(\s*(?:€|eur\b|zł|kr\b))", re.I)
+
+
+def _join_spaced(text: str) -> str:
+    """'$ 5 640,17' -> '$ 5640,17': thousands written with a space, next to a currency sign. Only then: without the
+    sign, '1 278.61' is just as often a quantity followed by a price."""
+    text = _SPACED_AFTER_CUR.sub(lambda m: m.group(1) + re.sub(r"\s", "", m.group(2)), text)
+    return _SPACED_BEFORE_CUR.sub(lambda m: re.sub(r"\s", "", m.group(1)) + m.group(2), text)
+
+
 def find_money(text: str) -> list[float]:
     """Numbers that really look like money: they have cents (12.34 / 12,34)
     or sit next to a currency marker. This filters out dates, %s and IDs."""
+    text = _join_spaced(text)
     out = []
     for m in _TOKEN.finditer(text):
         tok = m.group(0)
@@ -117,8 +130,8 @@ def _money_from(lines: list[Line], h: Hit) -> list[float]:
 # ---------------------------------------------------------------- invoice number
 
 _INV_LABELS = [
-    r"invoice\s*(?:no|number|num|nr|#)\b\.?",
-    r"\binv\.?\s*(?:no|number|#)\b\.?",
+    r"invoice\s*(?:(?:no|number|num|nr)\b|#)\.?",          # "Invoice No.", "Invoice number", "Invoice#: 4326"
+    r"\binv\.?\s*(?:(?:no|number)\b|#)\.?",
     r"factuur\s*(?:nummer|nr)\.?",
     r"facture\s*n\s*[°º]",
     r"n\s*[°º]\s*de\s*facture",
@@ -323,6 +336,15 @@ def extract_money(lines: list[Line]):
                 freq[round(v, 2)] = freq.get(round(v, 2), 0) + 1
             top = max(freq.values())
             tied = [(li, v) for li, v in pool if freq[round(v, 2)] == top]
+            if len({round(v, 2) for _, v in tied}) > 1:
+                # still a tie between different amounts: prefer the one printed most often on the page. A summary
+                # repeats the true total; a digit misread on a scan appears only once.
+                page: dict[float, int] = {}
+                for line in lines:
+                    for v in find_money(line.text):
+                        page[round(v, 2)] = page.get(round(v, 2), 0) + 1
+                most = max(page.get(round(v, 2), 0) for _, v in tied)
+                tied = [(li, v) for li, v in tied if page.get(round(v, 2), 0) == most]
             total_line = max(tied, key=lambda t: t[0])[0]
             total = max(tied, key=lambda t: t[0])[1]
             # multi-column totals ("Total 24.99 5.00 29.99"): the gross is the largest
@@ -346,7 +368,7 @@ def extract_money(lines: list[Line]):
 # ---------------------------------------------------------------- vendor, PO, tax id
 
 _COMPANY = re.compile(
-    r"((?:[A-Z][\w&'’.\-]*,?\s+){0,4}[A-Z][\w&'’.\-]*,?\s+"
+    r"((?:(?:[A-Z]|[a-z]-[A-Z])[\w&'’.\-]*,?\s+){0,4}[A-Z][\w&'’.\-]*,?\s+"
     r"(?:Inc|Ltd|LLC|GmbH|AG|B\.?V\.?|Pvt|Private|Limited|S\.?A\.?S?|SARL|Corp|Co|LLP|PLC|Pty|S\.?R\.?L\.?|N\.?V\.?)\b\.?)"
 )
 _BUYER_CUE = re.compile(r"bill\s*to|ship\s*to|attn|client|customer|factuuradres|afleveradres|invoice\s*to|sold\s*to|t\.a\.v", re.I)

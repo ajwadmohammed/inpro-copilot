@@ -34,3 +34,10 @@ def test_currency():
     assert detect_currency("Totaal € 717,97 € 9,32") == "EUR"
     assert detect_currency("Rs 1939 x 1 Night Rs 1939") == "INR"
     assert detect_currency("$4.11 All charges are in US Dollars") == "USD"
+
+
+def test_thousands_with_a_space_next_to_a_currency_sign():
+    from inpro_copilot.extractor_rules import find_money
+    assert find_money("Total $ 5 640,17 $ 564,02 $ 6 204,19") == [5640.17, 564.02, 6204.19]
+    assert find_money("Montant 1 234,56 €") == [1234.56]
+    assert find_money("Total 1 278.61 40.39 319.00") == [278.61, 40.39, 319.0]      # quantity 1, then a price

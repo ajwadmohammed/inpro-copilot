@@ -15,16 +15,6 @@
   "AzureInterior.pdf": "US1234567890",
   "oyo.pdf": "00030340067212 / HDFC0000003"
  },
- "known_domains": {
-  "AzureInterior.pdf": "azure-interior.com",
-  "QualityHosting.pdf": "qualityhosting.de",
-  "oyo.pdf": "oyorooms.com",
-  "free_fiber.pdf": "free.fr",
-  "FlipkartInvoice.pdf": "flipkart.com",
-  "coolblue1.pdf": "coolblue.nl",
-  "coolblue2.pdf": "coolblue.nl",
-  "NetpresseInvoice.pdf": "publicationannoncelegale.fr"
- },
  "cases": [
   {
    "base": "AmazonWebServices.pdf",

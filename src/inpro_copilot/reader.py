@@ -125,7 +125,7 @@ def ocr_available() -> bool:
     return cmd is not None
 
 
-def _ocr_words(img: Image.Image, page_no: int, scale: float) -> list[Word]:
+def _ocr_words(img: Image.Image, page_no: int, scale: float, min_conf: float = 0) -> list[Word]:
     """Run Tesseract. `scale` converts pixels back to PDF points so that
     OCR words and PDF words live in the same coordinate system."""
     import pytesseract
@@ -140,7 +140,7 @@ def _ocr_words(img: Image.Image, page_no: int, scale: float) -> list[Word]:
     out = []
     for i, text in enumerate(data["text"]):
         text = (text or "").strip()
-        if not text or float(data["conf"][i]) < 0:
+        if not text or float(data["conf"][i]) < min_conf or float(data["conf"][i]) < 0:
             continue
         x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
         out.append(Word(x * scale, y * scale, (x + w) * scale, (y + h) * scale, text, page_no))
@@ -165,6 +165,38 @@ def _embedded_scan(doc: pymupdf.Document, page: pymupdf.Page):
     if raw.width < 600:          # an icon or logo, not a full-page scan
         return None, 1.0
     return raw, page.rect.width / raw.width
+
+
+IMG_TEXT_MAX_PAGES, IMG_TEXT_MAX_IMAGES = 2, 6
+
+
+def _picture_words(doc: pymupdf.Document, page: pymupdf.Page, page_no: int) -> list[Word]:
+    """Text printed inside pictures on a page that otherwise has real text: a logo, or the supplier's company block
+    pasted as an image (name, address, VAT number, IBAN). Many invoices do this, and without it the supplier's name is
+    simply not in the text. Read with OCR, keeping only confident words, placed where the picture is drawn. Skipped
+    quietly when Tesseract is not installed (digital PDFs must keep working without it)."""
+    if not ocr_available():
+        return []
+    out: list[Word] = []
+    for im in page.get_images(full=True)[:IMG_TEXT_MAX_IMAGES]:
+        xref, w_px, h_px = im[0], im[2], im[3]
+        if w_px < 300 or h_px < 60:                      # icons, lines, small decorations
+            continue
+        try:
+            rect = page.get_image_rects(xref)[0]
+            raw = Image.open(io.BytesIO(doc.extract_image(xref)["image"])).convert("RGB")
+        except Exception:
+            continue
+        if rect.width < 80 or rect.height < 15:
+            continue
+        sx, sy = rect.width / raw.width, rect.height / raw.height
+        try:
+            words = _ocr_words(raw, page_no, 1.0, min_conf=60)
+        except OcrUnavailable:
+            return out
+        out += [Word(rect.x0 + w.x0 * sx, rect.y0 + w.y0 * sy, rect.x0 + w.x1 * sx, rect.y0 + w.y1 * sy, w.text, page_no)
+                for w in words]
+    return out
 
 
 def read_document(path: str | Path) -> ReadResult:
@@ -194,6 +226,11 @@ def read_document(path: str | Path) -> ReadResult:
         if chars >= MIN_CHARS_PER_PAGE:
             all_words += pw
             used_text = True
+            if i < IMG_TEXT_MAX_PAGES:
+                pics = _picture_words(doc, page, i)
+                if pics:
+                    all_words += pics
+                    notes.append(f"page {i + 1}: also read the text inside pictures (logo or company details)")
         else:
             # Looks like a scan: no embedded text. Prefer the embedded image at its NATIVE
             # resolution (re-rendering would resample and blur it); else render the page.

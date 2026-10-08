@@ -87,37 +87,34 @@
   /* ============================================================ sign-in */
   .login { min-height: 100%; display: grid; place-items: center; padding: 40px 16px; }
   .login-box { width: 100%; max-width: 400px; }
-  .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; font-weight: 600; font-size: 16px; }
   .login-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 28px; box-shadow: var(--shadow); }
   .login-card h1 { font-size: 20px; margin-bottom: 4px; }
-  .login-card form { display: grid; gap: 16px; margin-top: 22px; }
-  .demo { margin-top: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-  .demo-head { padding: 14px 18px 10px; font-size: 13px; color: var(--ink-2); }
-  .demo-head b { color: var(--ink); font-weight: 600; }
-  .demo-row { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-top: 1px solid var(--line); }
-  .demo-row div { flex: 1; min-width: 0; }
-  .demo-row b { font-weight: 600; font-size: 14px; }
-  .login-foot { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); text-align: center; }
-  .login.split { grid-template-columns: minmax(0, 540px) minmax(0, 400px); gap: 72px; justify-content: center; align-content: center; }
-  .pitch h1 { font-size: 36px; line-height: 1.12; letter-spacing: -0.028em; font-weight: 600; margin: 34px 0 14px; max-width: 20ch; }
-  .pitch > p { color: var(--ink-2); font-size: 15.5px; line-height: 1.55; max-width: 48ch; }
-  .evidence { margin-top: 30px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); }
-  .ev-head { padding: 11px 16px; font-size: 12.5px; color: var(--ink-3); border-bottom: 1px solid var(--line); }
-  .ev-row { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-  .ev-row:last-child { border-bottom: 0; }
-  .ev-label { font-size: 13px; font-weight: 600; }
-  .ev-vals { display: grid; gap: 4px; min-width: 0; }
-  .ev-vals > span { display: flex; align-items: center; gap: 7px; min-width: 0; }
-  .ev-vals svg { width: 12px; height: 12px; flex: none; }
-  .ev-ok svg { color: var(--ok); } .ev-bad svg { color: var(--bad); }
-  .ev-vals code { font: 500 12.5px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ev-ok code { color: var(--ink-3); }
-  .ev-vals mark { background: var(--bad-bg); color: var(--bad); border-radius: 2px; padding: 0 1px; }
-  .pitch > p.credit { margin-top: 18px; font-size: 12.5px; color: var(--ink-3); max-width: 60ch; }
-  .demo.first { margin-top: 0; }
-  .login-card.secondary { margin-top: 16px; padding: 22px 24px; box-shadow: none; }
-  .login-card.secondary h1 { font-size: 15px; font-weight: 600; }
-  .login-card.secondary form { margin-top: 16px; gap: 12px; }
+  .signin { min-height: 100%; display: grid; grid-template-rows: 1fr auto; padding: 0 16px; }
+  .signin-main { align-self: center; justify-self: center; width: 100%; max-width: 392px; padding: 48px 0 32px; }
+  .signin-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15.5px; }
+  .signin h1 { font-size: 34px; line-height: 1.12; letter-spacing: -0.025em; font-weight: 600; margin: 44px 0 0; text-wrap: balance; }
+  .signin-lede { color: var(--ink-2); font-size: 15.5px; margin-top: 12px; }
+  .signin .btn-enter { width: 100%; height: 44px; margin-top: 32px; font-size: 15px; justify-content: center; }
+  .signin form { display: grid; gap: 14px; margin-top: 28px; }
+  [hidden] { display: none !important; }       /* "hidden" always wins over a layout rule */
+  .signin form[hidden] { display: none; }
+  .signin .form-error { margin-top: 10px; }
+  .linkish { background: none; border: 0; padding: 0; font: inherit; font-size: 13.5px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; margin-top: 18px; }
+  .linkish:hover { color: var(--ink); }
+  .signin-foot { justify-self: center; text-align: center; font-size: 12px; color: var(--ink-3); padding: 0 0 22px; max-width: 60ch; }
+  .who-switch { width: 100%; background: none; border: 1px solid transparent; border-radius: 9px; padding: 6px; margin: -6px; width: calc(100% + 12px); text-align: left; cursor: pointer; color: inherit; font: inherit; }
+  .who-switch:hover, .who-switch[aria-expanded="true"] { background: var(--surface-3); }
+  .who-switch .swap { margin-left: auto; color: var(--ink-3); flex: none; display: grid; place-items: center; }
+  .rolemenu { position: fixed; z-index: 40; width: 236px; max-width: calc(100vw - 24px); background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px; box-shadow: 0 12px 32px rgba(16, 24, 40, .16); padding: 6px; }
+  .rolemenu[hidden] { display: none; }
+  .rolemenu-head { padding: 6px 10px 4px; font-size: 12px; color: var(--ink-3); }
+  .rolemenu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: 0; border-radius: 8px; background: none; color: inherit; font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+  .rolemenu button:hover, .rolemenu button:focus-visible { background: var(--surface-3); outline: none; }
+  .rolemenu button[aria-checked="true"] { background: var(--surface-2); }
+  .rolemenu .avatar { width: 30px; height: 30px; font-size: 11px; }
+  .rolemenu b { display: block; font-weight: 600; font-size: 13.5px; line-height: 1.3; }
+  .rolemenu small { display: block; font-size: 12px; color: var(--ink-3); line-height: 1.3; }
+  .rolemenu .tick { margin-left: auto; color: var(--ok); flex: none; }
 
   /* ============================================================ app shell */
   .shell { display: grid; grid-template-columns: 236px 1fr; height: 100%; }
@@ -168,10 +165,14 @@
 
   /* status, verdicts */
   .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; height: 24px; padding: 0 10px; border-radius: 99px; white-space: nowrap; border: 1px solid transparent; }
+  .step-cell { max-width: 220px; }
+  .inv-num { max-width: 150px; overflow-wrap: anywhere; }
+  .step-cell .pill { height: auto; min-height: 24px; white-space: normal; line-height: 1.3; padding: 3px 10px; border-radius: 12px; }
   .p-pending  { background: var(--warn-bg); color: var(--warn); border-color: var(--warn-line); }
   .p-approved { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-line); }
   .p-rejected { background: var(--bad-bg); color: var(--bad); border-color: var(--bad-line); }
   .p-neutral  { background: var(--surface-3); color: var(--ink-2); }
+  .p-task     { background: var(--surface); color: var(--ink); border-color: var(--ink); font-weight: 600; }
   .verdict { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13.5px; }
   .v-ok { color: var(--ok); } .v-warn { color: var(--warn); } .v-bad { color: var(--bad); }
 
@@ -260,6 +261,110 @@
   .stamp.bad { background: var(--bad-bg); border-color: var(--bad-line); }
   .stamp.bad b { color: var(--bad); }
   .stamp.flash { animation: settle 1.2s ease-out 1; }
+  /* a decided invoice: a short record instead of the review */
+  .record { border: 1px solid; border-radius: 10px; padding: 16px 18px; margin-top: 18px; }
+  .record.ok { background: var(--ok-bg); border-color: var(--ok-line); }
+  .record.bad { background: var(--bad-bg); border-color: var(--bad-line); }
+  .record.flash { animation: settle 1.2s ease-out 1; }
+  .record-head { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 650; }
+  .record.ok .record-head { color: var(--ok); } .record.bad .record-head { color: var(--bad); }
+  .record p { margin-top: 6px; }
+  .record-note { color: var(--ink-2); }
+  .record-why { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+  .record .kvs { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ok-line); }
+  .record.bad .kvs { border-top-color: var(--bad-line); }
+  .record .kvs dd .sub { display: block; }
+  details.change summary { cursor: pointer; font-size: 13.5px; color: var(--ink-2); list-style: none; width: max-content; }
+  details.change summary::-webkit-details-marker { display: none; }
+  details.change summary:hover { color: var(--ink); text-decoration: underline; }
+  details.change[open] summary { margin-bottom: 10px; }
+  details.change { display: grid; gap: 10px; }
+  .record.gone { background: var(--surface-2, var(--bg)); border-color: var(--line); }
+  .record.gone .record-head { color: var(--ink-2); }
+  .record.gone .kvs { border-top-color: var(--line); }
+  .remove-box { border: 1px solid var(--bad-line); background: var(--bad-bg); border-radius: 10px; padding: 14px 16px; margin-top: 18px; display: grid; gap: 10px; }
+  .remove-box b { color: var(--bad); }
+  .remove-box[hidden] { display: none; }
+  .sendon { display: grid; gap: 10px; margin-top: 12px; }
+  /* review: what looks good / what needs attention */
+  .pc { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0 4px; }
+  .pc-col { border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; background: var(--surface); }
+  .pc-col h3 { display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 650; margin: 0 0 6px; }
+  .pc-col.good h3 { color: var(--ok); } .pc-col.attn h3 { color: var(--warn); } .pc-col.attn.bad h3 { color: var(--bad); }
+  .pc-col h3 svg { width: 15px; height: 15px; }
+  .pc-col ul { margin: 0; padding: 0; }
+  .pc-col.skip h3 { color: var(--ink-2); }
+  .pc-col summary { list-style: none; cursor: pointer; }
+  .pc-col summary::-webkit-details-marker { display: none; }
+  .pc-col summary h3 { margin-bottom: 2px; }
+  .pc-names { display: block; font-size: 13px; color: var(--ink-2); padding-left: 21px; }
+  .pc-more { margin-left: 8px; color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
+  .pc-col[open] .pc-more { display: none; }
+  .pc-col[open] summary { margin-bottom: 4px; }
+  .pc-n { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .pc-none { margin: 0; font-size: 13px; color: var(--ink-3); }
+  .pc-col .checks { border-top: 0; }
+  .pc-col .checks li { padding: 8px 0; }
+  .pc-col .checks li:last-child { border-bottom: 0; padding-bottom: 2px; }
+  .decide-main { display: grid; gap: 10px; }
+  .rej-q { font-size: 13.5px; color: var(--ink-2); }
+  .rej-q b { color: var(--bad); }
+  .newsup .vcard { margin-top: 0; }
+  .done .next { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .done .next svg { width: 15px; height: 15px; color: var(--ink-3); }
+  .mini { list-style: none; margin: 0; padding: 0; }
+  .mini a { display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: baseline; padding: 11px 18px; border-top: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 14px; }
+  .mini a:hover { background: var(--surface-2); }
+  .mini .num { color: var(--ink-2); font-size: 13px; }
+  .newsup { border: 1px dashed var(--warn-line); background: var(--warn-bg); border-radius: var(--radius); padding: 12px 14px; margin-top: 12px; }
+  .newsup > b { color: var(--warn); }
+  .newsup p { margin: 4px 0 10px; font-size: 13.5px; color: var(--ink-2); }
+  .miss-note { display: flex; gap: 8px; align-items: flex-start; color: var(--bad); font-size: 13.5px; margin-top: 10px; }
+  .review-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .review-actions .grow { flex: 1; }
+  .banner { display: flex; gap: 8px; align-items: flex-start; border: 1px solid var(--ok-line); background: var(--ok-bg); color: var(--ink); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
+  .banner svg { color: var(--ok); flex: none; margin-top: 2px; }
+  .banner.bad { border-color: var(--bad-line); background: var(--bad-bg); } .banner.bad svg { color: var(--bad); }
+  /* the page after an action: what happened, what comes next */
+  .done-page { display: grid; place-items: center; min-height: 70vh; }
+  .done { max-width: 560px; text-align: center; display: grid; justify-items: center; gap: 10px; }
+  .done-icon { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-line); }
+  .done.bad .done-icon { background: var(--bad-bg); color: var(--bad); border-color: var(--bad-line); }
+  .done.info .done-icon { background: var(--surface-3); color: var(--ink-2); border-color: var(--line); }
+  .done-icon svg { width: 26px; height: 26px; }
+  .done h1 { font-size: 24px; margin: 6px 0 0; }
+  .done p { color: var(--ink-2); margin: 0; }
+  .done .next { margin-top: 2px; font-size: 13.5px; }
+  .done .row { justify-content: center; margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+  /* upload page */
+  .upzone { border: 2px dashed var(--line); border-radius: 14px; background: var(--surface); padding: 48px 24px; display: grid; justify-items: center; gap: 10px; text-align: center; transition: border-color .15s, background .15s; }
+  .upzone.on, .upzone:focus-visible { border-color: var(--ink-3); background: var(--surface-2); outline: none; }
+  .upzone svg { width: 34px; height: 34px; color: var(--ink-3); }
+  .upzone b { font-size: 17px; }
+  /* notifications */
+  .bell { position: relative; margin-left: auto; width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent; background: none; color: var(--ink-2); display: grid; place-items: center; cursor: pointer; }
+  .bell:hover, .bell[aria-expanded="true"] { background: var(--surface-2); border-color: var(--line); color: var(--ink); }
+  .bell svg { width: 18px; height: 18px; }
+  .bell .dot { position: absolute; top: 2px; right: 1px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; background: var(--bad); color: #fff; font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; }
+  .brand-row { display: flex; align-items: center; gap: 6px; }
+  .notes-panel { position: fixed; z-index: 60; width: min(380px, calc(100vw - 24px)); max-height: min(520px, 70vh); overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 50px rgba(15, 20, 30, .18); }
+  .notes-panel header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); font-weight: 650; }
+  .notes-panel ul { list-style: none; margin: 0; padding: 0; }
+  .notes-panel li a { position: relative; display: grid; gap: 2px; padding: 10px 14px 10px 28px; border-bottom: 1px solid var(--line); color: var(--ink); text-decoration: none; font-size: 13.5px; }
+  .notes-panel li a:hover { background: var(--surface-2); }
+  .notes-panel li.unread a { background: color-mix(in srgb, var(--warn-bg) 60%, transparent); }
+  .notes-panel li.unread a::before { content: ""; position: absolute; left: 13px; top: 17px; width: 7px; height: 7px; border-radius: 50%; background: var(--bad); }
+  .notes-panel .when { color: var(--ink-3); font-size: 12px; }
+  .notes-panel .empty { padding: 26px 14px; }
+  @media (max-width: 760px) { .pc { grid-template-columns: 1fr; } }
+  .open-items { border: 1px solid var(--warn-line); background: var(--warn-bg); border-radius: var(--radius); padding: 10px 12px; font-size: 13.5px; }
+  .open-items b { color: var(--warn); }
+  .open-items summary { cursor: pointer; list-style: none; color: var(--ink-2); }
+  .open-items summary::-webkit-details-marker { display: none; }
+  .open-items ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-2); max-height: 30vh; overflow: auto; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pick { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); border-radius: 99px; padding: 3px 10px; cursor: pointer; }
+  .pick:hover, .pick[aria-pressed="true"] { border-color: var(--ink-3); color: var(--ink); background: var(--surface-2); }
   @keyframes settle { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink-3) 30%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
   .hint { font-size: 13px; color: var(--ink-2); display: flex; gap: 8px; align-items: flex-start; }
   .hint svg { margin-top: 2px; color: var(--ink-3); }
@@ -296,8 +401,8 @@
 
   /* ============================================================ overview */
   /* flow palette: validated for colour-vision deficiency in both modes (amber never sits next to red) */
-  :root { --f-clear: #1d7a4e; --f-wait: #c48a12; --f-people: #3d63a8; --f-stop: #b42318; }
-  @media (prefers-color-scheme: dark) { :root { --f-clear: #36a072; --f-wait: #c08a1f; --f-people: #6b8bd6; --f-stop: #e2503f; } }
+  :root { --f-clear: #1d7a4e; --f-wait: #c48a12; --f-proc: #7a5ab8; --f-people: #3d63a8; --f-stop: #b42318; }
+  @media (prefers-color-scheme: dark) { :root { --f-clear: #36a072; --f-wait: #c08a1f; --f-proc: #a088d8; --f-people: #6b8bd6; --f-stop: #e2503f; } }
   .hero { padding: 26px 26px 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: end; }
   .hero-label { font-size: 13.5px; color: var(--ink-2); grid-column: 1 / -1; }
   .hero-value { font-size: 52px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
@@ -314,6 +419,7 @@
   .flowbar i:only-child { border-radius: 4px; }
   .flowbar i:focus-visible { outline-offset: 3px; }
   .flowkey { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+  .flowkey.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .flowkey div { border-top: 2px solid var(--line); padding-top: 10px; font-size: 13.5px; color: var(--ink-2); }
   .flowkey b { display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: 20px; font-weight: 600; }
   .flowkey .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
@@ -342,84 +448,76 @@
   .tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; padding: 6px 9px; border-radius: 6px; max-width: 280px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
   .tip[hidden] { display: none; }
 
-  /* ============================================================ inbox */
-  .channel { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--line); align-items: start; }
-  .channel:last-child { border-bottom: 0; }
-  .channel-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--surface-3); display: grid; place-items: center; color: var(--ink-2); }
-  .channel b { font-weight: 600; }
-  .channel p { color: var(--ink-2); font-size: 13.5px; margin-top: 2px; }
-  .path { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--surface-3); border-radius: 5px; padding: 2px 6px; overflow-wrap: anywhere; color: var(--ink); }
-  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
-  .live .dot { background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
-  .live.off .dot { background: var(--ink-3); box-shadow: none; }
-  .from b { font-weight: 600; display: block; } .from span { color: var(--ink-3); font-size: 12.5px; }
-  .story { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); }
-  .story li { display: flex; gap: 8px; } .story b { color: var(--ink); font-weight: 600; min-width: 18px; }
   .source-line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
 
-  /* ============================================================ fraud lab */
-  .score { display: flex; gap: 6px 22px; flex-wrap: wrap; align-items: baseline; font-size: 13px; color: var(--ink-2); }
-  .score b { font-size: 22px; font-weight: 600; color: var(--ink); margin-right: 5px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-  .lab { display: grid; grid-template-columns: minmax(330px, 390px) minmax(0, 1fr); gap: 16px; align-items: start; }
-  .lab-step { padding: 18px 18px 8px; }
-  .lab-step + .lab-step { padding-top: 10px; }
-  .lab-step h2 { margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; }
-  .lab-step h2 .n { color: var(--ink-3); font-variant-numeric: tabular-nums; }
-  .picks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .pick { position: relative; display: block; }
-  .pick input { position: absolute; opacity: 0; pointer-events: none; }
-  .pick .card { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; background: var(--surface); transition: border-color .12s, background .12s; }
-  .pick .card:hover { border-color: var(--line-2); background: var(--surface-2); }
-  .pick input:checked + .card { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
-  .pick input:focus-visible + .card { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .pick img { width: 38px; height: 52px; object-fit: cover; object-position: top; border-radius: 3px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
-  .pick b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pick span { display: block; font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tricks { border-top: 1px solid var(--line); }
-  .trick { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
-  .trick:last-child { border-bottom: 0; }
-  .trick input[type=radio] { margin: 4px 0 0; accent-color: var(--ink); width: 15px; height: 15px; }
-  .trick b { font-weight: 600; font-size: 14px; }
-  .trick p { color: var(--ink-2); font-size: 13px; margin-top: 1px; }
-  .trick .input { margin-top: 9px; height: 34px; font-size: 13.5px; }
-  .lab-go { padding: 14px 18px 18px; display: grid; gap: 8px; border-top: 1px solid var(--line); }
-  .outcome { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px 14px; align-items: center; padding: 20px 22px 16px; }
-  .outcome .ring { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
-  .outcome .ring svg { width: 22px; height: 22px; }
-  .outcome.bad .ring { background: var(--bad-bg); color: var(--bad); } .outcome.warn .ring { background: var(--warn-bg); color: var(--warn); } .outcome.ok .ring { background: var(--ok-bg); color: var(--ok); }
-  .outcome .word { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
-  .outcome.bad .word { color: var(--bad); } .outcome.warn .word { color: var(--warn); } .outcome.ok .word { color: var(--ok); }
-  .outcome .sub { font-size: 13.5px; }
-  .why { padding: 0 22px 16px; font-size: 14px; }
-  .why .by { color: var(--ink-2); }
-  .why .by b { color: var(--ink); }
-  .why q { display: block; quotes: none; margin-top: 8px; padding: 10px 12px; border-left: 3px solid var(--line-2); background: var(--surface-2); border-radius: 0 6px 6px 0; color: var(--ink-2); font-size: 13.5px; }
-  .mailhead { margin: 0 22px 16px; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; }
-  .mailhead div { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--line); }
-  .mailhead div:last-child { border-bottom: 0; }
-  .mailhead dt { color: var(--ink-3); } .mailhead dd { margin: 0; overflow-wrap: anywhere; }
-  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px 22px 20px; background: var(--surface-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .sheet { margin: 0; min-width: 0; }
-  .sheet figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-  .sheet figcaption a { font-weight: 500; color: var(--ink-2); font-size: 12.5px; }
-  .paper { position: relative; background: #fff; border-radius: 3px; box-shadow: 0 1px 3px rgba(16,24,40,.14), 0 0 0 1px rgba(16,24,40,.07); overflow: hidden; }
-  .paper img { display: block; width: 100%; height: auto; }
-  .paper.blank { aspect-ratio: 1 / 1.33; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--ink-3); font-size: 13px; background: var(--surface); box-shadow: none; border: 1.5px dashed var(--line-2); }
-  .hit { position: absolute; border: 2px solid var(--bad); border-radius: 3px; background: rgba(180, 35, 24, .10); animation: hit-in .55s cubic-bezier(.2, .8, .2, 1) both .15s; }
-  .hit.was { border: 1.5px dashed #6e7683; background: rgba(110, 118, 131, .08); animation: none; }
-  @keyframes hit-in { from { transform: scale(2.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .loupe { margin-top: 10px; height: 58px; border-radius: 6px; background-color: #fff; background-repeat: no-repeat; box-shadow: 0 0 0 1px var(--line); }
-  .loupe.forged { box-shadow: 0 0 0 2px var(--bad-line); }
-  .diff { margin-top: 8px; font: 500 12.5px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace; overflow-wrap: anywhere; }
-  .diff mark { background: var(--bad-bg); color: var(--bad); border-radius: 2px; padding: 0 1px; }
-  .diff .old mark { background: var(--surface-3); color: var(--ink-2); text-decoration: line-through; }
-  .diff small { display: block; font: 400 12px/1.4 var(--font); color: var(--ink-3); margin-bottom: 2px; }
-  .checkrow { display: flex; flex-wrap: wrap; gap: 6px; padding: 16px 22px 4px; }
-  .checkrow .chip { animation: chip-in .28s ease-out both; }
-  @keyframes chip-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-  .depth { padding: 10px 22px 20px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
-  .depth b { color: var(--ink); font-weight: 600; }
-  .lab-intro { padding: 20px 22px 18px; color: var(--ink-2); font-size: 14px; }
+  /* ============================================================ hand-offs: who has done what, and whose turn it is */
+  .handoff { list-style: none; margin: 18px 0 2px; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 6px; }
+  .handoff li { position: relative; padding-top: 28px; min-width: 0; }
+  .handoff li::after { content: ""; position: absolute; top: 10px; left: 26px; right: 2px; height: 2px; border-radius: 2px; background: var(--line-2); }
+  .handoff li:last-child::after { display: none; }
+  .handoff li.done::after { background: var(--ink-2); }
+  .handoff .pip { position: absolute; top: 0; left: 0; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+                  border: 2px solid var(--line-2); background: var(--surface); color: var(--surface); }
+  .handoff .pip svg { width: 12px; height: 12px; }
+  .handoff li.done .pip { background: var(--ink-2); border-color: var(--ink-2); }
+  .handoff li.current .pip { border-color: var(--ink); box-shadow: inset 0 0 0 4px var(--surface), inset 0 0 0 11px var(--ink); }
+  .handoff b { display: block; font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+  .handoff li.todo b { color: var(--ink-3); font-weight: 500; }
+  .handoff span:not(.pip) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 12px; line-height: 1.35; color: var(--ink-3); overflow: hidden; }
+  .handoff li.current span:not(.pip) { color: var(--ink); font-weight: 500; }
+  .task { margin-top: 14px; padding: 14px 16px; border: 1px solid var(--line-2); border-left: 3px solid var(--ink); border-radius: 0 10px 10px 0; background: var(--surface-2); }
+  .task.waiting { border-left-color: var(--line-2); }
+  .task-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .task-head svg { color: var(--ink-2); }
+  .task p { margin-top: 6px; font-size: 13.5px; color: var(--ink-2); }
+  .task .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .task > .input { margin-top: 10px; height: 34px; }
+  .vcard { display: grid; gap: 10px; margin-top: 12px; }
+  .vcard .input { height: 34px; }
+  .vhint { font-size: 12px; color: var(--ink-3); min-height: 0; }
+  .vrow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .reqform { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; margin-top: 10px; }
+  .reqform .wide { grid-column: span 2; }
+  .reqform .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  tr.req-open td { background: var(--surface-2); }
+  .req-why { color: var(--ink-3); font-size: 12.5px; margin-top: 2px; }
+  .tag-atf { display: inline-block; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-line); border-radius: 4px; padding: 0 6px; font-size: 12px; font-weight: 600; line-height: 18px; }
+  .vhint.ok { color: var(--ok); } .vhint.bad { color: var(--bad); } .vhint.warn { color: var(--warn); }
+  .kvs { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 4px 12px; margin: 10px 0 0; font-size: 13.5px; }
+  .kvs dt { color: var(--ink-3); } .kvs dd { margin: 0; overflow-wrap: anywhere; }
+  .h2row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .h2row h2 { margin: 28px 0 10px; }
+  .fieldform { display: grid; grid-template-columns: 136px minmax(0, 1fr); gap: 8px 12px; align-items: center; border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; }
+  .fieldform label { color: var(--ink-3); }
+  .fieldform .input { height: 34px; }
+  .fieldform .row { grid-column: 1 / -1; display: flex; gap: 8px; margin-top: 4px; }
+  .chip.edited { height: 18px; font-size: 11px; padding: 0 6px; margin-left: 4px; vertical-align: 1px; cursor: default; }
+  .show-sm { display: none; }
+
+  /* ============================================================ proof on the document */
+  .proof { margin-top: 16px; display: grid; gap: 12px; }
+  .proof-item { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+  .proof-head { display: flex; align-items: center; gap: 8px; padding: 11px 14px; font-weight: 600; font-size: 14px; border-bottom: 1px solid var(--line); }
+  .proof-head svg { flex: none; }
+  .proof-item.fail .proof-head { color: var(--bad); } .proof-item.warn .proof-head { color: var(--warn); }
+  .proof-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 4px 0 0; }
+  .proof-table th, .proof-table td { text-align: left; padding: 7px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .proof-table thead th { font-weight: 500; color: var(--ink-3); font-size: 12px; padding-top: 8px; padding-bottom: 6px; }
+  .proof-table tbody th { font-weight: 500; color: var(--ink-2); width: 30%; }
+  .proof-table td { font: 500 13px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace; overflow-wrap: anywhere; }
+  .proof-table td.ref { color: var(--ink-3); }
+  .proof-table mark { background: var(--bad-bg); color: var(--bad); border-radius: 2px; padding: 0 1px; }
+  .proof-shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; padding: 12px 14px 14px; }
+  .shot { margin: 0; min-width: 0; }
+  .shot figcaption { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+  .shot figcaption a { color: var(--ink-2); }
+  .zoom { position: relative; height: 78px; border-radius: 6px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+  .zoom img { position: absolute; left: 0; top: 0; max-width: none; }
+  .zoom .hit { position: absolute; border: 2px solid var(--bad); border-radius: 3px; background: rgba(180, 35, 24, .08); animation: hit-in .5s cubic-bezier(.2, .8, .2, 1) both .1s; }
+  .zoom.ref .hit { border: 1.5px dashed #6e7683; background: rgba(110, 118, 131, .08); animation: none; }
+  .zoom:not(.ready) .hit { visibility: hidden; }
+  @keyframes hit-in { from { transform: scale(1.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .zoom .hit { animation: none; } }
 
   /* the blinking text cursor: only where you can actually type */
   body { caret-color: transparent; }
@@ -446,18 +544,21 @@
     .hide-sm { display: none; }
     .search { flex: 1 1 100%; }
     .two { grid-template-columns: 1fr; }
-    .flowkey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .flowkey, .flowkey.five { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .hero { grid-template-columns: 1fr; } .hero-side { text-align: left; }
     .hero-value { font-size: 40px; }
     .rank li { grid-template-columns: 120px minmax(0, 1fr); }
-    .channel { grid-template-columns: 36px minmax(0, 1fr); } .channel > :last-child { grid-column: 2; }
-    .lab { grid-template-columns: 1fr; }
-    .login.split { grid-template-columns: minmax(0, 440px); gap: 28px; }
-    .pitch h1 { font-size: 28px; margin-top: 22px; }
-    .evidence { display: none; }
-    .compare { gap: 12px; padding: 14px 16px 16px; }
+    .show-sm { display: block; }
+    .fieldform { grid-template-columns: 110px minmax(0, 1fr); }
+    .signin h1 { font-size: 29px; margin-top: 36px; }
   }
-  @media (max-width: 520px) { .picks { grid-template-columns: 1fr; } .compare { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) {
+    .flowkey, .flowkey.five { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .mini a { grid-template-columns: minmax(0, 1fr) auto; row-gap: 2px; }
+    .mini a .num:first-of-type { grid-row: 2; grid-column: 1; }
+    .handoff { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; }
+    .handoff li::after { display: none; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -488,12 +589,12 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const svg = (d, s = 16, w = 1.8) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const I = {
   logo: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M10 14.5l2 2 4-4.5"/>', 16, 2),
-  inbox: svg('<path d="M4 13l2.5-7h11L20 13"/><path d="M4 13v6h16v-6h-5a3 3 0 0 1-6 0z"/>'),
   vendor: svg('<path d="M4 20V8l8-4 8 4v12"/><path d="M9 20v-6h6v6"/>'),
   po: svg('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6M9 18h3"/>'),
   activity: svg('<path d="M4 12h4l2-6 4 12 2-6h4"/>'),
   ai: svg('<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>'),
   users: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c1.7.8 2.8 2.6 3 5.2"/>'),
+  bell: svg('<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'),
   upload: svg('<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v4h16v-4"/>'),
   back: svg('<path d="M15 6l-6 6 6 6"/>'),
   next: svg('<path d="M9 6l6 6-6 6"/>'),
@@ -508,12 +609,10 @@ const I = {
   flag: svg('<path d="M12 5v9M12 18.5v.5"/>', 14, 2.6),
   dash: svg('<path d="M6 12h12"/>', 14, 2.6),
   chev: svg('<path d="M9 6l6 6-6 6"/>', 14, 2.2),
+  updown: svg('<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>', 14, 2),
   overview: svg('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
-  mail: svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6 8.5-6"/>'),
-  folder: svg('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'),
   file: svg('<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>'),
   refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'),
-  flask: svg('<path d="M9 3h6M10 3v6.5L4.6 18.2A1.9 1.9 0 0 0 6.2 21h11.6a1.9 1.9 0 0 0 1.6-2.8L14 9.5V3"/><path d="M7.4 15h9.2"/>'),
   shield: svg('<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
 };
 
@@ -523,21 +622,35 @@ const OUTCOME = {
   reject:       { label: "Recommend reject",  cls: "bad",  icon: I.cross },
 };
 const MARK = { pass: ["m-pass", I.check, "Passed"], warn: ["m-warn", I.flag, "Needs a look"], fail: ["m-fail", I.cross, "Failed"], skip: ["m-skip", I.dash, "Not checked"] };
-const CHECK_NAME = { completeness: "Required fields", math: "Arithmetic", duplicate: "Duplicates", vendor: "Vendor", tax_id: "Tax ID", po_match: "Purchase order", bank: "Bank account", sender: "Sender" };
+const CHECK_NAME = { completeness: "Required fields", math: "Arithmetic", duplicate: "Duplicates", vendor: "Vendor", tax_id: "Tax ID", po_match: "Purchase order", bank: "Bank account" };
 const STEP_NAME = { read: "Read the document", extract: "Extract the fields", decide: "Decide" };
 const STATUS_TXT = { pending: "Waiting for review", approved: "Approved", rejected: "Rejected" };
-const ROLE_TXT = { admin: "Admin", approver: "Approver", viewer: "Viewer", service: "Integration" };
+const ROLE_TXT = { ap: "Accounts payable", procurement: "Procurement", approver: "Manager", admin: "Manager", local: "Local user", viewer: "Read only", service: "Integration" };
+// what an empty "My tasks" list means for each role: when that role gets work
+const WHEN_WORK = {
+  ap: "Every new invoice comes to you first: check what needs attention, then approve it for the manager or reject it. A new supplier is added from the same page.",
+  procurement: "Procurement steps in when accounts payable adds a new supplier (verify it before a manager approves it) or when an invoice quotes an order that is not on file. Purchase requests to prepare are on the Purchase orders page.",
+  approver: "Invoices come to you after accounts payable approves them, and new suppliers after procurement verifies them.",
+};
+const stageText = st => st && st.key !== "done" ? `${st.who}: ${st.label.charAt(0).toLowerCase()}${st.label.slice(1)}` : "";
+const myTask = r => !!ME && r.stage && (r.stage.roles || []).includes(ME.user.role);
 const ACTION_TXT = {
-  learned: "Remembered", demo_emails: "Loaded demo e-mails",
+  learned: "Remembered", switched_role: "Switched role", po_requested: "Requested a purchase", po_prepared: "Prepared an order",
+  po_approved: "Approved an order", po_rejected: "Rejected a purchase request", po_saved: "Loaded a purchase order from the ERP",
+  po_recorded: "Recorded an order placed outside the app",
+  edited: "Corrected fields", rechecked: "Ran the checks again", vendor_proposed: "Added a new supplier", vendor_verified: "Verified a supplier",
+  vendor_approved: "Approved a supplier", reviewed: "Reviewed (accounts payable)", vendor_rejected: "Rejected a supplier", receipt_confirmed: "Confirmed delivery", receipt_problem: "Reported a delivery problem",
   signed_in: "Signed in", signed_out: "Signed out", login_failed: "Failed sign-in", account_locked: "Account locked",
   password_changed: "Changed password", user_created: "Created user", user_updated: "Updated user",
   uploaded: "Uploaded", received: "Received", extracted: "Read the invoice", checked: "Ran the checks",
   auto_approve: "Recommended approve", needs_review: "Sent for review", reject: "Recommended reject",
-  approved: "Approved", rejected: "Rejected", confirmed: "Confirmed decision", vendor_saved: "Saved vendor",
-  po_saved: "Saved purchase order", demo_reset: "Reset demo data",
+  approved: "Approved", rejected: "Rejected", confirmed: "Confirmed decision", vendor_saved: "Saved vendor", removed: "Removed an invoice", sent_on: "Sent on without a missing value",
+  demo_reset: "Reset demo data",
 };
 
 /* ------------------------------------------------------------ formatting */
+const MISSING = '<span class="missing" title="Not readable on the document. Accounts payable fills it in during the review.">Missing</span>';
+const NOT_PRINTED = '<span class="missing" title="Not printed on the document; accounts payable approved the invoice without it.">Not on invoice</span>';
 function money(v, cur) {
   if (v == null) return null;
   try { return new Intl.NumberFormat(undefined, { style: "currency", currency: cur || "USD", currencyDisplay: "code" }).format(v).replace(/ /g, " "); }
@@ -575,51 +688,42 @@ async function api(path, opts = {}) {
 /* ============================================================ sign-in screen */
 function showLogin(message = "") {
   document.title = "Sign in · InPro Copilot";
-  const demo = CFG && CFG.demo;
+  const demo = !!(CFG && CFG.demo);
   let framed = false; try { framed = window.self !== window.top; } catch { framed = true; }
-  // the evidence card: three of the eight checks, shown the way the review screen shows them
-  const ev = (label, good, bad, chip) => `<div class="ev-row"><span class="ev-label">${label}</span>
-      <span class="ev-vals"><span class="ev-ok">${I.check}<code>${good}</code></span><span class="ev-bad">${I.cross}<code>${bad}</code></span></span>
-      <span class="chip">${chip}</span></div>`;
   $("#root").innerHTML = `
-  <div class="login ${demo ? "split" : ""}">
-    ${demo ? `<section class="pitch" aria-label="About InPro Copilot">
-      <div class="login-brand"><span class="brand-mark">${I.logo}</span>InPro Copilot</div>
+  <div class="signin">
+    <div class="signin-main">
+      <div class="signin-brand"><span class="brand-mark">${I.logo}</span>InPro Copilot</div>
       <h1>Catches the invoice that should not be paid.</h1>
-      <p>Every invoice is read, put through eight checks and given a recommendation with its reasons, before anyone approves it. The decisions come from plain, explainable code; AI only helps read messy documents.</p>
-      <div class="evidence" aria-label="Examples of what the checks catch">
-        <div class="ev-head">Three of the eight checks, on real invoices</div>
-        ${ev("Bank account", "NL50 INGB 0683 2513 09", "NL<mark>86</mark> INGB 0683 <mark>5846 32</mark>", "Account changed")}
-        ${ev("Sender", "billing@azure-interior.com", "billing@azure-interior<mark>s</mark>.com", "Look-alike domain")}
-        ${ev("Arithmetic", "593.36 + 124.61 = 717.97", "593.36 + 124.61 = <mark>796.77</mark>", "Doesn't add up")}
-      </div>
-      <p class="credit">An independent prototype by Mohammed Ajwad MR, built around InPro's invoice approvals. Not affiliated with Novigo Solutions.</p>
-    </section>` : ""}
-    <div class="login-box">
-    ${demo ? "" : `<div class="login-brand"><span class="brand-mark">${I.logo}</span>InPro Copilot</div>`}
-    ${framed ? `<div class="advice warn" style="margin:0 0 16px">
-      <div class="verdict v-warn">${I.info}Open the app in its own tab</div>
-      <p style="font-size:13.5px">This page is shown inside another website, where browsers do not keep you signed in.</p>
-      <p style="margin-top:10px"><a class="btn btn-sm" href="${esc(location.href.split("#")[0])}" target="_blank" rel="noopener">${I.ext}Open InPro Copilot</a></p></div>` : ""}
-    ${demo ? `<div class="demo first">
-      <div class="demo-head"><b>Try it with a demo account.</b> Each one sees the app with a different role.</div>
-      ${CFG.demo_accounts.map(a => `<div class="demo-row"><span class="avatar">${esc(initials(a.name))}</span><div><b>${esc(a.name)}</b><div class="sub">${esc(a.note)}</div></div><button class="btn btn-sm ${a.role === "admin" ? "btn-primary" : ""}" type="button" data-email="${esc(a.email)}">Sign in</button></div>`).join("")}
-    </div>` : ""}
-    <div class="login-card ${demo ? "secondary" : ""}">
-      <h1>${demo ? "Or sign in with an account" : "Sign in"}</h1>
-      ${demo ? `<p class="muted">Demo password for all three: <span class="num" style="white-space:nowrap">${esc(CFG.demo_password)}</span></p>` : `<p class="muted">AI pre-review for invoice approvals</p>`}
-      <form id="loginForm" novalidate>
+      <p class="signin-lede">AI pre-review for invoice approvals.</p>
+      ${framed ? `<div class="advice warn" style="margin:28px 0 0">
+        <div class="verdict v-warn">${I.info}Open the app in its own tab</div>
+        <p style="font-size:13.5px">This page is shown inside another website, where browsers do not keep you signed in.</p>
+        <p style="margin-top:10px"><a class="btn btn-sm" href="${esc(location.href.split("#")[0])}" target="_blank" rel="noopener">${I.ext}Open InPro Copilot</a></p></div>` : ""}
+      ${demo ? `<button class="btn btn-primary btn-enter" type="button" id="enterBtn">Open the demo</button>
+      <p class="form-error" id="enterErr" hidden></p>
+      <button class="linkish" type="button" id="acctToggle" aria-expanded="false" aria-controls="loginForm">Sign in with an account</button>` : ""}
+      <form id="loginForm" novalidate ${demo && !message ? "hidden" : ""}>
         <div class="field"><label for="email">Work email</label><input class="input" id="email" type="email" autocomplete="username" required></div>
         <div class="field"><label for="password">Password</label><input class="input" id="password" type="password" autocomplete="current-password" required></div>
         <p class="form-error" id="loginErr" ${message ? "" : "hidden"}>${esc(message)}</p>
         <button class="btn ${demo ? "" : "btn-primary"} btn-block" type="submit" id="loginBtn">Sign in</button>
       </form>
     </div>
-    ${CFG && CFG.public ? `<p class="login-foot" style="text-align:left;margin-top:14px">This is a public demo: everyone who opens it sees the same sample data, and it starts fresh whenever the demo restarts. Please don't upload confidential invoices.</p>` : ""}
-    <p class="login-foot">${I.lock.replace('width="16" height="16"', 'width="12" height="12"')} ${CFG && CFG.public ? "Repeated wrong passwords are slowed down." : "Accounts lock after 5 wrong passwords."} Sessions end after 8 hours without activity.</p>
-  </div></div>`;
-  const form = $("#loginForm");
-  $$("[data-email]").forEach(b => b.onclick = () => { $("#email").value = b.dataset.email; $("#password").value = CFG.demo_password; b.textContent = "Signing in…"; form.requestSubmit(); });
+    ${demo ? `<p class="signin-foot">An independent prototype by Mohammed Ajwad MR, built around InPro. Not affiliated with Novigo Solutions.</p>` : ""}
+  </div>`;
+  const form = $("#loginForm"), tog = $("#acctToggle"), enter = $("#enterBtn");
+  if (tog) { tog.setAttribute("aria-expanded", String(!form.hidden));
+    tog.onclick = () => { form.hidden = !form.hidden; tog.setAttribute("aria-expanded", String(!form.hidden)); if (!form.hidden) $("#email").focus(); }; }
+  if (enter) enter.onclick = async () => {
+    const first = CFG.demo_accounts.find(a => a.role === "ap") || CFG.demo_accounts[0];
+    enter.disabled = true; enter.textContent = "Opening…"; $("#enterErr").hidden = true;
+    try {
+      await api("/api/auth/login", { method: "POST", json: { email: first.email, password: CFG.demo_password } });
+      await boot();
+      toast("You are in accounts payable. Click your name to switch to procurement or the manager.");
+    } catch (ex) { $("#enterErr").textContent = ex.message; $("#enterErr").hidden = false; enter.disabled = false; enter.textContent = "Open the demo"; }
+  };
   form.onsubmit = async e => {
     e.preventDefault();
     const btn = $("#loginBtn"), err = $("#loginErr");
@@ -627,33 +731,36 @@ function showLogin(message = "") {
     if (!email || !password) { err.textContent = "Enter your email and password."; err.hidden = false; return; }
     btn.disabled = true; btn.textContent = "Signing in…"; err.hidden = true;
     try { await api("/api/auth/login", { method: "POST", json: { email, password } }); await boot(); }
-    catch (ex) { err.textContent = ex.message; err.hidden = false; btn.disabled = false; btn.textContent = "Sign in"; $$("[data-email]").forEach(b => b.textContent = "Sign in"); }
+    catch (ex) { err.textContent = ex.message; err.hidden = false; btn.disabled = false; btn.textContent = "Sign in"; }
   };
-  if (!demo) $("#email").focus();          // demo: people click an account, so no blinking cursor waiting in a box
+  if (!demo) $("#email").focus();          // demo: one button to press, so no blinking cursor waiting in a box
 }
 
 /* ============================================================ app shell */
 function shell() {
   const u = ME.user;
   const limit = u.approval_limit != null ? `, limit ${plain(u.approval_limit)}` : "";
+  const switcher = !!(ME.auth && CFG && CFG.demo && (CFG.demo_accounts || []).some(a => a.email === u.email));
   $("#root").innerHTML = `
   <div class="shell">
     <aside class="side">
-      <a class="brand" href="#/overview"><span class="brand-mark">${I.logo}</span><span>InPro Copilot<small>Invoice pre-review</small></span></a>
+      <div class="brand-row"><a class="brand" href="#/overview"><span class="brand-mark">${I.logo}</span><span>InPro Copilot<small>Invoice pre-review</small></span></a>
+        <button class="bell" id="bellBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="notesPanel" title="Notifications">${I.bell}<span class="dot" id="bellDot" hidden></span><span class="sr">Notifications</span></button></div>
       <nav class="menu" aria-label="Main">
         <a href="#/overview" data-nav="overview">${I.overview}Overview</a>
-        <a href="#/invoices" data-nav="invoices">${I.file}Invoices<span class="count" id="pendingCount" hidden></span></a>
-        <a href="#/inbox" data-nav="inbox">${I.inbox}Inbox</a>
-        <a href="#/lab" data-nav="lab">${I.flask}Fraud lab</a>
+        ${can("upload") ? `<a href="#/upload" data-nav="upload">${I.upload}Upload</a>` : ""}
+        <a href="#/invoices" data-nav="invoices">${I.file}Invoices<span class="count" id="pendingCount" hidden title="Your tasks"></span></a>
         <a href="#/vendors" data-nav="vendors">${I.vendor}Vendors</a>
-        <a href="#/pos" data-nav="pos">${I.po}Purchase orders</a>
+        <a href="#/pos" data-nav="pos">${I.po}Purchase orders<span class="count" id="reqCount" hidden title="Your purchase requests to handle"></span></a>
         <a href="#/activity" data-nav="activity">${I.activity}Activity</a>
         <a href="#/ai" data-nav="ai">${I.ai}AI usage</a>
         ${can("manage") ? `<a href="#/users" data-nav="users">${I.users}Users</a>` : ""}
       </nav>
       <div class="side-foot">
         <div class="reader" id="reader"></div>
-        <div class="who"><span class="avatar">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><span>${esc(ROLE_TXT[u.role] || u.role)}${esc(limit)}</span></div></div>
+        ${switcher ? `<button class="who who-switch" id="whoBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="roleMenu" title="See the app as someone else">
+          <span class="avatar">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><span>${esc(ROLE_TXT[u.role] || u.role)}${esc(limit)}</span></div><span class="swap">${I.updown}</span></button>`
+        : `<div class="who"><span class="avatar">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><span>${esc(ROLE_TXT[u.role] || u.role)}${esc(limit)}</span></div></div>`}
         <div class="side-actions">
           ${ME.auth ? `<button class="btn btn-ghost btn-sm" id="pwBtn" type="button">${I.key}Password</button>
           <button class="btn btn-ghost btn-sm" id="outBtn" type="button">${I.out}Sign out</button>` : ""}
@@ -661,7 +768,15 @@ function shell() {
       </div>
     </aside>
     <main id="main" tabindex="-1"></main>
-  </div>`;
+  </div>
+  <div class="notes-panel" id="notesPanel" role="dialog" aria-label="Notifications" hidden></div>
+  ${switcher ? `<div class="rolemenu" id="roleMenu" role="menu" aria-label="View as" hidden>
+    <div class="rolemenu-head">View as</div>
+    ${CFG.demo_accounts.map(a => `<button type="button" role="menuitemradio" aria-checked="${a.email === u.email}" data-switch="${esc(a.email)}" title="${esc(a.note)}">
+      <span class="avatar">${esc(initials(a.name))}</span><span><b>${esc(a.name)}</b><small>${esc(ROLE_TXT[a.role] || a.role)}</small></span>${a.email === u.email ? `<span class="tick">${I.check}</span>` : ""}</button>`).join("")}
+  </div>` : ""}`;
+  if (switcher) roleSwitcher();
+  wireBell();
   if ($("#outBtn")) $("#outBtn").onclick = async () => { try { await api("/api/auth/logout", { method: "POST" }); } catch {} ME = null; showLogin(); };
   if ($("#pwBtn")) $("#pwBtn").onclick = openPassword;
   const r = $("#reader");
@@ -672,21 +787,57 @@ function shell() {
   }
 }
 
+function roleSwitcher() {
+  const btn = $("#whoBtn"), menu = $("#roleMenu");
+  const close = () => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+  const open = () => {
+    const r = btn.getBoundingClientRect();
+    menu.hidden = false; btn.setAttribute("aria-expanded", "true");
+    const w = menu.offsetWidth, clamp = x => Math.min(Math.max(12, x), innerWidth - w - 12);
+    if (r.top > innerHeight / 2) { menu.style.top = ""; menu.style.bottom = (innerHeight - r.top + 8) + "px"; menu.style.left = clamp(r.left) + "px"; }
+    else { menu.style.bottom = ""; menu.style.top = (r.bottom + 8) + "px"; menu.style.left = clamp(r.right - w) + "px"; }
+    (menu.querySelector('[aria-checked="true"]') || menu.querySelector("button")).focus();
+  };
+  btn.onclick = e => { e.stopPropagation(); menu.hidden ? open() : close(); };
+  document.addEventListener("click", e => { if (!menu.hidden && !menu.contains(e.target)) close(); });
+  menu.addEventListener("keydown", e => {
+    const items = [...menu.querySelectorAll("button")], i = items.indexOf(document.activeElement);
+    if (e.key === "Escape") { close(); btn.focus(); }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length].focus(); }
+  });
+  menu.querySelectorAll("[data-switch]").forEach(b => b.onclick = async () => {
+    if (b.getAttribute("aria-checked") === "true") return close();
+    b.disabled = true;
+    try {
+      const r = await api("/api/auth/switch", { method: "POST", json: { email: b.dataset.switch } });
+      filter = null;                       // each person's queue opens on their own tasks
+      await boot();
+      toast(`Now seeing the app as ${r.user.name} (${ROLE_TXT[r.user.role] || r.user.role}).`, "ok");
+    } catch (ex) { b.disabled = false; toast(ex.message, "bad"); }
+  });
+}
+
 async function refreshCount() {
-  try { const s = await api("/api/stats"); const c = $("#pendingCount"); if (c) { c.textContent = s.by_status.pending; c.hidden = !s.by_status.pending; } } catch {}
+  try {
+    const s = await api("/api/stats");
+    const c = $("#pendingCount"); if (c) { c.textContent = s.my_tasks; c.hidden = !s.my_tasks; }
+    const r = $("#reqCount"); if (r) { r.textContent = s.my_requests; r.hidden = !s.my_requests; }
+  } catch {}
+  refreshBell();
 }
 
 function setNav(key) { $$(".menu a").forEach(a => a.setAttribute("aria-current", a.dataset.nav === key ? "page" : "false")); }
 const MAIN = () => $("#main");
 
 /* ============================================================ invoices (the queue) */
-let filter = "pending", query = "";
+let filter = null, query = "";
 
 async function invoicesPage() {
   setNav("invoices"); document.title = "Invoices · InPro Copilot";
+  if (!filter) filter = ME.user.role === "viewer" ? "pending" : "mine";
   MAIN().innerHTML = `<div class="page">
     <div class="page-head">
-      <div><h1>Invoices</h1><p>Every invoice is read, checked and given a recommendation with its reasons. You make the final call.</p></div>
+      <div><h1>Invoices</h1><p>Every invoice is read and checked, then accounts payable reviews it: approve or reject. A new supplier is verified by procurement and approved by a manager, and a manager gives every invoice its final approval.</p></div>
       <div class="page-actions">${can("upload") ? `<button class="btn btn-primary" id="uploadBtn" type="button">${I.upload}Upload invoices</button>` : ""}</div>
     </div>
     <div id="queue"></div></div>`;
@@ -702,9 +853,10 @@ async function refreshQueue() {
   const s = stats.by_status, total = stats.total || 0;
   const seg = (n, c) => `<i style="width:${total ? 100 * n / total : 0}%;background:var(${c})"></i>`;
   const who = b => { const p = [b.checks ? `${b.checks} by the checks` : "", b.person ? `${b.person} by a person` : ""].filter(Boolean); return p.length ? ` <span class="muted">(${p.join(", ")})</span>` : ""; };
-  const visible = rows.filter(r => filter === "all" || r.status === filter);
-  const count = st => rows.filter(r => st === "all" || r.status === st).length;
-  const c = $("#pendingCount"); if (c) { c.textContent = s.pending; c.hidden = !s.pending; }
+  const pick = st => st === "mine" ? myTask : st === "all" ? () => true : r => r.status === st;
+  const visible = rows.filter(pick(filter));
+  const count = st => rows.filter(pick(st)).length;
+  const c = $("#pendingCount"); if (c) { c.textContent = stats.my_tasks; c.hidden = !stats.my_tasks; }
 
   box.innerHTML = `
     ${total ? `<div class="panel summary">
@@ -717,50 +869,252 @@ async function refreshQueue() {
     <div class="panel" style="margin-top:16px">
       <div class="toolbar">
         <div class="seg" role="group" aria-label="Show">
-          ${[["pending", "Needs review"], ["approved", "Approved"], ["rejected", "Rejected"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${filter === k}">${l}<small>${count(k)}</small></button>`).join("")}
+          ${[...(ME.user.role === "viewer" ? [] : [["mine", "My tasks"]]), ["pending", "Waiting"], ["approved", "Approved"], ["rejected", "Rejected"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${filter === k}">${l}<small>${count(k)}</small></button>`).join("")}
         </div>
         <div class="search">${I.search}<label class="sr" for="q">Search invoices</label><input class="input" id="q" type="search" placeholder="Search vendor or invoice number" value="${esc(query)}"></div>
       </div>
-      ${visible.length ? `<table><thead><tr><th>Vendor</th><th>Invoice</th><th class="hide-sm">Date</th><th class="r">Amount</th><th>AI recommendation</th><th class="hide-sm">Status</th></tr></thead><tbody>
+      ${visible.length ? `<table><thead><tr><th>Vendor</th><th>Invoice</th><th class="hide-sm">Date</th><th class="r">Amount</th><th>AI recommendation</th><th class="hide-sm">Status or next step</th></tr></thead><tbody>
         ${visible.map(r => { const o = OUTCOME[r.ai_outcome] || OUTCOME.needs_review; return `<tr class="click" data-id="${r.id}">
-          <td><a class="cell-title" href="#/invoice/${r.id}">${esc(r.vendor || "Vendor not found")}</a><div class="sub">${r.lab ? '<span class="chip neutral" style="height:18px;margin-right:6px">Fraud lab</span>' : ""}${esc(r.filename)}</div></td>
-          <td class="num">${r.invoice_number ? esc(r.invoice_number) : '<span class="muted">Not found</span>'}</td>
-          <td class="num hide-sm">${r.invoice_date ? esc(r.invoice_date) : '<span class="muted">Not found</span>'}</td>
-          <td class="r num">${r.total != null ? esc(money(r.total, r.currency)) : '<span class="muted">Not found</span>'}</td>
-          <td><span class="verdict v-${o.cls}">${o.icon}${o.label}</span>${r.flags ? `<div class="sub">${r.flags} ${r.flags === 1 ? "issue" : "issues"} found</div>` : ""}</td>
-          <td class="hide-sm"><span class="pill p-${r.status}">${STATUS_TXT[r.status]}</span></td></tr>`; }).join("")}
+          <td><a class="cell-title" href="#/invoice/${r.id}">${esc(r.vendor || "Vendor not found")}</a><div class="sub">${esc(r.filename)}</div></td>
+          <td class="num inv-num">${r.invoice_number ? esc(r.invoice_number) : (r.waived || []).includes("invoice_number") ? NOT_PRINTED : MISSING}</td>
+          <td class="num hide-sm">${r.invoice_date ? esc(r.invoice_date) : (r.waived || []).includes("invoice_date") ? NOT_PRINTED : MISSING}</td>
+          <td class="r num">${r.total != null ? esc(money(r.total, r.currency)) : MISSING}</td>
+          <td><span class="verdict v-${o.cls}">${o.icon}${o.label}</span>${r.flags ? `<div class="sub">${r.flags} ${r.flags === 1 ? "issue" : "issues"} found</div>` : ""}${r.status === "pending" ? `<div class="sub show-sm">Next: ${esc(stageText(r.stage))}</div>` : ""}</td>
+          <td class="hide-sm step-cell">${r.status === "pending" ? `<span class="pill ${myTask(r) ? "p-task" : "p-pending"}" ${myTask(r) ? 'title="This is your task"' : ""}>${esc(stageText(r.stage))}</span>` : `<span class="pill p-${r.status}">${STATUS_TXT[r.status]}</span>`}</td></tr>`; }).join("")}
       </tbody></table>`
       : `<div class="empty">${total
-          ? `<p>${query ? "No invoice matches that search." : filter === "pending" ? "Nothing is waiting for review." : "No invoices here."}</p>`
-          : `<p>No invoices yet. ${can("upload") ? "Upload a PDF or photo of an invoice to see it checked." : "Invoices appear here once an approver uploads them."}</p>
-             ${can("manage") ? `<button class="btn" id="seed" type="button">Load demo data (12 sample invoices)</button>` : ""}`}</div>`}
+          ? `<p>${query ? "No invoice matches that search." : filter === "mine" ? `Nothing is waiting for you right now.</p><p class="sub" style="max-width:52ch;margin:6px auto 0">${esc(WHEN_WORK[ME.user.role] || "")}` : filter === "pending" ? "Nothing is waiting for anyone." : "No invoices here."}</p>`
+          : `<p>No invoices yet. ${can("upload") ? "Upload a PDF or photo of an invoice to see it checked." : "Invoices appear here once accounts payable uploads them."}</p>
+             ${can("manage") ? `<button class="btn" id="seed" type="button">Load demo data</button>` : ""}`}</div>`}
     </div>
-    <div class="note-line">${can("upload") ? "Tip: drop PDF or photo files anywhere on this page to upload them. " : ""}${can("manage") && total ? `<button class="btn btn-ghost btn-sm btn-danger" id="reset" type="button">Reset demo data</button>` : ""}</div>`;
+    <div class="note-line">${can("upload") ? (CFG && CFG.public ? "Public demo: everyone sees the same invoices, so don't upload confidential ones. Drop PDF or photo files anywhere on this page to upload. " : "Tip: drop PDF or photo files anywhere on this page to upload them. ") : ""}${can("manage") && total ? `<button class="btn btn-ghost btn-sm btn-danger" id="reset" type="button">Reset demo data</button>` : ""}</div>`;
 
   $$(".seg button", box).forEach(b => b.onclick = () => { filter = b.dataset.f; refreshQueue(); });
   $$("tr.click", box).forEach(tr => tr.onclick = e => { if (e.target.tagName !== "A") location.hash = "#/invoice/" + tr.dataset.id; });
   const q = $("#q"); let qt; q.oninput = () => { clearTimeout(qt); qt = setTimeout(() => { query = q.value.trim(); refreshQueue().then(() => { const n = $("#q"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }); }, 250); };
-  const seed = $("#seed"); if (seed) seed.onclick = async () => { seed.disabled = true; seed.textContent = "Reading 12 invoices…"; try { const r = await api("/api/demo/seed", { method: "POST" }); toast(!r.seeded ? r.message : (r.skipped && r.skipped.length ? `Demo loaded, but ${r.skipped.length} scanned example skipped: ${r.skipped[0].reason}` : "Demo loaded: 12 invoices read and checked."), "ok"); filter = "all"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
-  const reset = $("#reset"); if (reset) reset.onclick = async () => { if (!confirm("Remove every invoice and its history? Users, the AI cache and sign-in history are kept.")) return; try { const r = await api("/api/demo/reset", { method: "POST" }); toast(r.reseeded ? "Back to the starting demo: the sample invoices and e-mails are loaded again." : "All invoices removed.", "ok"); filter = r.reseeded ? "all" : "pending"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
+  const seed = $("#seed"); if (seed) seed.onclick = async () => { seed.disabled = true; seed.textContent = "Reading the sample invoices…"; try { const r = await api("/api/demo/seed", { method: "POST" }); toast(!r.seeded ? r.message : (r.skipped && r.skipped.length ? `Demo loaded, but ${r.skipped.length} scanned example skipped: ${r.skipped[0].reason}` : `Demo loaded: ${r.invoices.length} invoices read and checked.`), "ok"); filter = "all"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
+  const reset = $("#reset"); if (reset) reset.onclick = async () => { if (!confirm("Remove every invoice and its history? Users, the AI cache and sign-in history are kept.")) return; try { const r = await api("/api/demo/reset", { method: "POST" }); toast(r.reseeded ? "Back to the starting demo: the sample invoices are loaded again." : "All invoices removed.", "ok"); filter = r.reseeded ? "all" : "pending"; } catch (e) { toast(e.message, "bad"); } refreshQueue(); };
 }
 
 async function uploadFiles(files) {
   if (!files.length || !can("upload")) return;
-  const btn = $("#uploadBtn"); if (btn) btn.disabled = true;
+  const btn = $("#uploadBtn"), zone = $("#upzone");
+  if (btn) btn.disabled = true;
+  if (zone) zone.disabled = true;
   let last = null, done = 0;
   for (const f of files) {
     if (btn) btn.innerHTML = `${I.upload}Reading ${done + 1} of ${files.length}…`;
+    if (zone) zone.innerHTML = `${I.upload}<b>Reading ${esc(f.name)}</b><span class="sub">${files.length > 1 ? `${done + 1} of ${files.length}. ` : ""}Reading the document and running the checks…</span>`;
     const fd = new FormData(); fd.append("file", f);
     try { last = await api("/api/invoices", { method: "POST", body: fd }); done++; }
     catch (e) { toast(`${f.name}: ${e.message}`, "bad"); }
   }
   if (btn) { btn.disabled = false; btn.innerHTML = `${I.upload}Upload invoices`; }
-  if (!done) return;
-  if (files.length === 1 && last) { location.hash = "#/invoice/" + last.id; toast("Read and checked. The recommendation is on the left.", "ok"); }
-  else { filter = "all"; toast(`${done} invoice${done > 1 ? "s" : ""} read and checked.`, "ok"); route(); }
+  refreshCount();
+  if (!done) { if (zone) uploadPage(); return; }
+  if (files.length === 1 && last) { location.hash = "#/invoice/" + last.id; toast("Read and checked. Review it: what needs attention, what looks good, then approve or reject.", "ok"); }
+  else { filter = "mine"; toast(`${done} invoice${done > 1 ? "s" : ""} read and checked. They are in your tasks.`, "ok"); if (location.hash.startsWith("#/invoices")) route(); else location.hash = "#/invoices"; }
 }
 
 /* ============================================================ invoice review */
+const FIELD_ROWS = [
+  ["vendor", "Vendor", "text"], ["invoice_number", "Invoice number", "text"], ["invoice_date", "Invoice date", "date"],
+  ["currency", "Currency", "text"], ["subtotal", "Subtotal", "money"], ["tax_amount", "Tax", "money"], ["total", "Total", "money"],
+  ["tax_id", "Seller tax ID", "text"], ["po_number", "Purchase order", "text"], ["bank_account", "Pay to (bank)", "bank"],
+];
+
+function handoffStrip(inv) {
+  const you = inv.you || {}, st = you.stage || {}, vr = inv.vendor_record || {};
+  const closed = inv.status !== "pending" || !!inv.removed_at;
+  const label = s => {
+    if (s.state === "current") return (st.roles || []).includes(ME.user.role) ? "Your turn" : "Now";
+    if (s.state === "todo") return closed ? "Not needed" : "Later";
+    if (s.key === "received" || s.key === "checked") return esc(s.by || "");
+    const first = n => esc(String(n || "").split(" ")[0]);
+    if (s.key === "review") return (s.ok === false ? "Rejected by " : "Approved by ") + first(s.by);
+    if (s.key === "vendor") return vr.status === "rejected" ? "Rejected by " + first(vr.approved_by || vr.verified_by)
+      : vr.approved_by ? "Approved by " + first(vr.approved_by) : vr.verified_by ? "Verified by " + first(vr.verified_by) : "On file";
+    if (s.key === "order") return "Done";
+    if (s.key === "decision") return String(s.by || "").startsWith("AI") ? "Automatic" : esc(s.by || "");
+    return "";
+  };
+  return `<ol class="handoff" aria-label="Who has done what">${(you.steps || []).map(s => `<li class="${s.state}">
+      <span class="pip" aria-hidden="true">${s.state === "done" ? I.check : ""}</span>
+      <b>${esc(s.label)}</b><span>${label(s)}</span><span class="sr">: ${s.state === "done" ? "done" : s.state === "current" ? "in progress" : "later"}</span></li>`).join("")}</ol>`;
+}
+
+// the review as pros and cons: what needs attention comes first (that is what a reviewer acts on), then what could not
+// be checked, then what the checks confirmed, folded to one line of names because it needs no action
+function prosCons(inv) {
+  const cs = inv.checks || [];
+  const attn = cs.filter(c => c.status === "fail" || c.status === "warn").sort((a, b) => (a.status === "fail" ? 0 : 1) - (b.status === "fail" ? 0 : 1));
+  const good = cs.filter(c => c.status === "pass"), un = cs.filter(c => c.status === "skip");
+  const li = c => { const m = MARK[c.status]; return `<li><span class="mark ${m[0]}" title="${m[2]}">${m[1]}</span><div><div class="name">${CHECK_NAME[c.name] || esc(c.name)}<span class="sr">: ${m[2]}</span></div><div class="msg">${esc(c.message)}</div></div></li>`; };
+  return `<div class="pc">
+    <section class="pc-col attn${attn.some(c => c.status === "fail") ? " bad" : ""}" aria-label="Needs attention"><h3>${I.flag}Needs attention<span class="pc-n">${attn.length}</span></h3>
+      ${attn.length ? `<ul class="checks">${attn.map(li).join("")}</ul>` : `<p class="pc-none">Nothing failed and nothing looks wrong.</p>`}</section>
+    ${un.length ? `<details class="pc-col skip" aria-label="Not checked"><summary><h3>${I.dash}Not checked<span class="pc-n">${un.length}</span></h3>
+        <span class="pc-names">${un.map(c => esc(CHECK_NAME[c.name] || c.name)).join(", ")}<span class="pc-more">Why</span></span></summary>
+      <ul class="checks">${un.map(li).join("")}</ul></details>` : ""}
+    ${good.length ? `<details class="pc-col good" aria-label="Looks good"><summary><h3>${I.check}Looks good<span class="pc-n">${good.length}</span></h3>
+        <span class="pc-names">${good.map(c => esc(CHECK_NAME[c.name] || c.name)).join(", ")}<span class="pc-more">Details</span></span></summary>
+      <ul class="checks">${good.map(li).join("")}</ul></details>` : ""}
+  </div>`;
+}
+
+// reasons offered when accounts payable rejects: the problems the checks found first, then the usual ones
+const REJECT_WHY = { duplicate: "Duplicate of an invoice already received", math: "The amounts do not add up", bank: "Bank details differ from our records",
+  tax_id: "Tax ID does not match the supplier", po_match: "Billed more than was ordered", vendor: "We do not know this supplier", completeness: "Key details are missing" };
+function rejectReasons(inv) {
+  const found = (inv.checks || []).filter(c => c.status === "fail" || (c.status === "warn" && ["duplicate", "bank", "tax_id", "vendor"].includes(c.name)))
+    .map(c => REJECT_WHY[c.name]).filter(Boolean);
+  return [...new Set([...found, "Not ordered by us", "Billed to the wrong company"])].slice(0, 5);
+}
+
+function taskPanel(inv) {
+  const you = inv.you || {}, st = you.stage || {}, f = inv.fields || {}, rev = inv.ap_review || {}, vr = inv.vendor_record || {};
+  if (!st.key || st.key === "done") return "";
+  const check = n => (inv.checks || []).find(c => c.name === n) || {};
+  const waiting = (msg, extra = "") => `<section class="task waiting" aria-label="Next step"><div class="task-head">${I.info}<b>Now with ${esc(st.who.toLowerCase())}: ${esc(st.label.charAt(0).toLowerCase() + st.label.slice(1))}</b></div><p>${msg}</p>${extra}</section>`;
+  const reviewed = rev.ok ? `Approved in the accounts payable review by ${esc(rev.by)}${rev.note ? `: “${esc(rev.note)}”` : ""}.` : "";
+  const supplier = `<dl class="kvs"><dt>Supplier</dt><dd>${esc(vr.name || f.vendor || "")}</dd>
+      <dt>Tax ID</dt><dd class="num">${vr.tax_id ? esc(vr.tax_id) : '<span class="muted">Not on the invoice</span>'}</dd>
+      <dt>Bank account</dt><dd class="num">${vr.bank_account ? esc(prettyBank(vr.bank_account)) : '<span class="muted">Not on the invoice</span>'}</dd>
+      <dt>Added by</dt><dd>${esc(vr.proposed_by || "accounts payable")}</dd>
+      ${vr.verified_by ? `<dt>Verified by</dt><dd>${esc(vr.verified_by)}${vr.note ? `<span class="sub">${esc(vr.note)}</span>` : ""}</dd>` : ""}</dl>`;
+
+  if (st.key === "ap_review") {
+    if (!you.can_review) return waiting(`Every invoice is reviewed by accounts payable first, then it comes to the manager.${you.vendor_kind === "new" ? ` ${esc(f.vendor || "The supplier")} is not on the vendor list, so accounts payable adds it with the review.` : ""}`);
+    const missing = (you.missing_to_pay || []).map(k => k === "total" ? "amount" : k);
+    return `<section class="task" aria-label="Your review" id="reviewTask"><div class="task-head">${I.file}<b>Your review</b></div>
+      <p>Compare what was read with the document on the right, then approve the invoice to send it to the manager, or reject it. A rejected invoice is closed and never paid; its record is kept.</p>
+      ${missing.length ? `<div class="miss-note">${I.cross}<span>The ${missing.join(" and ")} could not be read. ${missing.length > 1 ? "They are" : "It is"} needed to pay, so fill ${missing.length > 1 ? "them" : "it"} in first.</span></div>
+        <div class="row"><button class="btn btn-primary btn-sm" type="button" data-edit>Correct the fields</button></div>`
+        : you.can_edit ? `<p class="sub">Something read wrongly? <button class="linkish" style="margin:0" type="button" data-edit>Correct the fields</button> before you approve.</p>` : ""}
+      ${you.vendor_kind === "new" ? `<div class="newsup" id="newSup"><b>New supplier: ${esc(f.vendor || "not on the vendor list")}</b>
+        <p>This supplier is not on the vendor list. Check the details read from the invoice: they are added with your approval. Procurement then verifies the supplier and a manager approves it; the invoice waits until then.</p>
+        <div class="vcard" id="vcard">
+          <div class="field"><label for="vcName">Supplier name</label><input class="input" id="vcName" maxlength="200" value="${esc(f.vendor || "")}" autocomplete="off"></div>
+          <div class="field"><label for="vcTax">Tax ID (GSTIN / VAT)</label><input class="input num" id="vcTax" maxlength="40" value="${esc(f.tax_id || "")}" autocomplete="off" placeholder="Not on the invoice"><span class="vhint" id="vcTaxHint"></span></div>
+          <div class="field"><label for="vcBank">Bank account</label><input class="input num" id="vcBank" maxlength="60" value="${esc(f.bank_account || "")}" autocomplete="off" placeholder="Not on the invoice"><span class="vhint" id="vcBankHint"></span></div>
+        </div></div>` : ""}
+    </section>`;
+  }
+  if (st.key === "vendor_verify") {
+    const mine = vr.proposed_by && vr.proposed_by === ME.user.name;
+    if (!you.can_verify_vendor || mine) return waiting((mine ? `You added ${esc(vr.name || "this supplier")}, so someone else verifies it (segregation of duties). `
+      : `${esc(vr.name || "The new supplier")} was added by ${esc(vr.proposed_by || "accounts payable")} with this invoice. `) + "Procurement verifies it, then a manager approves it; the invoice waits until then.", supplier);
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.vendor}<b>Your next step: verify the new supplier</b></div>
+      <p>${esc(vr.proposed_by || "Accounts payable")} added this supplier while reviewing the invoice. Confirm it is real by phoning the supplier on a number you already have, never one printed on this invoice. Once verified, it goes to a manager for approval.</p>
+      ${supplier}</section>`;
+  }
+  if (st.key === "vendor_approve") {
+    if (!you.can_approve_vendor) return waiting(`${esc(vr.name || "The new supplier")} was verified by ${esc(vr.verified_by || "procurement")} and waits for a manager's approval. Only an approved supplier is paid.`, supplier);
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.vendor}<b>Your next step: approve the new supplier</b></div>
+      <p>Accounts payable added this supplier and procurement verified it. Approve it to put it on the vendor list, then decide on the invoice. If you reject it, its invoices are not paid.</p>
+      ${supplier}${reviewed ? `<p class="sub">${reviewed}</p>` : ""}</section>`;
+  }
+  if (st.key === "po_missing") {
+    const po = check("po_match"), num = (po.details || {}).po || f.po_number || "";
+    if (!you.can_record_order) return waiting(`The invoice quotes order <b>${esc(num)}</b>, but no approved order has that number. If it was placed outside the app (by phone or e-mail), procurement records it and a manager approves it before the invoice goes on.`);
+    const item = ((f.line_items || [])[0] || {}).description || (f.invoice_number ? `Goods and services on invoice ${f.invoice_number}` : "");
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.po}<b>Your next step: record order ${esc(num)}</b></div>
+      <p>The invoice quotes this order, but no approved order has that number. If it was placed outside the app, record it from your order confirmation. A manager approves it like every other order before the invoice goes on. Enter the amount that was <b>ordered</b>, never the amount on the invoice, or over-billing could not be caught.</p>
+      <form class="reqform" id="orderForm" novalidate>
+        <div class="field"><label for="ofNum">PO number</label><input class="input num" id="ofNum" value="${esc(num)}" readonly></div>
+        <div class="field wide"><label for="ofItem">What was ordered</label><input class="input" id="ofItem" maxlength="300" value="${esc(item)}" required></div>
+        <div class="field"><label for="ofVendor">Supplier</label><input class="input" id="ofVendor" maxlength="200" value="${esc(f.vendor || "")}" required></div>
+        <div class="field"><label for="ofAmt">Ordered amount</label><input class="input num" id="ofAmt" type="number" min="0.01" step="0.01" required placeholder="From the order"></div>
+        <div class="field"><label for="ofCur">Currency</label><input class="input num" id="ofCur" maxlength="3" value="${esc(f.currency || "")}" required></div>
+        <div class="field wide"><label for="ofWhy">Why it was ordered outside the app</label><input class="input" id="ofWhy" maxlength="500" required placeholder="e.g. urgent replacement, ordered by phone"></div>
+        <div class="actions"><button class="btn btn-primary btn-sm" type="submit">Send to the manager</button></div>
+      </form></section>`;
+  }
+  if (st.key === "po_approval") {
+    const o = you.order_request || {};
+    const facts = `<dl class="kvs"><dt>Order</dt><dd class="num">${esc(o.po_number || "")}</dd><dt>What</dt><dd>${esc(o.item || "")}</dd>
+        <dt>Supplier</dt><dd>${esc(o.vendor || "")}</dd><dt>Ordered</dt><dd class="num">${esc(money(o.amount, o.currency) || "")}</dd>
+        <dt>Recorded by</dt><dd>${esc(o.requested_by || "")}</dd><dt>Reason</dt><dd>${esc(o.reason || "")}</dd></dl>`;
+    if (!o.can_approve && !o.can_reject) return waiting(`${esc(o.requested_by || "Procurement")} recorded order <b>${esc(o.po_number || "")}</b>, which was placed outside the app. A manager approves it before the invoice goes on.`, facts);
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.po}<b>Your next step: approve order ${esc(o.po_number || "")}</b></div>
+      <p>This invoice quotes an order placed outside the app, and ${esc(o.requested_by || "procurement")} has recorded it. Approve it if the purchase was authorised, then decide on the invoice. Rejecting it rejects the invoice too: an order nobody approved is not paid.</p>
+      ${facts}</section>`;
+  }
+  if (st.key === "receipt") {
+    if (!you.can_receipt) return waiting(`The invoice matches purchase order ${esc(f.po_number || "")}. Procurement confirms the goods or services were received before it goes to the manager.`);
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.po}<b>Your next step: confirm delivery</b></div>
+      <p>The invoice matches purchase order <b class="num">${esc(f.po_number || "")}</b>. Were the goods or services received as ordered? That completes the three-way match: order, invoice, delivery.</p></section>`;
+  }
+  if (st.key === "approval") {
+    if (!you.can_decide) return waiting(`${reviewed ? reviewed + " " : ""}The manager gives the final approval, or rejects it.`);
+    return `<section class="task" aria-label="Your next step"><div class="task-head">${I.check}<b>Your next step: approve or reject</b></div>
+      <p>${reviewed || "Accounts payable has not reviewed this invoice."}${rev.vendor_added && vr.approved_by ? ` The new supplier ${esc(vr.name)} was verified by ${esc(vr.verified_by || "procurement")} and approved by ${esc(vr.approved_by)}.` : ""} The decision is yours: the pros and cons are above and the document is on the right.</p></section>`;
+  }
+  return "";
+}
+
+function fieldsBlock(inv, editing) {
+  const f = inv.fields || {}, you = inv.you || {};
+  const edits = {}; (inv.edits || []).forEach(e => { edits[e.field] = e; });
+  const OPTIONAL = new Set(["subtotal", "tax_amount", "tax_id", "po_number", "bank_account"]);
+  const show = (k, kind) => {
+    const v = f[k];
+    if (v == null || v === "") return MISSING;
+    return esc(kind === "money" ? plain(v) + (k === "total" && f.currency ? " " + f.currency : "") : kind === "bank" ? prettyBank(v) : v);
+  };
+  const tag = k => { const e = edits[k]; if (!e) return "";
+    const was = (inv.original_fields || {})[k];
+    return ` <span class="chip neutral edited" tabindex="0" data-tip="Read as ${esc(was == null || was === "" ? "nothing" : was)}; corrected by ${esc(e.by)}, ${esc(when(e.at))}${e.note ? ": " + esc(e.note) : ""}">edited</span>`; };
+  if (!editing) return `<dl class="fields">${FIELD_ROWS.filter(([k]) => !(OPTIONAL.has(k) && (f[k] == null || f[k] === "") && !edits[k])).map(([k, l, kind]) => `<dt>${l}</dt><dd class="${kind === "text" && k === "vendor" ? "" : "num"}">${show(k, kind)}${tag(k)}</dd>`).join("")}</dl>`;
+  const inputVal = (k, kind) => f[k] == null ? "" : esc(kind === "money" ? Number(f[k]).toFixed(2) : f[k]);
+  return `<form id="fieldForm" class="fieldform" novalidate>
+    ${FIELD_ROWS.map(([k, l, kind]) => `<label for="ff_${k}">${l}</label><input class="input ${kind === "text" && k === "vendor" ? "" : "num"}" id="ff_${k}" name="${k}" value="${inputVal(k, kind)}"
+       ${kind === "date" ? 'type="date"' : kind === "money" ? 'inputmode="decimal"' : ""} ${k === "currency" ? 'maxlength="3"' : 'maxlength="200"'} autocomplete="off" spellcheck="false">`).join("")}
+    <label for="ff_note">Reason</label><input class="input" id="ff_note" maxlength="500" placeholder="e.g. read wrongly from the scan (optional)">
+    <div class="row"><button class="btn btn-primary btn-sm" type="submit">Save and check again</button><button class="btn btn-sm" type="button" id="ffCancel">Cancel</button></div>
+  </form>`;
+}
+
+function recordCard(inv, flash) {
+  // once a decision is made, the reviewer needs the outcome, not the whole review again
+  const f = inv.fields || {}, ok = inv.status === "approved", byAI = String(inv.decided_by || "").startsWith("AI");
+  const rec = inv.receipt || {}, vr = inv.vendor_record || {}, rev = inv.ap_review || {};
+  const byAP = !ok && rev.ok === false && rev.by && rev.by === inv.decided_by;      // closed in the accounts payable review
+  if (inv.removed_at) return `<section class="record gone${flash ? " flash" : ""}" role="status" aria-label="Removed">
+    <div class="record-head">${I.cross}Removed: not to be paid</div>
+    <p>Removed by <b>${esc(inv.removed_by || "a person")}</b>, ${esc(when(inv.removed_at))}.</p>
+    <p class="record-note">Reason: ${esc(inv.removed_reason || "")}</p>
+    <dl class="kvs"><dt>Supplier</dt><dd>${esc(f.vendor || "")}</dd><dt>Invoice</dt><dd>${esc(f.invoice_number || "")}${f.invoice_date ? ", " + esc(f.invoice_date) : ""}</dd>
+      <dt>Amount</dt><dd>${esc(money(f.total, f.currency) || "")}</dd></dl>
+  </section>`;
+  const problems = (inv.checks || []).filter(c => c.status === "fail" || c.status === "warn");
+  const lastOk = (inv.audit || []).filter(a => a.action === "approved").pop();
+  const accepted = lastOk && /^Approved with open items: /.test(lastOk.detail || "") ? lastOk.detail.replace(/^Approved with open items: /, "").split(". ")[0] : "";
+  const payTo = f.bank_account ? prettyBank(f.bank_account) : vr.bank_account ? prettyBank(vr.bank_account) : "";
+  const facts = [
+    ["Supplier", `${esc(f.vendor || "")}${vr.name ? `<span class="sub">${vr.status === "rejected" ? "rejected as a supplier" : vr.approved_by ? `new supplier, verified by ${esc(vr.verified_by || "procurement")} and approved by ${esc(vr.approved_by)}` : vr.verified_by ? "verified by " + esc(vr.verified_by) : "on the approved vendor list"}</span>` : ""}`],
+    ["Invoice", `${esc(f.invoice_number || "")}${f.invoice_date ? ", " + esc(f.invoice_date) : ""}`],
+    ["Amount", esc(money(f.total, f.currency) || "")],
+    rev.ok ? ["Reviewed", `${esc(rev.by)}, accounts payable${rev.note ? `<span class="sub">${esc(rev.note)}</span>` : ""}`] : null,
+    f.po_number ? ["Order", `${esc(f.po_number)}${rec.ok ? `<span class="sub">delivery confirmed by ${esc(rec.by)}</span>` : ""}`] : null,
+    ok && payTo ? ["Pay to", esc(payTo)] : null,
+  ].filter(Boolean);
+  const who = byAI ? (ok ? "Approved automatically: every check passed and nobody had to step in"
+                         : "Stopped automatically by the checks")
+                   : byAP ? `Rejected by <b>${esc(inv.decided_by)}</b> in the accounts payable review`
+                   : `${ok ? "Approved" : "Rejected"} by <b>${esc(inv.decided_by || "a person")}</b>`;
+  return `<section class="record ${ok ? "ok" : "bad"}${flash ? " flash" : ""}" role="status" aria-label="Decision">
+    <div class="record-head">${ok ? I.check : I.cross}${ok ? "Approved for payment" : "Rejected: not to be paid"}</div>
+    <p>${who}${inv.decided_at ? ", " + esc(when(inv.decided_at)) : ""}.</p>
+    ${ok && accepted ? `<p class="record-note">Accepted when approving: ${esc(accepted)}.</p>` : ""}
+    ${inv.human_note ? `<p class="record-note">${byAP || !ok ? "Reason" : "Comment"}: ${esc(inv.human_note)}</p>` : ""}
+    ${!ok && problems.length ? `<ul class="record-why">${problems.map(c => `<li>${esc(c.message)}</li>`).join("")}</ul>` : ""}
+    <dl class="kvs">${facts.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>
+  </section>`;
+}
+
+const cap = s => String(s).charAt(0).toUpperCase() + String(s).slice(1);
+
 async function reviewPage(id, opts = {}) {
   setNav("invoices");
   const main = MAIN();
@@ -769,66 +1123,36 @@ async function reviewPage(id, opts = {}) {
   try { inv = await api("/api/invoices/" + id); }
   catch (e) { main.innerHTML = `<div class="page"><a class="btn btn-ghost" href="#/invoices">${I.back}Invoices</a><h1 style="margin-top:16px">Invoice not found</h1><p class="muted">${esc(e.message)}</p></div>`; return; }
   const f = inv.fields || {}, d = inv.decision || {}, o = OUTCOME[inv.ai_outcome] || OUTCOME.needs_review, you = inv.you || {};
+  const st = you.stage || {}, key = st.key, vr = inv.vendor_record || {}, ord = you.order_request || {};
   document.title = `${f.vendor || inv.filename} · InPro Copilot`;
-  const val = (v, fmt) => v == null || v === "" ? '<span class="missing">Not found</span>' : esc(fmt ? fmt(v) : v);
   const isPdf = /\.pdf$/i.test(inv.filename);
-  const pending = inv.status === "pending";
-  const byAI = String(inv.decided_by || "").startsWith("AI");
+  const removed = !!inv.removed_at;
+  const pending = inv.status === "pending" && !removed;
   const src = inv.source || {};
-  const sCheck = (inv.checks || []).find(c => c.name === "sender");
-  const sKind = sCheck && sCheck.details && sCheck.details.kind;
-  const senderChip = sKind && SENDER_CHIP[sKind] ? `<span class="chip ${SENDER_CHIP[sKind][0]}">${SENDER_CHIP[sKind][1]}</span>` : "";
-  const canApprove = you.can_decide && you.within_limit && inv.status !== "approved";
-  const canReject = you.can_decide && inv.status !== "rejected";
+  const canApprove = you.can_approve && inv.status !== "approved";
+  const canReject = you.can_reject;
+  const isNew = you.vendor_kind === "new";
+  const missing = (you.missing_to_pay || []).map(k => k === "total" ? "amount" : k);
+  // how the next pages name this invoice: "invoice 123 from Coolblue (EUR 1,250.00)"
+  const what = `invoice ${f.invoice_number ? esc(f.invoice_number) + " " : ""}from ${esc(f.vendor || "an unknown supplier")}${f.total != null ? " (" + esc(money(f.total, f.currency)) + ")" : ""}`;
 
-  let hint = "";
-  if (!you.can_decide) hint = `${I.info}<span>You can view this invoice. Approvers and admins make decisions.</span>`;
-  else if (!you.within_limit && inv.status !== "approved") hint = `${I.info}<span>This invoice is above your approval limit of ${esc(plain(you.approval_limit))}. You can reject it, or leave it for an approver with a higher limit.</span>`;
+  // the recommendation's sentence, unless the pros and cons below already say exactly that
+  const norm = t => String(t || "").toLowerCase().replace(/\s*\(\+\d+ more problems?\)\s*$/, "").replace(/['"‘’“”]/g, "").replace(/[.\s]+$/, "");
+  let adviceLine = (d.summary || "").replace(/^(Recommend \w+|Needs HUMAN REVIEW): ?/, "");
+  if (/^[a-z]+\b/.test(adviceLine) && !/^[a-z]+[-A-Z]/.test(adviceLine)) adviceLine = cap(adviceLine);
+  if ((inv.checks || []).some(c => norm(c.message) === norm(adviceLine))) adviceLine = "";
+  const hint = you.can_decide && !canApprove && inv.status !== "approved" && you.approve_blocked ? `${I.info}<span>${esc(you.approve_blocked)}</span>` : "";
+  const openItems = pending ? (you.open_items || []) : [];
 
-  main.innerHTML = `
-  <div class="review">
-    <div class="review-top">
-      <a class="btn btn-ghost btn-sm" href="#/invoices">${I.back}Invoices</a>
-      <span class="crumb"><b>${esc(f.vendor || "Vendor not found")}</b> &nbsp;${esc(f.invoice_number ? "Invoice " + f.invoice_number : inv.filename)}</span>
-      <span class="grow"></span>
-      <span class="pill p-${inv.status}">${STATUS_TXT[inv.status]}</span>
-      <button class="btn btn-sm" id="next" type="button">Next to review${I.next}</button>
-    </div>
-    <div class="review-body">
-      <section class="detail" aria-label="Review">
-        <div class="detail-body">
-          <h1>${esc(f.vendor || "Vendor not found")}</h1>
-          <div class="facts num">Invoice ${esc(f.invoice_number || "number not found")}${f.invoice_date ? ", dated " + esc(f.invoice_date) : ""}</div>
-          ${src.lab ? `<div class="source-line">${I.flask}<span>${src.role === "genuine" ? "Genuine copy put on file by the Fraud lab" : `Forged in the Fraud lab by ${esc(src.by || "a visitor")}: ${esc(src.trick_title || src.trick || "")}`}</span><span class="chip neutral">Test</span></div>` : ""}
-          ${src.channel === "email" ? `<div class="source-line">${I.mail}<span>By e-mail from <b>${esc(src.sender_name || "")}</b> ${esc(src.sender || "")}</span>${senderChip}</div>
-            ${src.subject ? `<div class="source-line" style="margin-top:2px"><span class="muted">Subject: ${esc(src.subject)}</span></div>` : ""}`
-          : src.channel === "folder" ? `<div class="source-line">${I.folder}<span>Picked up from the watched folder</span></div>`
-          : src.by && !src.lab ? `<div class="source-line">${I.upload}<span>Uploaded by ${esc(src.by)}</span></div>` : ""}
-          <div class="amount num">${f.total != null ? esc(plain(f.total)) : "Total not found"}<small>${esc(f.currency || "")}</small></div>
-
-          <div class="advice ${o.cls}">
-            <div class="verdict v-${o.cls}">${o.icon}${o.label}<span class="sub" style="font-weight:400">&nbsp;${esc(d.confidence || "")} confidence</span></div>
-            <p>${esc((d.summary || "").replace(/^(Recommend \w+|Needs HUMAN REVIEW): ?/, ""))}</p>
-            ${(d.reasons || []).length > 1 ? `<ul>${d.reasons.slice(1).map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : ""}
-          </div>
-
+  const PROOF = `<section class="proof" id="proof" aria-label="Where the problem is" hidden></section>`;
+  const CHECKLIST = `
           <h2>What the checks found</h2>
           <ul class="checks">
             ${(inv.checks || []).map(c => { const m = MARK[c.status]; return `<li><span class="mark ${m[0]}" title="${m[2]}">${m[1]}</span><div><div class="name">${CHECK_NAME[c.name] || esc(c.name)}<span class="sr">: ${m[2]}</span></div><div class="msg">${esc(c.message)}</div></div></li>`; }).join("")}
-          </ul>
-
-          <h2>What was read from the document</h2>
-          <dl class="fields">
-            <dt>Vendor</dt><dd>${val(f.vendor)}</dd>
-            <dt>Invoice number</dt><dd class="num">${val(f.invoice_number)}</dd>
-            <dt>Invoice date</dt><dd class="num">${val(f.invoice_date)}</dd>
-            <dt>Subtotal</dt><dd class="num">${val(f.subtotal, plain)}</dd>
-            <dt>Tax</dt><dd class="num">${val(f.tax_amount, plain)}</dd>
-            <dt>Total</dt><dd class="num">${val(f.total, plain)} ${esc(f.currency || "")}</dd>
-            <dt>Seller tax ID</dt><dd class="num">${val(f.tax_id)}</dd>
-            <dt>Purchase order</dt><dd class="num">${val(f.po_number)}</dd>
-            <dt>Pay to (bank)</dt><dd class="num">${val(f.bank_account, prettyBank)}</dd>
-          </dl>
+          </ul>`;
+  const REST = `
+          <div class="h2row"><h2>What was read from the document</h2>${you.can_edit && !opts.editing ? `<button class="btn btn-ghost btn-sm" type="button" data-edit>Correct</button>` : ""}</div>
+          <div id="fieldsBox">${fieldsBlock(inv, !!opts.editing)}</div>
           <div class="notes">
             ${(f.notes || []).map(n => `<span>${esc(n)}</span>`).join("")}
             <span>Read by ${f.extractor === "llm" ? "the AI model, with every value verified against the document" : f.extractor === "rules+ai" ? "the layout rules and an AI model together, with every AI value verified against the document" : "the layout rules (no AI request was needed)"}${inv.read_method && inv.read_method.includes("ocr") ? ", using text recognition because the file is a scan or photo" : ""}.</span>
@@ -838,24 +1162,100 @@ async function reviewPage(id, opts = {}) {
             <ol class="trace">${(inv.trace || []).map(t => `<li><b>${esc(t.step === "check" ? (CHECK_NAME[t.tool] || t.tool) : (STEP_NAME[t.step] || t.step))}</b> <span class="t">${esc(t.step === "check" ? "check" : t.tool)}${t.ms ? `, ${t.ms} ms` : ""}</span><div>${esc(t.summary)}</div></li>`).join("")}</ol>
           </details>
 
-          <h2>Approval history</h2>
+          <h2>History</h2>
           <ul class="hist">${(inv.audit || []).map(a => `<li><span class="actor">${esc(a.actor === "system" ? "System" : a.actor)}</span> ${esc((ACTION_TXT[a.action] || a.action.replace(/_/g, " ")).toLowerCase())}${a.detail ? ": " + esc(a.detail) : ""}<span class="when">${esc(when(a.ts))}</span></li>`).join("")}</ul>
-        </div>
-
-        <div class="decide">
-          ${pending ? "" : `<div class="stamp ${inv.status === "approved" ? "ok" : "bad"}${opts.flash ? " flash" : ""}" role="status">
-            <b>${inv.status === "approved" ? "Approved" : "Rejected"}</b> ${byAI ? "automatically by the checks" : "by " + esc(inv.decided_by || "a person")}${inv.decided_at ? ", " + esc(when(inv.decided_at)) : ""}.
-            ${inv.human_note ? `<div class="sub" style="margin-top:4px">Comment: ${esc(inv.human_note)}</div>` : ""}
-          </div>`}
-          ${hint ? `<div class="hint">${hint}</div>` : ""}
-          ${(canApprove || canReject) ? `
+`;
+  const OPEN = canApprove && openItems.length ? `<details class="open-items"><summary><b>${openItems.length} still open</b> &nbsp;You can approve anyway: the decision records that you accepted ${openItems.length > 1 ? "them" : "it"}.</summary>
+    <ul>${openItems.map(x => `<li>${esc(cap(x))}</li>`).join("")}</ul></details>` : "";
+  const CONTROLS = (canApprove || canReject) ? OPEN + `
             <label class="sr" for="note">Comment</label>
             <textarea class="input" id="note" rows="1" placeholder="${pending ? "Comment for the record (optional)" : "Reason for changing the decision (optional)"}"></textarea>
             <div class="row">
-              ${canApprove ? `<button class="btn btn-approve" id="approve" type="button">${I.check}${pending ? "Approve" : "Approve instead"}</button>` : ""}
+              ${canApprove ? `<button class="btn btn-approve" id="approve" type="button">${I.check}${!pending ? "Approve instead" : openItems.length ? "Approve anyway" : "Approve for payment"}</button>`
+                : pending && you.can_decide ? `<button class="btn btn-approve" type="button" disabled title="Not yet: see the note above">${I.check}Approve</button>` : ""}
               ${canReject ? `<button class="btn btn-reject" id="reject" type="button">${I.cross}${pending ? "Reject" : "Reject instead"}</button>` : ""}
-            </div>` : ""}
+            </div>` : "";
+  const note = (nid, ph) => `<label class="sr" for="${nid}">Note</label><textarea class="input" id="${nid}" rows="1" placeholder="${ph}"></textarea>`;
+
+  // the action bar: whoever's turn it is finds their decision here
+  let BAR = "";
+  if (pending && key === "ap_review" && you.can_review) {
+    BAR = `<div class="decide-main" id="apMain">
+        ${missing.length ? `<div class="hint">${I.info}<span>Fill in the ${missing.join(" and ")} first: ${missing.length > 1 ? "they are" : "it is"} needed to pay.</span></div>` : ""}
+        ${note("revNote", "Note for the manager (optional)")}
+        <div class="row"><button class="btn btn-approve" id="revOk" type="button"${missing.length ? " disabled" : ""}>${I.check}${isNew ? "Add supplier and approve" : "Approve and send to the manager"}</button>
+          <button class="btn btn-reject" id="revNo" type="button">${I.cross}Reject</button></div></div>
+      <form class="decide-main" id="rejBox" hidden novalidate>
+        <div class="rej-q"><b>Reject this invoice?</b> It is closed and never paid. The record stays, with your reason.</div>
+        <div class="chips" role="group" aria-label="Common reasons">${rejectReasons(inv).map(r => `<button class="pick" type="button" data-why="${esc(r)}">${esc(r)}</button>`).join("")}</div>
+        <label class="sr" for="rejWhy">Reason</label><input class="input" id="rejWhy" maxlength="500" placeholder="Reason (required)">
+        <div class="row"><button class="btn btn-reject" type="submit">${I.cross}Reject invoice</button><button class="btn btn-ghost" type="button" id="rejCancel">Cancel</button></div>
+      </form>`;
+  } else if (pending && key === "vendor_verify" && you.can_verify_vendor && !(vr.proposed_by && vr.proposed_by === ME.user.name)) {
+    BAR = `${note("supNote", "Note (required to reject)")}
+      <div class="row"><button class="btn btn-approve" type="button" data-sup="verify" data-ok="1">${I.check}Verify the supplier</button>
+        <button class="btn btn-reject" type="button" data-sup="verify" data-ok="0">${I.cross}Reject the supplier</button></div>`;
+  } else if (pending && key === "vendor_approve" && you.can_approve_vendor) {
+    BAR = [vr.proposed_by, vr.verified_by].includes(ME.user.name)
+      ? `<div class="hint">${I.info}<span>You added or verified this supplier, so another manager approves it (segregation of duties).</span></div>`
+      : `${note("supNote", "Note (required to reject)")}
+      <div class="row"><button class="btn btn-approve" type="button" data-sup="approve" data-ok="1">${I.check}Approve the supplier</button>
+        <button class="btn btn-reject" type="button" data-sup="approve" data-ok="0">${I.cross}Reject the supplier</button></div>`;
+  } else if (pending && key === "po_approval" && (ord.can_approve || ord.can_reject)) {
+    BAR = `${ord.approve_blocked ? `<div class="hint">${I.info}<span>${esc(ord.approve_blocked)}</span></div>` : ""}${note("ordNote", "Note (required to reject)")}
+      <div class="row">${ord.can_approve ? `<button class="btn btn-approve" type="button" data-order="1">${I.check}Approve the order</button>` : ""}
+        ${ord.can_reject ? `<button class="btn btn-reject" type="button" data-order="0">${I.cross}Reject order and invoice</button>` : ""}</div>`;
+  } else if (pending && key === "receipt" && you.can_receipt) {
+    BAR = `${note("rNote", "Note (required when reporting a problem)")}
+      <div class="row"><button class="btn btn-approve" type="button" data-receipt="1">${I.check}Confirm delivery</button>
+        <button class="btn btn-reject" type="button" data-receipt="0">${I.cross}Report a problem</button></div>`;
+  } else if (pending) {
+    BAR = (hint ? `<div class="hint">${hint}</div>` : "") + CONTROLS;
+  }
+  // a step about a supplier or an order (including adding a new supplier in the review) comes before the pros and cons
+  const taskFirst = pending && (["vendor_verify", "vendor_approve", "po_missing", "po_approval", "receipt"].includes(key) || (key === "ap_review" && isNew && you.can_review));
+  const banner = opts.banner ? `<div class="banner ${opts.banner.kind || ""}" role="status">${opts.banner.kind === "bad" ? I.cross : I.check}<span>${opts.banner.html}</span></div>` : "";
+
+  main.innerHTML = `
+  <div class="review">
+    <div class="review-top">
+      <a class="btn btn-ghost btn-sm" href="#/invoices">${I.back}Invoices</a>
+      <span class="crumb"><b>${esc(f.vendor || "Vendor not found")}</b> &nbsp;${esc(f.invoice_number ? "Invoice " + f.invoice_number : inv.filename)}</span>
+      <span class="grow"></span>
+      ${removed ? `<span class="pill p-neutral">Removed</span>` : `<span class="pill p-${inv.status}">${pending ? esc(stageText(st)) : STATUS_TXT[inv.status]}</span>`}
+      ${you.can_remove ? `<button class="btn btn-ghost btn-sm btn-danger" id="removeBtn" type="button">${I.cross}Remove invoice</button>` : ""}
+      <button class="btn btn-sm" id="next" type="button">Next task${I.next}</button>
+    </div>
+    <div class="review-body">
+      <section class="detail" aria-label="Review">
+        <div class="detail-body">
+          ${banner}
+          <h1>${esc(f.vendor || "Vendor not found")}</h1>
+          <div class="facts num">Invoice ${esc(f.invoice_number || "number not found")}${f.invoice_date ? ", dated " + esc(f.invoice_date) : ""}</div>
+          ${src.by ? `<div class="source-line">${I.upload}<span>Uploaded by ${esc(src.by)}</span></div>` : ""}
+          <div class="amount num">${f.total != null ? esc(plain(f.total)) : "Total not found"}<small>${esc(f.currency || "")}</small></div>
+          ${handoffStrip(inv)}
+          ${you.can_remove ? `<form class="remove-box" id="removeBox" hidden novalidate>
+            <div><b>Remove this invoice?</b> It leaves the queue and is never paid. Nothing is deleted: the Activity log keeps who removed it and why.</div>
+            <div class="chips" role="group" aria-label="Common reasons">${["Uploaded by mistake", "Wrong file", "Second copy of the same invoice", "Supplier will send a corrected invoice"].map(r => `<button class="pick" type="button" data-reason="${esc(r)}">${esc(r)}</button>`).join("")}</div>
+            <label class="sr" for="removeWhy">Reason</label><input class="input" id="removeWhy" maxlength="300" placeholder="Reason (required)">
+            <div class="row"><button class="btn btn-reject btn-sm" type="submit">${I.cross}Remove invoice</button><button class="btn btn-ghost btn-sm" type="button" id="removeCancel">Cancel</button></div>
+          </form>` : ""}
+
+          ${pending ? `
+          <div class="advice ${o.cls}">
+            <div class="verdict v-${o.cls}">${o.icon}${o.label}<span class="sub" style="font-weight:400">&nbsp;${esc(d.confidence || "")} confidence</span></div>
+            ${adviceLine ? `<p>${esc(adviceLine)}</p>` : ""}
+          </div>
+          ${taskFirst ? taskPanel(inv) : ""}
+          ${prosCons(inv)}` : recordCard(inv, opts.flash)}
+          ${taskFirst && pending ? "" : taskPanel(inv)}
+          ${inv.status === "approved" || removed ? "" : PROOF}
+          ${pending ? REST : `<details class="trace-box full-review"${opts.editing ? " open" : ""}><summary>${I.chev}Full review: checks, fields and history</summary>${inv.status === "approved" || removed ? PROOF : ""}${CHECKLIST}${REST}</details>`}
         </div>
+
+        ${pending ? (BAR ? `<div class="decide">${BAR}</div>` : "")
+          : (CONTROLS ? `<div class="decide"><details class="change"><summary>Change the decision</summary>${CONTROLS}</details></div>` : "")}
       </section>
 
       <section class="docpane" aria-label="Original document">
@@ -866,23 +1266,271 @@ async function reviewPage(id, opts = {}) {
     </div>
   </div>`;
 
+  loadProof(inv);
+  const busy = (btn, txt) => { $$(".detail button").forEach(b => b.disabled = true); if (btn) btn.textContent = txt; };
+  const again = (msg, kind = "ok") => { if (msg) toast(msg, kind); refreshCount(); reviewPage(id, { keep: true, flash: true }); };
+  const fail = ex => { toast(ex.message, "bad"); reviewPage(id, { keep: true }); };
+
+  // the manager's decision on the invoice
   const decide = async (approve, btn) => {
-    $$(".decide button").forEach(b => b.disabled = true);
-    btn.textContent = "Saving…";
+    const comment = ($("#note") || {}).value?.trim() || null;
+    busy(btn, "Saving…");
     try {
-      await api(`/api/invoices/${id}/decision`, { method: "POST", json: { approve, note: ($("#note") || {}).value?.trim() || null } });
-      toast(approve ? "Invoice approved. It now counts under Approved." : "Invoice rejected. It now counts under Rejected.", approve ? "ok" : "bad");
-      refreshCount();
-      reviewPage(id, { flash: true, keep: true });
+      await api(`/api/invoices/${id}/decision`, { method: "POST", json: { approve, note: comment } });
+      if (!pending) return again(approve ? "Decision changed: approved." : "Decision changed: rejected.", approve ? "ok" : "bad");
+      donePage({ id: Number(id), kind: approve ? "ok" : "bad", title: approve ? "Approved for payment" : "Invoice rejected",
+        text: approve ? `${cap(what)} is approved${openItems.length ? `, with ${openItems.length} open item${openItems.length > 1 ? "s" : ""} recorded as accepted by you` : ""}. Accounts payable can schedule the payment.`
+                      : `${cap(what)} is rejected and will not be paid${comment ? `: ${esc(comment)}` : ""}.`,
+        who: "Accounts payable has been notified.", nextLabel: "Next invoice to approve" });
     } catch (e) { toast("Not saved: " + e.message, "bad"); reviewPage(id, { keep: true }); }
   };
   if ($("#approve")) $("#approve").onclick = e => decide(true, e.currentTarget);
   if ($("#reject")) $("#reject").onclick = e => decide(false, e.currentTarget);
-  $("#next").onclick = async () => {
-    const rows = await api("/api/invoices?status=pending").catch(() => []);
-    const n = rows.find(r => r.id !== Number(id));
-    if (n) location.hash = "#/invoice/" + n.id; else toast("Nothing else is waiting for review.");
+
+  // the accounts payable review: approve (with the new supplier, if any) or reject
+  if ($("#revOk")) {
+    if (isNew) api(`/api/invoices/${id}/vendor-suggestion`).then(sg => {
+      const hintOf = (el, c, okTxt) => { if (!el || !c) return; el.className = "vhint " + (c.valid === true ? "ok" : c.valid === false ? "bad" : "warn"); el.textContent = c.valid === true ? okTxt : (c.reason || c.message || ""); };
+      hintOf($("#vcTaxHint"), sg.tax_check, sg.tax_check && sg.tax_check.valid ? `${(sg.tax_check.kind || "").replace(/_/g, " ")} is valid` : "");
+      hintOf($("#vcBankHint"), sg.bank_check, sg.bank_check ? sg.bank_check.message : "");
+    }).catch(() => {});
+    $("#revOk").onclick = async e => {
+      let vendor = null;
+      if (isNew) {
+        const name = $("#vcName").value.trim();
+        if (!name) { toast("Give the supplier's name.", "bad"); $("#vcName").focus(); return; }
+        vendor = { name, tax_id: $("#vcTax").value.trim() || null, bank_account: $("#vcBank").value.trim() || null };
+      }
+      busy(e.currentTarget, "Saving…");
+      try {
+        const r = await api(`/api/invoices/${id}/review`, { method: "POST", json: { approve: true, note: $("#revNote").value.trim() || null, vendor } });
+        const next = ((r.you || {}).stage || {}).key, sup = esc(vendor ? vendor.name : f.vendor || "");
+        const T = {
+          vendor_verify: ["Approved. New supplier sent to procurement", `You approved ${what} and added ${sup} as a new supplier. Procurement verifies the supplier, then a manager approves it; after that the invoice goes to the manager.`, "Procurement has been notified."],
+          vendor_approve: ["Approved. The supplier needs a manager", `You approved ${what}. Its supplier is verified and waits for a manager's approval; then the manager decides on the invoice.`, "The manager has been notified."],
+          po_missing: ["Approved. Procurement records the order", `You approved ${what}. It quotes an order that is not on file, so procurement records it and a manager approves it before the invoice is decided.`, "Procurement has been notified."],
+          po_approval: ["Approved. The order needs a manager", `You approved ${what}. Its order waits for a manager's approval; then the manager decides on the invoice.`, "The manager has been notified."],
+          receipt: ["Approved. Procurement confirms the delivery", `You approved ${what}. Procurement confirms the delivery, then it goes to the manager.`, "Procurement has been notified."],
+          approval: ["Approved and sent to the manager", `${cap(what)} is with the manager for the final approval.`, "The manager has been notified."],
+        };
+        const [title, text, who] = T[next] || T.approval;
+        donePage({ id: Number(id), title, text, who, upload: true, nextLabel: "Review the next invoice" });
+      } catch (ex) { fail(ex); }
+    };
+    const rej = $("#rejBox");
+    $("#revNo").onclick = () => { $("#apMain").hidden = true; rej.hidden = false; $("#rejWhy").focus(); };
+    $("#rejCancel").onclick = () => { rej.hidden = true; $("#apMain").hidden = false; };
+    $$("[data-why]", rej).forEach(c => c.onclick = () => { $("#rejWhy").value = c.dataset.why; $$("[data-why]", rej).forEach(x => x.setAttribute("aria-pressed", x === c)); });
+    rej.onsubmit = async e => {
+      e.preventDefault();
+      const reason = $("#rejWhy").value.trim();
+      if (!reason) { toast("Pick or write a reason first.", "bad"); $("#rejWhy").focus(); return; }
+      busy(rej.querySelector("[type=submit]"), "Rejecting…");
+      try {
+        await api(`/api/invoices/${id}/review`, { method: "POST", json: { approve: false, note: reason } });
+        refreshCount();
+        uploadNote = { kind: "bad", html: `<b>${cap(what)} was rejected and closed:</b> ${esc(reason)}. It will not be paid, and its record is kept under Invoices, Rejected. Upload the corrected invoice when the supplier sends it.` };
+        if (can("upload")) location.hash = "#/upload";
+        else { toast("Invoice rejected and closed.", "bad"); location.hash = "#/invoices"; }
+      } catch (ex) { fail(ex); }
+    };
+  }
+
+  // a new supplier: procurement verifies it, then a manager approves it
+  $$("[data-sup]").forEach(b => b.onclick = async () => {
+    const ok = b.dataset.ok === "1", verify = b.dataset.sup === "verify", why = $("#supNote").value.trim();
+    if (!ok && !why) { toast("Write why the supplier is rejected.", "bad"); $("#supNote").focus(); return; }
+    busy(b, "Saving…");
+    try {
+      await api(`/api/vendors/${vr.id}/${verify ? "verify" : "approve"}`, { method: "POST", json: { approve: ok, note: why || null } });
+      refreshCount();
+      if (verify) donePage({ id: Number(id), kind: ok ? "ok" : "bad", title: ok ? "Supplier verified" : "Supplier rejected",
+        text: ok ? `${esc(vr.name)} is verified and sent to a manager for approval. ${cap(what)} goes on once the supplier is approved.`
+                 : `${esc(vr.name)} was rejected: ${esc(why)}. Its invoices are not paid; ${what} goes to the manager to be rejected.`,
+        who: ok ? "The manager has been notified." : "The manager and accounts payable have been notified.", nextLabel: "Next task" });
+      else reviewPage(id, { keep: true, flash: true, banner: ok
+        ? { html: `<b>Supplier approved.</b> ${esc(vr.name)} is on the vendor list now. Next, approve or reject the invoice below.` }
+        : { kind: "bad", html: `<b>Supplier rejected.</b> ${esc(vr.name)} is not paid. Reject the invoice below, with the reason.` } });
+    } catch (ex) { fail(ex); }
+  });
+
+  // an order placed outside the app: procurement records it, a manager approves it
+  const of = $("#orderForm");
+  if (of) of.onsubmit = async e => {
+    e.preventDefault();
+    const amt = Number($("#ofAmt").value), why = $("#ofWhy").value.trim();
+    if (!$("#ofItem").value.trim()) { toast("Say what was ordered.", "bad"); $("#ofItem").focus(); return; }
+    if (!$("#ofVendor").value.trim()) { toast("Enter the supplier.", "bad"); $("#ofVendor").focus(); return; }
+    if (!/^[A-Za-z]{3}$/.test($("#ofCur").value.trim())) { toast("Enter the currency as a 3-letter code, like EUR.", "bad"); $("#ofCur").focus(); return; }
+    if (!(amt > 0)) { toast("Enter the amount that was ordered.", "bad"); $("#ofAmt").focus(); return; }
+    if (!why) { toast("Say why it was ordered outside the app.", "bad"); $("#ofWhy").focus(); return; }
+    busy(of.querySelector("[type=submit]"), "Sending…");
+    try {
+      const r = await api("/api/purchase-requests/after-the-fact", { method: "POST", json: { invoice_id: Number(id), item: $("#ofItem").value.trim(),
+        vendor: $("#ofVendor").value.trim(), amount: amt, currency: $("#ofCur").value.trim().toUpperCase(), reason: why } });
+      donePage({ id: Number(id), title: "Order recorded and sent to the manager", text: `Order ${esc(r.po_number || "")} for ${what} waits for a manager's approval. Once it is approved, the manager decides on the invoice.`,
+        who: "The manager has been notified.", nextLabel: "Next task" });
+    } catch (ex) { fail(ex); }
   };
+  $$("[data-order]").forEach(b => b.onclick = async () => {
+    const ok = b.dataset.order === "1", why = $("#ordNote").value.trim();
+    if (!ok && !why) { toast("Write a reason in the note to reject.", "bad"); $("#ordNote").focus(); return; }
+    busy(b, "Saving…");
+    try {
+      const r = await api(`/api/purchase-requests/${ord.id}/decision`, { method: "POST", json: { approve: ok, note: why || null } });
+      refreshCount();
+      if (ok) reviewPage(id, { keep: true, flash: true, banner: { html: `<b>Order ${esc(r.po_number || "")} approved.</b> The invoice was checked against it again. Next, approve or reject the invoice below.` } });
+      else donePage({ id: Number(id), kind: "bad", title: "Order and invoice rejected", text: `Order ${esc(ord.po_number || "")} was not approved, so ${what} is rejected and will not be paid.`,
+        who: "Procurement and accounts payable have been notified.", nextLabel: "Next invoice to approve" });
+    } catch (ex) { fail(ex); }
+  });
+  // procurement's delivery confirmation (only when INPRO_REQUIRE_RECEIPT is on)
+  $$("[data-receipt]").forEach(b => b.onclick = async () => {
+    const ok = b.dataset.receipt === "1", why = ($("#rNote") || {}).value?.trim() || null;
+    if (!ok && !why) { toast("Write what is wrong with the delivery.", "bad"); $("#rNote").focus(); return; }
+    busy(b, "Saving…");
+    try {
+      await api(`/api/invoices/${id}/receipt`, { method: "POST", json: { ok, note: why } });
+      donePage({ id: Number(id), kind: ok ? "ok" : "bad", title: ok ? "Delivery confirmed" : "Problem reported",
+        text: ok ? `Order, invoice and delivery match for ${what}. It is with the manager for the final approval.` : `The manager sees your note on ${what}, with a recommendation to reject it.`,
+        who: "The manager has been notified.", nextLabel: "Next task" });
+    } catch (ex) { fail(ex); }
+  });
+
+  // remove an invoice uploaded by mistake
+  const rb = $("#removeBox");
+  if (rb) {
+    $("#removeBtn").onclick = () => { rb.hidden = !rb.hidden; if (!rb.hidden) { rb.scrollIntoView({ block: "nearest", behavior: "smooth" }); $("#removeWhy").focus(); } };
+    $("#removeCancel").onclick = () => { rb.hidden = true; };
+    $$("[data-reason]", rb).forEach(c => c.onclick = () => { $("#removeWhy").value = c.dataset.reason; $$("[data-reason]", rb).forEach(x => x.setAttribute("aria-pressed", x === c)); });
+    rb.onsubmit = async e => {
+      e.preventDefault();
+      const reason = $("#removeWhy").value.trim();
+      if (!reason) { toast("Pick or write a reason first.", "bad"); $("#removeWhy").focus(); return; }
+      busy(rb.querySelector("[type=submit]"), "Removing…");
+      try {
+        await api(`/api/invoices/${id}/remove`, { method: "POST", json: { reason } });
+        toast("Invoice removed. It will not be paid, and the Activity log keeps the record.", "ok"); refreshCount();
+        location.hash = "#/invoices";
+      } catch (ex) { fail(ex); }
+    };
+  }
+
+  // correct the fields (accounts payable, during the review)
+  $$("[data-edit]").forEach(b => b.onclick = () => { reviewPage(id, { keep: true, editing: true }).then(() => { const ff = $("#fieldForm"); if (ff) ff.scrollIntoView({ block: "center", behavior: "smooth" }); }); });
+  const ff = $("#fieldForm");
+  if (ff) {
+    $("#ffCancel").onclick = () => reviewPage(id, { keep: true });
+    ff.onsubmit = async e => {
+      e.preventDefault();
+      const changes = {};
+      FIELD_ROWS.forEach(([k, , kind]) => {
+        const raw = $("#ff_" + k).value.trim();
+        const was = f[k] == null ? "" : String(kind === "money" ? Number(f[k]).toFixed(2) : f[k]);
+        if (raw !== was) changes[k] = raw === "" ? null : raw;
+      });
+      if (!Object.keys(changes).length) return reviewPage(id, { keep: true });
+      busy(ff.querySelector("[type=submit]"), "Checking…");
+      try { await api(`/api/invoices/${id}/fields`, { method: "PATCH", json: { changes, note: $("#ff_note").value.trim() || null } }); again("Saved. The checks ran again with the corrected values."); }
+      catch (ex) { toast(ex.message, "bad"); $$(".detail button").forEach(b => b.disabled = false); ff.querySelector("[type=submit]").textContent = "Save and check again"; }
+    };
+  }
+
+  $("#next").onclick = async () => {
+    const rows = await api("/api/invoices?mine=1").catch(() => []);
+    const n = rows.find(r => r.id !== Number(id));
+    if (n) location.hash = "#/invoice/" + n.id; else toast("No other task is waiting for you.");
+  };
+}
+
+/* ============================================================ after an action: what happened, and what next */
+async function donePage(o) {
+  history.pushState(null, "", "#/done");      // a page of its own: Back returns to the invoice, and every link on it works
+  setNav("invoices"); document.title = `${o.title} · InPro Copilot`;
+  refreshCount();
+  let rows = [];
+  try { rows = (await api("/api/invoices?mine=1")).filter(r => r.id !== o.id); } catch {}
+  const acts = [];
+  if (rows.length) acts.push(`<a class="btn btn-primary" href="#/invoice/${rows[0].id}">${esc(o.nextLabel || "Next task")}${I.next}</a>`);
+  if (o.upload && can("upload")) acts.push(`<a class="btn${rows.length ? "" : " btn-primary"}" href="#/upload">${I.upload}Upload another invoice</a>`);
+  if (o.id) acts.push(`<a class="btn" href="#/invoice/${o.id}">See this invoice</a>`);
+  acts.push(`<a class="btn btn-ghost" href="#/invoices">All invoices</a>`);
+  MAIN().innerHTML = `<div class="page done-page"><section class="done ${o.kind || "ok"}" role="status" aria-live="polite">
+    <span class="done-icon">${o.kind === "bad" ? I.cross : o.kind === "info" ? I.info : I.check}</span>
+    <h1>${esc(o.title)}</h1>
+    <p>${o.text}</p>
+    ${o.who ? `<p class="next">${I.bell}${esc(o.who)}</p>` : ""}
+    <p class="next">${rows.length ? `${rows.length} more ${rows.length === 1 ? "task is" : "tasks are"} waiting for you.` : "Nothing else is waiting for you right now."}</p>
+    <div class="row">${acts.join("")}</div></section></div>`;
+  MAIN().focus();
+}
+
+/* ============================================================ upload */
+let uploadNote = null;            // what the upload page says first, e.g. after accounts payable rejected an invoice
+async function uploadPage() {
+  if (!can("upload")) { location.hash = "#/invoices"; return; }
+  setNav("upload"); document.title = "Upload · InPro Copilot";
+  const note = uploadNote; uploadNote = null;
+  let mine = [];
+  try { mine = await api("/api/invoices?mine=1"); } catch {}
+  MAIN().innerHTML = `<div class="page">
+    ${note ? `<div class="banner ${note.kind || ""}" role="status">${note.kind === "bad" ? I.cross : I.check}<span>${note.html}</span></div>` : ""}
+    <div class="page-head"><div><h1>Upload an invoice</h1><p>A PDF or a photo. It is read and checked straight away, then it opens for your review: what needs attention, what looks good, and Approve or Reject.</p></div></div>
+    <button class="upzone" id="upzone" type="button">${I.upload}<b>Drop the invoice here, or choose a file</b><span class="sub">PDF, PNG or JPG. Several at once is fine.</span></button>
+    ${mine.length ? `<section class="panel" style="margin-top:20px" aria-label="Waiting for you"><div class="panel-head"><h2>Also waiting for you</h2><span class="sub">${mine.length}</span></div>
+      <ul class="mini">${mine.slice(0, 6).map(r => `<li><a href="#/invoice/${r.id}"><b>${esc(r.vendor || "Vendor not found")}</b><span class="num">${esc(r.invoice_number || "")}</span><span class="num">${r.total != null ? esc(money(r.total, r.currency)) : ""}</span></a></li>`).join("")}</ul></section>` : ""}
+  </div>`;
+  $("#upzone").onclick = () => $("#file").click();
+}
+
+/* ============================================================ notifications (the bell) */
+let bellItems = [], bellTop = null, bellTimer = null, bellWired = false;
+async function refreshBell() {
+  if (!ME || !$("#bellBtn")) return;
+  let r; try { r = await api("/api/notifications"); } catch { return; }
+  bellItems = r.items || [];
+  const top = bellItems.length ? bellItems[0].id : 0;
+  if (bellTop !== null && top > bellTop) {                // something new arrived while the page was open
+    const fresh = bellItems.filter(n => n.id > bellTop && n.unread);
+    if (fresh.length) toast(fresh.length === 1 ? fresh[0].text : `${fresh.length} new notifications. Open the bell to see them.`);
+  }
+  bellTop = top;
+  const dot = $("#bellDot");
+  dot.textContent = r.unread > 9 ? "9+" : r.unread; dot.hidden = !r.unread;
+  $("#bellBtn").setAttribute("aria-label", r.unread ? `Notifications, ${r.unread} new` : "Notifications");
+  if (!$("#notesPanel").hidden) renderNotes();
+}
+function renderNotes() {
+  const p = $("#notesPanel");
+  p.innerHTML = `<header><span>Notifications</span><button class="btn btn-ghost btn-sm" type="button" id="notesClose">Close</button></header>
+    ${bellItems.length ? `<ul>${bellItems.map(n => `<li class="${n.unread ? "unread" : ""}"><a href="${esc(n.link || "#/invoices")}"><span>${esc(n.text)}</span><span class="when">${n.actor ? esc(n.actor) + ", " : ""}${esc(when(n.ts))}</span></a></li>`).join("")}</ul>`
+      : `<div class="empty"><p>Nothing yet. You hear here when work reaches your step, or when a decision affects your work.</p></div>`}`;
+  $("#notesClose").onclick = () => { closeNotes(); $("#bellBtn").focus(); };
+  $$("a", p).forEach(a => a.onclick = () => closeNotes());
+}
+function openNotes() {
+  const p = $("#notesPanel"), b = $("#bellBtn"), r = b.getBoundingClientRect();
+  renderNotes(); p.hidden = false; b.setAttribute("aria-expanded", "true");
+  p.style.left = Math.min(Math.max(12, r.left), innerWidth - p.offsetWidth - 12) + "px";
+  p.style.top = Math.min(r.bottom + 8, innerHeight - 120) + "px";
+  if (bellItems.some(n => n.unread)) api("/api/notifications/seen", { method: "POST" }).then(() => { $("#bellDot").hidden = true; $("#bellBtn").setAttribute("aria-label", "Notifications"); }).catch(() => {});
+  (p.querySelector("li a") || p.querySelector("button")).focus();
+}
+function closeNotes() {
+  const p = $("#notesPanel"); if (!p || p.hidden) return;
+  p.hidden = true; $("#bellBtn").setAttribute("aria-expanded", "false");
+  bellItems.forEach(n => { n.unread = false; });
+}
+function wireBell() {
+  bellTop = null;
+  $("#bellBtn").onclick = e => { e.stopPropagation(); $("#notesPanel").hidden ? openNotes() : closeNotes(); };
+  if (!bellWired) {
+    bellWired = true;
+    document.addEventListener("click", e => { const p = $("#notesPanel"); if (p && !p.hidden && !p.contains(e.target)) closeNotes(); });
+    document.addEventListener("keydown", e => { const p = $("#notesPanel"); if (e.key === "Escape" && p && !p.hidden) { closeNotes(); $("#bellBtn").focus(); } });
+  }
+  clearInterval(bellTimer);
+  bellTimer = setInterval(() => { if (document.visibilityState === "visible" && ME) refreshCount(); }, 30000);
 }
 
 /* ============================================================ tooltips (hover and keyboard focus) */
@@ -896,7 +1544,7 @@ document.addEventListener("focusin", e => { const el = e.target.closest("[data-t
 document.addEventListener("focusout", () => { tipEl.hidden = true; });
 
 const amounts = obj => Object.entries(obj || {}).map(([c, v]) => money(v, c === "?" ? undefined : c));
-const CATCH_ICON = { duplicate: "Duplicate", math: "Numbers", vendor: "Spoofed vendor", tax_id: "Tax ID", po_match: "Over-billing", bank: "Bank changed", sender: "Fake sender", completeness: "Missing field" };
+const CATCH_ICON = { duplicate: "Duplicate", math: "Numbers", vendor: "Spoofed vendor", tax_id: "Tax ID", po_match: "Over-billing", bank: "Bank changed", completeness: "Missing field" };
 
 /* ============================================================ overview */
 async function overviewPage() {
@@ -913,24 +1561,25 @@ async function overviewPage() {
   const t = o.time;
 
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Overview</h1><p>What the copilot has done so far: what it stopped before payment, what it cleared on its own, and what it cost.</p></div>
-      <div class="page-actions"><a class="btn" href="#/lab">${I.flask}Try to fool the checks</a><a class="btn" href="#/invoices">${I.file}Open the invoice queue</a></div></div>
+    <div class="page-head"><div><h1>Overview</h1><p>What the copilot has done so far: where every invoice is now, what it held back before payment, and what it cost.</p></div>
+      <div class="page-actions"><a class="btn" href="#/invoices">${I.file}Open the invoice queue</a></div></div>
     ${n ? `
     <section class="panel" aria-label="Summary">
       <div class="hero">
-        <div class="hero-label">Value of invoices stopped before payment</div>
+        <div class="hero-label">Value of invoices held back before payment</div>
         <div><div class="hero-value">${heroParts[1] ? `<small>${esc(heroParts[1])}</small>` : ""}${esc(heroParts[2])}</div>
           <div class="hero-also">${prot.length > 1 ? "plus " + amounts(Object.fromEntries(prot.slice(1))).map(esc).join(" and ") + ". " : ""}${o.caught_total} invoice${o.caught_total === 1 ? "" : "s"} with a hard failure, each with its reason below.</div></div>
-        <div class="hero-side"><b class="num">${t.saved_hours} h</b>of checking time saved<span class="fine" data-tip="Cleared invoices take no one's time. Change the two figures with INPRO_MANUAL_MINUTES and INPRO_REVIEW_MINUTES." tabindex="0">at ${t.manual_minutes} min by hand vs ${t.assisted_minutes} min with the copilot</span></div>
+        <div class="hero-side"><b class="num">${t.saved_hours} h</b>of checking time saved<span class="fine" data-tip="People still decide every invoice; the copilot does the reading and checking. Change the two figures with INPRO_MANUAL_MINUTES and INPRO_REVIEW_MINUTES." tabindex="0">at ${t.manual_minutes} min by hand vs ${t.assisted_minutes} min with the copilot</span></div>
       </div>
       <div class="flow">
         <div class="flow-title">Where the ${n} invoice${n === 1 ? "" : "s"} went</div>
-        <div class="flowbar">${seg("c", f.cleared, "--f-clear", "cleared automatically by the checks")}${seg("w", f.waiting, "--f-wait", "waiting for a person")}${seg("p", f.people, "--f-people", "decided by a person")}${seg("s", f.stopped, "--f-stop", "stopped by the checks")}</div>
-        <div class="flowkey">
-          <div><b><span class="sw" style="background:var(--f-clear)"></span>${f.cleared}</b>Cleared automatically</div>
-          <div><b><span class="sw" style="background:var(--f-wait)"></span>${f.waiting}</b>Waiting for a person</div>
-          <div><b><span class="sw" style="background:var(--f-people)"></span>${f.people}</b>Decided by a person${f.people ? ` <span class="muted">(${f.people_approved} approved, ${f.people_rejected} rejected)</span>` : ""}</div>
-          <div><b><span class="sw" style="background:var(--f-stop)"></span>${f.stopped}</b>Stopped by the checks</div>
+        <div class="flowbar">${seg("a", f.ap, "--f-wait", "with accounts payable for review")}${seg("p", f.procurement, "--f-proc", "with procurement (new supplier or order)")}${seg("m", f.manager, "--f-people", "with the manager for approval")}${seg("c", f.approved, "--f-clear", "approved for payment")}${seg("s", f.rejected, "--f-stop", "rejected")}</div>
+        <div class="flowkey five">
+          <div><b><span class="sw" style="background:var(--f-wait)"></span>${f.ap}</b>With accounts payable</div>
+          <div><b><span class="sw" style="background:var(--f-proc)"></span>${f.procurement}</b>With procurement</div>
+          <div><b><span class="sw" style="background:var(--f-people)"></span>${f.manager}</b>With the manager</div>
+          <div><b><span class="sw" style="background:var(--f-clear)"></span>${f.approved}</b>Approved for payment</div>
+          <div><b><span class="sw" style="background:var(--f-stop)"></span>${f.rejected}</b>Rejected${f.rejected ? ` <span class="muted">(${f.rejected_by_ap} by accounts payable)</span>` : ""}</div>
         </div>
       </div>
     </section>
@@ -949,12 +1598,10 @@ async function overviewPage() {
         <section class="panel" aria-label="Time and cost">
           <div class="panel-head"><h2>Time and cost</h2></div>
           <dl class="statement">
-            <div><dt>Cleared without anyone's time</dt><dd class="num">${t.auto_share}%</dd></div>
-            <div><dt>Typical time to a person's decision<span class="fine">median, from arrival to approve or reject</span></dt><dd class="num">${t.median_decision_minutes == null ? '<span class="muted" style="font-weight:400;font-size:13px">no decisions yet</span>' : t.median_decision_minutes < 120 ? t.median_decision_minutes + " min" : (t.median_decision_minutes / 60).toFixed(1) + " h"}</dd></div>
+            <div><dt>Decided so far</dt><dd class="num">${t.decided_share}%</dd></div>
+            <div><dt>Typical time to a person's decision<span class="fine">median, from arrival to approve or reject</span></dt><dd class="num">${t.median_decision_minutes == null ? '<span class="muted" style="font-weight:400;font-size:13px">no decisions yet</span>' : t.median_decision_minutes < 1 ? "under 1 min" : t.median_decision_minutes < 120 ? t.median_decision_minutes + " min" : (t.median_decision_minutes / 60).toFixed(1) + " h"}</dd></div>
             <div><dt>AI cost this month</dt><dd class="num">$${o.ai.month_cost_usd.toFixed(4)}</dd></div>
             <div><dt>AI cost per invoice</dt><dd class="num">$${o.ai.cost_per_invoice_usd.toFixed(5)}</dd></div>
-            ${o.lab && o.lab.tries ? `<div><dt>Forgeries stopped in the Fraud lab<span class="fine">tests, kept out of every figure above</span></dt><dd class="num">${o.lab.stopped} of ${o.lab.tries}</dd></div>` : ""}
-            <div><dt>Arrived by e-mail or folder<span class="fine">no one had to upload them</span></dt><dd class="num">${(o.channels.email || 0) + (o.channels.folder || 0)} of ${n}</dd></div>
           </dl>
         </section>
         <section class="panel" style="margin-top:16px" aria-label="Which checks caught what">
@@ -965,262 +1612,85 @@ async function overviewPage() {
         </section>
       </div>
     </div>`
-    : `<section class="panel"><div class="empty"><p>No invoices yet. Upload some on the Invoices page, send them to the Inbox, or load the demo.</p>
+    : `<section class="panel"><div class="empty"><p>No invoices yet. Upload some on the Invoices page, or load the demo.</p>
         <a class="btn btn-primary" href="#/invoices">Go to Invoices</a></div></section>`}
   </div>`;
 }
 
-/* ============================================================ fraud lab: try to fool the checks */
-const LAB = { base: "coolblue", trick: "scam", values: {}, last: null, busy: false, data: null };
-const LAB_OUT = {
-  reject: { cls: "bad", icon: I.cross, word: "Stopped", sub: "before anyone could pay it", pill: ["p-rejected", "Stopped"] },
-  needs_review: { cls: "warn", icon: I.flag, word: "Held for a person", sub: "it cannot be paid until someone approves it", pill: ["p-pending", "Held for a person"] },
-  auto_approve: { cls: "ok", icon: I.check, word: "Got through", sub: "the checks found nothing wrong", pill: ["p-approved", "Got through"] },
-};
-const CHIP_FOR = { pass: ["ok", I.check], warn: ["warn", I.flag], fail: ["", I.cross], skip: ["neutral", I.dash] };
-const listNames = names => { const n = names.map(k => CHECK_NAME[k] || k); return n.length > 1 ? n.slice(0, -1).join(", ") + " and " + n[n.length - 1] : (n[0] || ""); };
-
-/* mark what changed: the common start and end stay plain, the middle is highlighted */
+/* mark what changed. Same length (an IBAN, a tax ID, an invoice number): every character that differs.
+   Otherwise the common start and end stay plain and the middle is highlighted. */
 function diffMark(from, to) {
   from = String(from || ""); to = String(to || "");
+  if (from.length === to.length) {
+    let out = "", run = "";
+    for (let k = 0; k < to.length; k++) {
+      if (from[k] !== to[k]) { run += to[k]; continue; }
+      if (run) { out += `<mark>${esc(run)}</mark>`; run = ""; }
+      out += esc(to[k]);
+    }
+    return out + (run ? `<mark>${esc(run)}</mark>` : "");
+  }
   let i = 0; while (i < from.length && i < to.length && from[i] === to[i]) i++;
   let j = 0; while (j < from.length - i && j < to.length - i && from[from.length - 1 - j] === to[to.length - 1 - j]) j++;
   const mid = to.slice(i, to.length - j);
   return esc(to.slice(0, i)) + (mid ? `<mark>${esc(mid)}</mark>` : "") + esc(to.slice(to.length - j));
 }
 
-async function labPage() {
-  setNav("lab"); document.title = "Fraud lab · InPro Copilot";
-  try { LAB.data = await api("/api/lab"); }
-  catch (e) { MAIN().innerHTML = `<div class="page"><h1>Fraud lab</h1><p class="form-error" style="margin-top:12px">${esc(e.message)}</p></div>`; return; }
-  const d = LAB.data;
-  if (!d.bases.find(b => b.key === LAB.base)) LAB.base = d.bases[0].key;
-  MAIN().innerHTML = `<div class="page">
-    <div class="page-head">
-      <div><h1>Fraud lab</h1><p>Try to get a fake invoice past the checks. Pick a real invoice and a trick: the lab forges the document the way a fraudster would and sends it through the same checks as every other invoice. The result is whatever the checks decide.</p></div>
-      <div class="score" id="score" aria-label="Attempts so far"></div>
-    </div>
-    <div class="lab">
-      <section class="panel" aria-label="Build a fake invoice">
-        <div class="lab-step"><h2><span class="n">1</span>The invoice</h2>
-          <div class="picks" role="radiogroup" aria-label="Invoice">${d.bases.map(b => `<label class="pick">
-            <input type="radio" name="labBase" value="${b.key}" ${b.key === LAB.base ? "checked" : ""}>
-            <span class="card"><img src="/api/lab/base/${b.key}.png?small=1" alt="" loading="lazy" width="38" height="52"><span style="min-width:0"><b>${esc(b.vendor)}</b><span>${esc(b.country)}</span><span class="num">${esc(money(b.total, b.currency))}</span></span></span>
-          </label>`).join("")}</div></div>
-        <div class="lab-step"><h2><span class="n">2</span>The trick</h2><div class="tricks" id="tricks" role="radiogroup" aria-label="Trick"></div></div>
-        <div class="lab-go">
-          <button class="btn btn-primary btn-block" id="forge" type="button" ${can("upload") ? "" : "disabled"}>Forge it and run the checks</button>
-          <p class="sub">${can("upload") ? "The forgery is filed like any invoice, so you can open it in the queue afterwards." : "Viewers can look but not send invoices. Sign in as Priya or Rahul to try a trick."}</p>
-        </div>
-      </section>
-      <section class="panel" id="labResult" aria-live="polite" aria-label="Result"></section>
-    </div>
-    <section class="panel" style="margin-top:16px" aria-label="Attempts so far" id="labRecent"></section>
-  </div>`;
-  $$('input[name="labBase"]').forEach(r => r.onchange = () => { LAB.base = r.value; labTricks(); labResult(); });
-  $("#forge").onclick = labForge;
-  labTricks(); labResult(); labScore();
+/* ============================================================ proof on the document */
+const PROOF_CHECKS = ["bank", "duplicate", "math", "vendor", "tax_id", "po_match"];
+
+function zoom(invId, m, cls = "") {
+  return `<div class="zoom ${cls}" data-src="/api/invoices/${invId}/page/${m.page}.png" data-m='${JSON.stringify(m)}' role="img"
+    aria-label="Close-up of page ${m.page + 1} where the value is printed"><img alt=""><span class="hit"></span></div>`;
 }
 
-function labTricks() {
-  const d = LAB.data, base = d.bases.find(b => b.key === LAB.base);
-  if (!base.tricks.includes(LAB.trick)) LAB.trick = base.tricks[0];
-  const box = $("#tricks");
-  box.innerHTML = d.tricks.filter(t => base.tricks.includes(t.key)).map(t => `<label class="trick">
-      <input type="radio" name="labTrick" value="${t.key}" ${t.key === LAB.trick ? "checked" : ""}>
-      <span><b>${esc(t.title)}</b><p>${esc(t.text)}</p>
-        ${t.input && t.key === LAB.trick ? `<span class="sub" style="display:block;margin-top:9px">${esc(t.input.label)}</span><input class="input" style="margin-top:4px" id="labValue" maxlength="${t.input.max}" aria-label="${esc(t.input.label)}" placeholder="${esc(t.input.placeholder)}" value="${esc(LAB.values[t.key] || "")}" autocomplete="off" spellcheck="false">` : ""}
-      </span></label>`).join("");
-  $$('input[name="labTrick"]', box).forEach(r => r.onchange = () => { LAB.trick = r.value; labTricks(); });
-  const v = $("#labValue"); if (v) v.oninput = () => { LAB.values[LAB.trick] = v.value; };
-}
-
-function labScore() {
-  const s = LAB.data.score;
-  $("#score").innerHTML = s.tries ? `<div><b>${s.tries}</b>attempt${s.tries === 1 ? "" : "s"}</div><div><b>${s.stopped}</b>stopped</div><div><b>${s.review}</b>held for a person</div><div><b>${s.through}</b>got through</div>` : "";
-  const rec = LAB.data.recent, box = $("#labRecent");
-  box.hidden = !rec.length;
-  if (!rec.length) return;
-  box.innerHTML = `<div class="panel-head"><h2>Attempts so far</h2><span class="sub">newest first</span></div>
-    <table><thead><tr><th>When</th><th>Invoice</th><th>Trick</th><th>Result</th><th class="hide-sm">Caught by</th></tr></thead><tbody>
-    ${rec.map(r => { const o = LAB_OUT[r.outcome] || LAB_OUT.needs_review; return `<tr class="click" data-id="${r.id}">
-      <td class="num">${esc(when(r.at))}</td><td><a class="cell-title" href="#/invoice/${r.id}">${esc(r.vendor || "")}</a>${r.by ? `<div class="sub">by ${esc(r.by)}</div>` : ""}</td>
-      <td>${esc(r.trick || "")}</td><td><span class="pill ${o.pill[0]}">${o.pill[1]}</span></td>
-      <td class="hide-sm">${r.caught_by.length ? esc(listNames(r.caught_by)) : '<span class="muted">Nothing failed outright</span>'}</td></tr>`; }).join("")}
-    </tbody></table>`;
-  $$("tr.click", box).forEach(tr => tr.onclick = e => { if (e.target.tagName !== "A") location.hash = "#/invoice/" + tr.dataset.id; });
-}
-
-function labSheets(r) {
-  const base = LAB.data.bases.find(b => b.key === LAB.base);
-  const page = r && r.marks.length ? r.marks[0].page : 0;
-  const box = (m, cls) => `<span class="hit ${cls}" style="left:${m.x * 100}%;top:${m.y * 100}%;width:${m.w * 100}%;height:${m.h * 100}%"></span>`;
-  const marks = r ? r.marks.filter(m => m.page === page) : [];
-  const genuine = `/api/lab/base/${base.key}.png?page=${page}`;
-  const forged = r ? `/api/invoices/${r.invoice_id}/page/${page}.png` : "";
-  const ch = r ? r.change : null, docChange = ch && ch.what && !["Nothing", "Sender"].includes(ch.what);
-  const loupe = (src, cls) => marks.length ? `<div class="loupe ${cls}" data-src="${src}" data-x="${marks[0].x + marks[0].w / 2}" data-y="${marks[0].y + marks[0].h / 2}" data-w="${marks[0].w}" role="img" aria-label="Close-up of the changed spot"></div>` : "";
-  return `<div class="compare">
-    <figure class="sheet"><figcaption><span>Genuine</span><span class="sub" style="font-weight:400">${esc(base.vendor)}</span></figcaption>
-      <div class="paper"><img src="${genuine}" alt="The genuine invoice from ${esc(base.vendor)}">${marks.map(m => box(m, "was")).join("")}</div>
-      ${r ? loupe(genuine, "") : ""}
-      ${docChange ? `<div class="diff old"><small>${esc(ch.what)} on the genuine invoice</small>${diffMark(ch.to, ch.from)}</div>` : ""}</figure>
-    <figure class="sheet"><figcaption><span>${r && r.trick === "duplicate" ? "Sent again" : "Forged"}</span>${r ? `<a href="#/invoice/${r.invoice_id}">Open the full review</a>` : ""}</figcaption>
-      ${r ? `<div class="paper"><img src="${forged}" alt="The forged copy">${marks.map(m => box(m, "")).join("")}</div>${loupe(forged, "forged")}
-        ${docChange ? `<div class="diff"><small>${esc(ch.what)} on the forgery</small>${diffMark(ch.from, ch.to)}</div>`
-          : ch && ch.what === "Nothing" ? `<div class="diff"><small>An identical copy of the genuine file</small></div>` : ""}`
-        : `<div class="paper blank">${LAB.busy ? "Forging the document…" : "The forged copy appears here, with the change marked."}</div>`}</figure>
-  </div>`;
-}
-
-function labLoupes() {
-  $$(".loupe[data-src]").forEach(el => {
-    const img = new Image();
-    img.onload = () => {
-      const lw = el.clientWidth, lh = el.clientHeight;
-      const scale = Math.min(4.5, Math.max(1.6, 0.6 / Math.max(+el.dataset.w, 0.06)));
-      const iw = lw * scale, ih = iw * img.naturalHeight / img.naturalWidth;
-      const x = Math.min(0, Math.max(lw - iw, lw / 2 - (+el.dataset.x) * iw));
-      const y = Math.min(0, Math.max(lh - ih, lh / 2 - (+el.dataset.y) * ih));
-      el.style.backgroundImage = `url("${el.dataset.src}")`;
-      el.style.backgroundSize = `${iw}px ${ih}px`;
-      el.style.backgroundPosition = `${x}px ${y}px`;
+function fitZooms(root = document) {
+  $$(".zoom[data-src]", root).forEach(el => {
+    const img = el.querySelector("img"), box = el.querySelector(".hit"), m = JSON.parse(el.dataset.m);
+    const place = () => {
+      const cw = el.clientWidth, ch = el.clientHeight, nw = img.naturalWidth, nh = img.naturalHeight;
+      if (!cw || !nw) return;
+      const mw = Math.max(m.w * nw, 1), mh = Math.max(m.h * nh, 1);
+      const s = Math.max(cw / nw, Math.min(0.62 * cw / mw, 0.5 * ch / mh, 3));
+      const iw = nw * s, ih = nh * s;
+      const left = Math.min(0, Math.max(cw - iw, cw / 2 - (m.x * nw + mw / 2) * s));
+      const top = Math.min(0, Math.max(ch - ih, ch / 2 - (m.y * nh + mh / 2) * s));
+      Object.assign(img.style, { width: iw + "px", left: left + "px", top: top + "px" });
+      Object.assign(box.style, { left: (left + m.x * nw * s - 4) + "px", top: (top + m.y * nh * s - 3) + "px",
+                                 width: (mw * s + 8) + "px", height: (mh * s + 6) + "px" });
+      el.classList.add("ready");
     };
-    img.src = el.dataset.src;
+    el._place = place;
+    if (img.complete && img.naturalWidth) place(); else { img.onload = place; img.src = el.dataset.src; }
   });
 }
+window.addEventListener("resize", () => $$(".zoom.ready").forEach(el => el._place && el._place()));
 
-function labResult() {
-  const box = $("#labResult"); if (!box) return;
-  const r = LAB.last && LAB.last.base === LAB.base ? LAB.last : null;
-  if (!r) {
-    box.innerHTML = `<div class="lab-intro">${LAB.busy ? "Forging and checking…" : "Pick an invoice and a trick, then forge it. Your fake appears next to the genuine invoice, with what changed marked on the page."}</div>${labSheets(null)}`;
-    return;
-  }
-  const o = LAB_OUT[r.outcome] || LAB_OUT.needs_review;
-  const secs = (r.ms / 1000).toFixed(r.ms < 1000 ? 2 : 1);
-  const hit = r.target_hits.find(h => h.status === "fail") || r.target_hits[0];
-  const failMsg = (r.checks.find(c => c.status === "fail" && r.caught_by.includes(c.name)) || {}).message;
-  const ch = r.change || {};
-  const sender = ch.sender || (ch.what === "Sender" ? ch.to : null);
-  const realDomain = ch.real_domain || null;
-  let depth = "";
-  if (r.alone === null) depth = "Duplicates can only be caught by comparing with invoices already received. The genuine invoice was on file, so this is exactly the check that should catch it.";
-  else if (r.alone.outcome === "reject") depth = `<b>Even with no earlier invoices on file</b>, ${esc(listNames(r.alone.caught_by))} would still have stopped it on ${r.alone.caught_by.length > 1 ? "their" : "its"} own.`;
-  else if (r.alone.outcome === "needs_review") depth = "<b>With no earlier invoices on file</b>, it would still have been held for a person.";
-  else depth = "<b>With no earlier invoices on file</b>, it would have got through: here it was the invoice history that caught it.";
-  box.innerHTML = `
-    <div class="outcome ${o.cls}"><span class="ring">${o.icon}</span>
-      <div><div class="word">${o.word}</div><div class="sub">${o.sub}. Checked in ${secs} s.</div></div></div>
-    <div class="why">
-      ${r.caught_by.length ? `<div class="by">Caught by <b>${esc(listNames(r.caught_by))}</b></div>`
-        : r.warned.length ? `<div class="by">Flagged by <b>${esc(listNames(r.warned.filter(n => n !== "completeness")))}</b></div>` : `<div class="by">No check objected.</div>`}
-      <q>${esc((hit && hit.message) || failMsg || r.summary.replace(/^(Recommend \w+|Needs HUMAN REVIEW): ?/, ""))}</q>
-    </div>
-    ${sender ? `<dl class="mailhead">
-      <div><dt>From</dt><dd>${esc(r.vendor)} &lt;${realDomain ? esc(sender.split("@")[0]) + "@" + diffMark(realDomain, sender.split("@")[1]) : esc(sender)}&gt;</dd></div>
-      ${realDomain ? `<div><dt>Real</dt><dd class="muted">${esc(realDomain)}</dd></div>` : ""}
-      <div><dt>Subject</dt><dd>${esc(r.trick === "scam" ? "URGENT: updated bank details" : "Invoice")}</dd></div></dl>` : ""}
-    ${labSheets(r)}
-    <div class="checkrow" aria-label="All eight checks">${r.checks.map((c, i) => { const [cls, icon] = CHIP_FOR[c.status] || CHIP_FOR.skip;
-      return `<span class="chip ${cls}" style="animation-delay:${i * 55}ms" tabindex="0" data-tip="${esc(c.message)}">${icon}${esc(CHECK_NAME[c.name] || c.name)}</span>`; }).join("")}</div>
-    <div class="depth"><div>${depth}</div>${r.baseline_added ? `<div class="muted">The genuine invoice was put on file first, as if it had arrived last week.</div>` : ""}</div>`;
-  labLoupes();
+function proofTable(rows) {
+  if (!rows.length) return "";
+  const withRef = rows.filter(r => r.ref);
+  if (!withRef.length) return `<table class="proof-table"><tbody>${rows.map(r => `<tr><th scope="row">${esc(r.label)}</th><td>${esc(r.value)}</td></tr>`).join("")}</tbody></table>`;
+  return `<table class="proof-table"><thead><tr><th></th><th scope="col">${esc(withRef[0].ref_label)}</th><th scope="col">This invoice</th></tr></thead>
+    <tbody>${rows.map(r => `<tr><th scope="row">${esc(r.label)}</th><td class="ref">${esc(r.ref || "")}</td><td>${!r.ref ? esc(r.value) : r.kind === "amount" ? (r.ref === r.value ? esc(r.value) : `<mark>${esc(r.value)}</mark>`) : diffMark(r.ref, r.value)}</td></tr>`).join("")}</tbody></table>`;
 }
 
-async function labForge() {
-  if (LAB.busy) return;
-  const btn = $("#forge");
-  LAB.busy = true; LAB.last = null; btn.disabled = true; btn.textContent = "Forging and checking…"; labResult();
-  try {
-    const value = (LAB.values[LAB.trick] || "").trim();
-    LAB.last = await api("/api/lab/forge", { method: "POST", json: { base: LAB.base, trick: LAB.trick, value: value || null } });
-    try { const d = await api("/api/lab"); LAB.data.score = d.score; LAB.data.recent = d.recent; } catch {}
-  } catch (e) { toast(e.message, "bad"); }
-  LAB.busy = false; btn.disabled = false; btn.textContent = "Forge it and run the checks";
-  labResult(); labScore(); refreshCount();
-  if (LAB.last && matchMedia("(max-width: 960px)").matches) $("#labResult").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-/* ============================================================ inbox: e-mail and watched folder */
-const SENDER_CHIP = {
-  known: ["ok", "Verified sender"], new: ["neutral", "New sender"], lookalike: ["bad", "Look-alike domain"],
-  free_mail: ["warn", "Free e-mail account"], unknown: ["warn", "Address not on file"], reply_to: ["warn", "Replies go elsewhere"],
-};
-async function inboxPage() {
-  setNav("inbox"); document.title = "Inbox · InPro Copilot";
-  let d;
-  try { d = await api("/api/intake"); } catch (e) { toast(e.message, "bad"); return; }
-  const imap = d.imap;
-  MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Inbox</h1><p>${d.public ? "Invoices that arrive by e-mail are read and checked by themselves, and the sender is verified too: look-alike domains, free e-mail accounts and replies redirected elsewhere are flagged."
-        : "Invoices that arrive by e-mail or land in the watched folder are read and checked by themselves. For e-mails, the sender is verified too: look-alike domains, free e-mail accounts and replies redirected elsewhere are flagged."}</p></div>
-      <div class="page-actions">
-        ${can("upload") && !d.public ? `<button class="btn" id="scanNow" type="button">${I.refresh}Check now</button>` : ""}
-        ${can("upload") ? `
-        <button class="btn" id="emlBtn" type="button">${I.mail}Add a saved e-mail</button>` : ""}
-        <input id="emlFile" type="file" accept=".eml,message/rfc822" multiple hidden>
-      </div></div>
-
-    <section class="panel" aria-label="How invoices arrive">
-      ${d.public ? `<div class="channel">
-        <span class="channel-icon">${I.mail}</span>
-        <div><b>Saved e-mails</b><p>Save an invoice e-mail from Outlook or Gmail as a file (.eml) and add it here. The attachment is checked, and so is the sender.</p></div>
-        <span></span>
-      </div>
-      <div class="channel">
-        <span class="channel-icon">${I.inbox}</span>
-        <div><b>One invoice address per company</b><p>The next step: each company gets a single address, like invoices@yourcompany, that suppliers send to. Nobody connects a personal mailbox, and every e-mail goes through the same sender check.</p></div>
-        <span class="live off"><span class="dot"></span>Planned</span>
-      </div>` : `<div class="channel">
-        <span class="channel-icon">${I.folder}</span>
-        <div><b>Watched folder</b><p>Save PDFs, photos or e-mails (.eml) here, or point a scanner at it. Processed files move to <span class="path">processed</span>.</p>
-          <p style="margin-top:8px"><span class="path">${esc(d.folder)}</span></p></div>
-        <span class="live ${d.running ? "" : "off"}"><span class="dot"></span>${d.running ? `Checked every ${Math.round(d.interval_seconds)} s` : "Not watching"}${d.last_run ? `, last ${esc(when(d.last_run))}` : ""}</span>
-      </div>
-      <div class="channel">
-        <span class="channel-icon">${I.mail}</span>
-        <div><b>Mailbox</b>${imap.configured
-          ? `<p>Unread messages in <b>${esc(imap.folder)}</b> of ${esc(imap.user)} are fetched from ${esc(imap.host)}.</p>`
-          : `<p>Not connected. To read a real mailbox (Gmail, Zoho or a company mail server), add <span class="path">INPRO_IMAP_HOST</span>, <span class="path">INPRO_IMAP_USER</span> and <span class="path">INPRO_IMAP_PASSWORD</span> (an app password) to .env.</p>`}
-          ${d.last_error ? `<p class="form-error" style="margin-top:6px">${esc(d.last_error)}</p>` : ""}</div>
-        <span class="live ${imap.configured ? "" : "off"}"><span class="dot"></span>${imap.configured ? "Connected" : "Off"}</span>
-      </div>`}
-      ${can("manage") ? `<div class="channel">
-        <span class="channel-icon">${I.shield}</span>
-        <div><b>Try it with three demo e-mails</b>
-          <ol class="story"><li><b>1</b>Azure Interior sends its real invoice from azure-interior.com.</li>
-            <li><b>2</b>A fraudster re-sends the same invoice from azure-interiors.com, asking for payment to a new bank account.</li>
-            <li><b>3</b>A supplier sends an invoice from a Gmail address.</li></ol></div>
-        <button class="btn" id="demoMail" type="button">Send demo e-mails</button>
-      </div>` : ""}
-    </section>
-
-    <section class="panel" style="margin-top:16px" aria-label="Received">
-      <div class="panel-head"><h2>Received</h2><span class="sub">${d.log.length} item${d.log.length === 1 ? "" : "s"}</span></div>
-      ${d.log.length ? `<table><thead><tr><th>Received</th><th>From</th><th class="hide-sm">Subject and file</th><th>Result</th></tr></thead><tbody>
-        ${d.log.map(r => { const sc = r.sender_check && SENDER_CHIP[r.sender_check.kind]; const o = OUTCOME[r.ai_outcome];
-          return `<tr ${r.invoice_id ? `class="click" data-id="${r.invoice_id}"` : ""}>
-          <td class="sub num" style="white-space:nowrap">${esc(when(r.ts))}</td>
-          <td class="from">${r.sender ? `<b>${esc(r.sender_name || r.sender)}</b><span>${esc(r.sender)}</span>` : `<b>${r.channel === "folder" ? "Watched folder" : "Mailbox"}</b>`}
-            ${sc ? `<div class="chips" style="margin-top:6px"><span class="chip ${sc[0]}" data-tip="${esc(r.sender_check.message)}" tabindex="0">${sc[0] === "ok" ? I.check : sc[0] === "bad" ? I.cross : I.flag}${sc[1]}</span>${r.bank_check && r.bank_check.status === "fail" ? `<span class="chip" data-tip="${esc(r.bank_check.message)}" tabindex="0">${I.cross}Bank account changed</span>` : ""}</div>` : ""}</td>
-          <td class="hide-sm">${r.subject ? `<div>${esc(r.subject)}</div>` : ""}<div class="sub">${esc(r.filename || "no attachment")}</div></td>
-          <td>${r.invoice_id && o ? `<span class="verdict v-${o.cls}">${o.icon}${o.label}</span><div class="sub">${esc(r.vendor || "")}${r.total != null ? " " + esc(money(r.total, r.currency)) : ""}</div>`
-             : r.status === "error" ? `<span class="verdict v-bad">${I.cross}Could not read</span><div class="sub">${esc(r.note || "")}</div>` : `<span class="sub">${esc(r.note || r.status)}</span>`}</td></tr>`; }).join("")}
-      </tbody></table>` : `<div class="empty"><p>${d.public ? "Nothing received yet. Add a saved e-mail" : "Nothing received yet. Drop a PDF or a saved e-mail into the watched folder"}${can("manage") ? ", or send the demo e-mails" : ""}.</p></div>`}
-    </section></div>`;
-
-  $$("tr.click").forEach(tr => tr.onclick = () => location.hash = "#/invoice/" + tr.dataset.id);
-  const busy = (b, txt) => { b.disabled = true; b.dataset.label = b.innerHTML; b.textContent = txt; };
-  if ($("#scanNow")) $("#scanNow").onclick = async e => { busy(e.currentTarget, "Checking…"); try { const r = await api("/api/intake/scan", { method: "POST" }); toast(r.results.length ? `${r.results.length} new item${r.results.length > 1 ? "s" : ""} processed.` : "Nothing new in the folder or mailbox.", "ok"); } catch (ex) { toast(ex.message, "bad"); } refreshCount(); inboxPage(); };
-  if ($("#emlBtn")) $("#emlBtn").onclick = () => $("#emlFile").click();
-  $("#emlFile").onchange = async e => {
-    const files = [...e.target.files]; e.target.value = "";
-    for (const f of files) { const fd = new FormData(); fd.append("file", f);
-      try { const r = await api("/api/intake/email", { method: "POST", body: fd }); toast(`${f.name}: ${r.results.map(x => x.status).join(", ")}`, "ok"); } catch (ex) { toast(`${f.name}: ${ex.message}`, "bad"); } }
-    refreshCount(); inboxPage();
-  };
-  if ($("#demoMail")) $("#demoMail").onclick = async e => { busy(e.currentTarget, "Sending…"); try { const r = await api("/api/demo/emails", { method: "POST" }); const n = r.results.filter(x => x.status === "processed").length; toast(n ? `${n} demo e-mail${n > 1 ? "s" : ""} received and checked.` : "The demo e-mails were already received.", "ok"); } catch (ex) { toast(ex.message, "bad"); } refreshCount(); inboxPage(); };
+async function loadProof(inv) {
+  const box = $("#proof");
+  if (!box || !(inv.checks || []).some(c => PROOF_CHECKS.includes(c.name) && (c.status === "fail" || c.status === "warn"))) return;
+  let items = [];
+  try { items = (await api(`/api/invoices/${inv.id}/evidence`)).items; } catch { return; }
+  if (!items.length || !document.body.contains(box)) return;
+  box.innerHTML = `<h2>Where the problem is</h2>${items.map(it => {
+    const here = it.marks[0], there = it.other && it.other.marks[0];
+    const shots = it.other
+      ? (here || there ? `<div class="proof-shots">
+          ${there ? `<figure class="shot"><figcaption><span>Earlier: invoice #${it.other.id}</span><a href="#/invoice/${it.other.id}">Open</a></figcaption>${zoom(it.other.id, there, "ref")}</figure>` : ""}
+          ${here ? `<figure class="shot"><figcaption><span>This invoice</span></figcaption>${zoom(inv.id, here)}</figure>` : ""}</div>` : "")
+      : (here ? `<div class="proof-shots"><figure class="shot"><figcaption><span>On the document${here.page ? `, page ${here.page + 1}` : ""}</span></figcaption>${zoom(inv.id, here)}</figure></div>` : "");
+    return `<div class="proof-item ${it.status}"><div class="proof-head">${it.status === "fail" ? I.cross : I.flag}${esc(it.title)}</div>${proofTable(it.rows)}${shots}</div>`;
+  }).join("")}`;
+  box.hidden = false;
+  fitZooms(box);
 }
 
 /* ============================================================ vendors */
@@ -1228,77 +1698,203 @@ async function vendorsPage() {
   setNav("vendors"); document.title = "Vendors · InPro Copilot";
   let rows = [];
   try { rows = await api("/api/vendors"); } catch (e) { toast(e.message, "bad"); }
+  const verifier = can("vendor_verify"), manager = can("decide"), canAdd = can("vendor_propose"), me = ME.user.name;
+  const local = ME.user.role === "local";
+  const STATUS = { approved: ["p-approved", "Approved"], verified: ["p-task", "Waiting for a manager"], pending: ["p-pending", "Waiting for procurement"], rejected: ["p-rejected", "Rejected"] };
+  const toVerify = v => v.status === "pending" && verifier && v.proposed_by !== me;
+  const toApprove = v => v.status === "verified" && manager && v.proposed_by !== me && v.verified_by !== me;
+  const order = { pending: 1, verified: 1, approved: 2, rejected: 3 };
+  rows.sort((a, b) => ((toVerify(a) || toApprove(a)) ? 0 : order[a.status] || 2) - ((toVerify(b) || toApprove(b)) ? 0 : order[b.status] || 2) || a.name.localeCompare(b.name));
+  const trail = v => [v.proposed_by ? `Added by ${esc(v.proposed_by)}` : "",
+    v.verified_by && v.status !== "pending" && !(v.status === "rejected" && !v.approved_by) ? `verified by ${esc(v.verified_by)}` : "",
+    v.status === "approved" && v.approved_by ? `approved by ${esc(v.approved_by)}` : "",
+    v.status === "rejected" ? `rejected by ${esc(v.approved_by || v.verified_by || "")}${v.note ? ": " + esc(v.note) : ""}` : ""].filter(Boolean).join(", ");
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Vendors</h1><p>The approved-vendor list, with what is on file for each: tax ID, the bank account they are paid to, and the domains they e-mail from. An invoice that changes any of these is stopped. Bank accounts and domains are remembered automatically the first time a person approves an invoice.</p></div></div>
-    ${can("manage") ? `<div class="panel"><div class="panel-head"><h2>Add a vendor</h2></div><div class="panel-body">
+    <div class="page-head"><div><h1>Vendors</h1><p>The suppliers on file and how each is paid. An invoice that changes the tax ID or the bank account is stopped. A new supplier is added by accounts payable, usually while reviewing its first invoice; procurement verifies it and a manager approves it. Only then is it paid.</p></div></div>
+    ${canAdd ? `<div class="panel"><div class="panel-head"><h2>${verifier ? "Add a supplier" : "Propose a supplier"}</h2><span class="sub">${local ? "Added straight to the list" : verifier ? "A manager approves it" : "Procurement verifies it, then a manager approves it"}</span></div><div class="panel-body">
       <form id="vForm" class="form-row">
-        <div class="field"><label for="vName">Vendor name</label><input class="input" id="vName" required maxlength="200" placeholder="e.g. Coastal Supplies Pvt Ltd"></div>
+        <div class="field"><label for="vName">Supplier name</label><input class="input" id="vName" required maxlength="200" placeholder="e.g. Coastal Supplies Pvt Ltd"></div>
         <div class="field"><label for="vTax">Tax ID (GSTIN / VAT)</label><input class="input" id="vTax" maxlength="40" placeholder="Optional"></div>
         <div class="field"><label for="vBank">Bank account (IBAN, or account / IFSC)</label><input class="input" id="vBank" maxlength="60" placeholder="Optional"></div>
-        <div class="field"><label for="vDom">E-mail domains</label><input class="input" id="vDom" maxlength="300" placeholder="e.g. coolblue.nl"></div>
-        <div><button class="btn btn-primary" type="submit">Add vendor</button></div>
+        <div><button class="btn btn-primary" type="submit">${verifier ? "Add supplier" : "Propose supplier"}</button></div>
       </form></div></div>` : ""}
     <div class="panel">
-      ${rows.length ? `<table><thead><tr><th>Vendor</th><th>Tax ID</th><th>Bank account</th><th class="hide-sm">E-mail domains</th></tr></thead><tbody>
-        ${rows.map(v => `<tr><td class="cell-title">${esc(v.name)}</td><td class="num">${v.tax_id ? esc(v.tax_id) : '<span class="muted">None</span>'}</td>
-          <td class="num">${v.bank_account ? esc(prettyBank(v.bank_account)) : '<span class="muted">Learned on first approval</span>'}</td>
-          <td class="hide-sm">${v.email_domains ? v.email_domains.split(",").map(d => `<span class="chip neutral">${esc(d)}</span>`).join(" ") : '<span class="muted">-</span>'}</td></tr>`).join("")}
-      </tbody></table>` : `<div class="empty"><p>No approved vendors yet.</p></div>`}
-    </div></div>`;
+      ${rows.length ? `<table><thead><tr><th>Supplier</th><th>Tax ID</th><th>Paid to</th><th>Status</th></tr></thead><tbody>
+        ${rows.map(v => { const [cls, txt] = STATUS[v.status] || STATUS.approved; const t = trail(v);
+          const act = toVerify(v) ? ["verify", "Verify"] : toApprove(v) ? ["approve", "Approve"] : null;
+          const self = (v.status === "pending" && verifier && v.proposed_by === me) || (v.status === "verified" && manager && (v.proposed_by === me || v.verified_by === me));
+          return `<tr><td class="cell-title">${esc(v.name)}${t ? `<div class="sub" style="font-weight:400">${t}</div>` : ""}</td>
+          <td class="num">${v.tax_id ? esc(v.tax_id) : v.status === "pending" || v.status === "verified" ? '<span class="muted">To be confirmed</span>' : '<span class="muted">Not on file</span>'}</td>
+          <td class="num">${v.bank_account ? esc(prettyBank(v.bank_account)) : v.status === "pending" || v.status === "verified" ? '<span class="muted">To be confirmed</span>' : '<span class="muted" title="Saved from the first approved invoice that shows one, and checked from then on">Not on file</span>'}</td>
+          <td><span class="pill ${cls}">${act ? "Your turn: " + act[1].toLowerCase() : txt}</span>
+            ${act ? `<div class="vrow" data-vid="${v.id}" data-act="${act[0]}">
+              <button class="btn btn-sm" type="button" data-v="1">${I.check}${act[1]}</button><button class="btn btn-sm btn-reject" type="button" data-v="0">Reject</button></div>`
+              : self ? '<div class="sub">You added or verified it; someone else decides</div>' : ""}</td></tr>`; }).join("")}
+      </tbody></table>` : `<div class="empty"><p>No suppliers yet.</p></div>`}
+    </div>
+    ${rows.some(toVerify) ? `<p class="note-line">Before verifying, confirm the details with the supplier on a phone number you already have, never one printed on the invoice.</p>` : ""}
+  </div>`;
   const form = $("#vForm");
-  if (form) form.onsubmit = async e => { e.preventDefault(); try { await api("/api/vendors", { method: "POST", json: { name: $("#vName").value.trim(), tax_id: $("#vTax").value.trim() || null, bank_account: $("#vBank").value.trim() || null, email_domains: $("#vDom").value.trim() || null } }); toast("Vendor added.", "ok"); vendorsPage(); } catch (ex) { toast(ex.message, "bad"); } };
+  if (form) form.onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const r = await api("/api/vendors", { method: "POST", json: { name: $("#vName").value.trim(), tax_id: $("#vTax").value.trim() || null, bank_account: $("#vBank").value.trim() || null } });
+      toast(r.status === "pending" ? "Proposed. Procurement verifies it, then a manager approves it." : r.status === "verified" ? "Added and sent to a manager for approval." : "Supplier added.", "ok");
+      refreshCount(); vendorsPage();
+    } catch (ex) { toast(ex.message, "bad"); }
+  };
+  $$(".vrow").forEach(row => {
+    const vid = row.dataset.vid, act = row.dataset.act, name = (rows.find(v => String(v.id) === vid) || {}).name || "The supplier";
+    const go = async (approve, note) => {
+      try {
+        await api(`/api/vendors/${vid}/${act}`, { method: "POST", json: { approve, note } });
+        toast(!approve ? `${name} rejected. Its invoices are not paid.` : act === "verify" ? `${name} verified and sent to a manager for approval.` : `${name} approved. It is on the vendor list, and its invoices were checked again.`, approve ? "ok" : "bad");
+        refreshCount(); vendorsPage();
+      } catch (ex) { toast(ex.message, "bad"); }
+    };
+    row.querySelector('[data-v="1"]').onclick = () => go(true, null);
+    row.querySelector('[data-v="0"]').onclick = () => {
+      row.innerHTML = `<label class="sr" for="vr${vid}">Reason</label><input class="input" id="vr${vid}" maxlength="500" placeholder="Why is it rejected?" style="height:30px;margin-top:6px">
+        <div style="display:flex;gap:6px;margin-top:6px"><button class="btn btn-sm btn-reject" type="button" data-go>Reject supplier</button><button class="btn btn-sm btn-ghost" type="button" data-cancel>Cancel</button></div>`;
+      row.querySelector("[data-cancel]").onclick = vendorsPage;
+      row.querySelector("[data-go]").onclick = () => { const note = $("#vr" + vid).value.trim(); if (!note) { toast("Write why the supplier is rejected.", "bad"); return; } go(false, note); };
+      $("#vr" + vid).focus();
+    };
+  });
 }
 
 /* ============================================================ purchase orders */
+const REQ_PILL = { requested: "p-pending", prepared: "p-pending", approved: "p-approved", rejected: "p-rejected" };
+let reqOpen = null;
+
 async function posPage() {
   setNav("pos"); document.title = "Purchase orders · InPro Copilot";
-  let rows = [];
-  try { rows = await api("/api/purchase-orders"); } catch (e) { toast(e.message, "bad"); }
+  let rows = [], reqs = [], vendors = [];
+  try { [rows, reqs, vendors] = await Promise.all([api("/api/purchase-orders"), api("/api/purchase-requests"), api("/api/vendors")]); }
+  catch (e) { toast(e.message, "bad"); }
+  const mine = reqs.filter(r => r.mine).length;
+  const curOpts = cur => ["INR", "EUR", "USD", "AED", "GBP"].map(c => `<option ${c === cur ? "selected" : ""}>${c}</option>`).join("");
+  const atf = r => r.kind === "after_the_fact";
+  const reqStatus = r => r.status === "approved" ? `<span class="pill p-approved">Approved: ${esc(r.po_number)}</span>`
+    : r.status === "rejected" ? `<span class="pill p-rejected">Rejected</span>`
+    : `<span class="pill ${r.mine ? "p-task" : "p-pending"}" ${r.mine ? 'title="This is your task"' : ""}>${esc(r.stage.who)}: ${esc(r.stage.label.charAt(0).toLowerCase() + r.stage.label.slice(1))}</span>`;
+  const reqWho = r => [r.prepared_by && !atf(r) ? `prepared by ${esc(r.prepared_by)}` : "", r.decided_by ? `${r.status === "rejected" ? "rejected" : "approved"} by ${esc(r.decided_by)}` : ""].filter(Boolean).join(", ");
+  const reqAction = r => {
+    if (reqOpen !== r.id) return r.can_prepare || r.can_approve || r.can_reject || r.approve_blocked ? `<button class="btn btn-sm" type="button" data-open="${r.id}">${r.can_prepare ? "Prepare" : "Review"}</button>` : "";
+    return "";
+  };
+  const reqPanel = r => {
+    if (reqOpen !== r.id) return "";
+    if (r.can_prepare) return `<tr class="req-open"><td colspan="5"><form class="reqform" data-prep="${r.id}" novalidate>
+        <div class="field"><label for="pv${r.id}">Supplier</label><input class="input" id="pv${r.id}" list="vendorNames" maxlength="200" value="${esc(r.vendor)}" required></div>
+        <div class="field"><label for="pa${r.id}">Price agreed</label><input class="input num" id="pa${r.id}" type="number" min="0.01" step="0.01" value="${Number(r.amount).toFixed(2)}" required></div>
+        <div class="field"><label for="pc${r.id}">Currency</label><select class="input" id="pc${r.id}">${curOpts(r.currency)}</select></div>
+        <div class="field wide"><label for="pn${r.id}">Note</label><input class="input" id="pn${r.id}" maxlength="500" placeholder="e.g. price checked against two quotes (required to reject)"></div>
+        <div class="actions"><button class="btn btn-primary btn-sm" type="submit">Send to manager</button><button class="btn btn-sm btn-reject" type="button" data-rej="${r.id}">Reject</button></div>
+      </form></td></tr>`;
+    return `<tr class="req-open"><td colspan="5"><div class="reqform">
+        <div class="field wide"><label for="pn${r.id}">Note</label><input class="input" id="pn${r.id}" maxlength="500" placeholder="Optional to approve, required to reject"></div>
+        <div class="actions">${r.can_approve ? `<button class="btn btn-approve btn-sm" type="button" data-ok="${r.id}">${I.check}Approve the order</button>` : ""}${r.can_reject ? `<button class="btn btn-sm btn-reject" type="button" data-rej="${r.id}">Reject</button>` : ""}</div>
+        ${r.approve_blocked ? `<p class="sub" style="grid-column:1/-1">${esc(r.approve_blocked)}</p>` : ""}
+      </div></td></tr>`;
+  };
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Purchase orders</h1><p>Invoices that cite a PO are matched against it: billing more than what is left on the order is a hard stop.</p></div></div>
-    ${can("manage") ? `<div class="panel"><div class="panel-head"><h2>Add a purchase order</h2></div><div class="panel-body">
-      <form id="poForm" class="form-row">
-        <div class="field"><label for="poNum">PO number</label><input class="input" id="poNum" required maxlength="40" placeholder="PO-1001"></div>
-        <div class="field"><label for="poVendor">Vendor</label><input class="input" id="poVendor" required maxlength="200"></div>
-        <div class="field"><label for="poAmt">Amount</label><input class="input num" id="poAmt" type="number" min="0.01" step="0.01" required></div>
-        <div class="field"><label for="poCur">Currency</label><select class="input" id="poCur"><option>INR</option><option>EUR</option><option>USD</option><option>AED</option><option>GBP</option></select></div>
-        <div><button class="btn btn-primary" type="submit">Add PO</button></div>
+    <div class="page-head"><div><h1>Purchase orders</h1><p>Every order starts as a request: accounts payable asks, procurement prepares it, a manager approves it. No one can open a purchase order alone. An invoice that quotes an order is checked against it: billing more than what is left is stopped, and procurement confirms delivery before payment. An order placed outside the app is recorded from its invoice and approved the same way.</p></div>
+      <div class="page-actions">${can("request") ? `<button class="btn btn-primary" id="reqBtn" type="button">${I.po}Request a purchase</button>` : ""}</div></div>
+    <datalist id="vendorNames">${vendors.filter(v => v.status !== "rejected").map(v => `<option value="${esc(v.name)}"></option>`).join("")}</datalist>
+    ${can("request") ? `<div class="panel" id="reqNew" hidden><div class="panel-head"><h2>Request a purchase</h2><span class="sub">Procurement prepares it, a manager approves it</span></div><div class="panel-body">
+      <form id="reqForm" class="reqform" novalidate>
+        <div class="field wide"><label for="rqItem">What is needed</label><input class="input" id="rqItem" maxlength="300" required placeholder="e.g. 10 office chairs"></div>
+        <div class="field"><label for="rqVendor">Supplier</label><input class="input" id="rqVendor" list="vendorNames" maxlength="200" required></div>
+        <div class="field"><label for="rqAmt">Estimated amount</label><input class="input num" id="rqAmt" type="number" min="0.01" step="0.01" required></div>
+        <div class="field"><label for="rqCur">Currency</label><select class="input" id="rqCur">${curOpts("INR")}</select></div>
+        <div class="field"><label for="rqDate">Needed by</label><input class="input num" id="rqDate" type="date"></div>
+        <div class="field wide"><label for="rqWhy">Reason</label><input class="input" id="rqWhy" maxlength="500" placeholder="Optional"></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Send request</button><button class="btn btn-ghost" type="button" id="reqCancel">Cancel</button></div>
       </form></div></div>` : ""}
-    <div class="panel">
+    <div class="panel"><div class="panel-head"><h2>Purchase requests</h2>${mine ? `<span class="sub">${mine} waiting for you</span>` : ""}</div>
+      ${reqs.length ? `<table><thead><tr><th>Request</th><th>Supplier</th><th class="r">Amount</th><th>Status</th><th></th></tr></thead><tbody>
+        ${reqs.map(r => `<tr><td><span class="cell-title">${esc(r.item)}</span>${atf(r) ? `<div class="sub"><span class="tag-atf">Ordered outside the app</span> ${esc(r.po_number || "")}, quoted on <a href="#/invoice/${r.invoice_id}">invoice #${r.invoice_id}</a></div>` : ""}<div class="sub">#${r.id} ${atf(r) ? "recorded by" : "by"} ${esc(r.requested_by)}, ${esc(when(r.created_at))}${r.needed_by ? `, needed by ${esc(r.needed_by)}` : ""}</div>${r.reason ? `<div class="req-why">${esc(r.reason)}</div>` : ""}</td>
+          <td>${esc(r.vendor)}</td><td class="r num">${esc(money(r.amount, r.currency))}</td>
+          <td>${reqStatus(r)}${reqWho(r) ? `<div class="sub">${reqWho(r)}</div>` : ""}${r.note ? `<div class="req-why">${esc(r.note)}</div>` : ""}</td>
+          <td class="r">${reqAction(r)}</td></tr>${reqPanel(r)}`).join("")}
+      </tbody></table>` : `<div class="empty"><p>No purchase requests yet.${can("request") ? " Use Request a purchase to ask for one." : ""}</p></div>`}
+    </div>
+    <div class="panel"><div class="panel-head"><h2>Purchase orders</h2></div>
       ${rows.length ? `<table><thead><tr><th>PO number</th><th>Vendor</th><th class="r">Ordered</th><th class="r">Invoiced (approved)</th><th class="r">Remaining</th></tr></thead><tbody>
-        ${rows.map(p => { const rem = p.amount - (p.invoiced || 0); return `<tr><td class="cell-title num">${esc(p.po_number)}</td><td>${esc(p.vendor)}</td>
+        ${rows.map(p => { const rem = p.amount - (p.invoiced || 0); return `<tr><td class="cell-title num">${esc(p.po_number)}<div class="sub" style="font-weight:400">${p.request_id ? `Approved request #${p.request_id}` : "Loaded from the ERP"}</div></td><td>${esc(p.vendor)}</td>
           <td class="r num">${esc(money(p.amount, p.currency))}</td><td class="r num">${esc(money(p.invoiced || 0, p.currency))}</td>
           <td class="r"><div class="remaining num">${esc(money(rem, p.currency))}<span class="meter" title="${pct(p.invoiced || 0, p.amount)}% used"><i style="width:${pct(p.invoiced || 0, p.amount)}%"></i></span></div></td></tr>`; }).join("")}
       </tbody></table>` : `<div class="empty"><p>No purchase orders yet.</p></div>`}
     </div></div>`;
-  const form = $("#poForm");
-  if (form) form.onsubmit = async e => { e.preventDefault(); try { await api("/api/purchase-orders", { method: "POST", json: { po_number: $("#poNum").value.trim(), vendor: $("#poVendor").value.trim(), amount: Number($("#poAmt").value), currency: $("#poCur").value } }); toast("Purchase order saved.", "ok"); posPage(); } catch (ex) { toast(ex.message, "bad"); } };
+  const reload = () => { refreshCount(); posPage(); };
+  if ($("#reqBtn")) $("#reqBtn").onclick = () => { $("#reqNew").hidden = false; $("#rqItem").focus(); };
+  if ($("#reqCancel")) $("#reqCancel").onclick = () => { $("#reqNew").hidden = true; };
+  const rf = $("#reqForm");
+  if (rf) rf.onsubmit = async e => {
+    e.preventDefault();
+    try {
+      await api("/api/purchase-requests", { method: "POST", json: { item: $("#rqItem").value.trim(), vendor: $("#rqVendor").value.trim(), amount: Number($("#rqAmt").value),
+        currency: $("#rqCur").value, needed_by: $("#rqDate").value || null, reason: $("#rqWhy").value.trim() || null } });
+      toast("Request sent. Procurement prepares the order next.", "ok"); reload();
+    } catch (ex) { toast(ex.message, "bad"); }
+  };
+  $$("[data-open]").forEach(b => b.onclick = () => { reqOpen = reqOpen === +b.dataset.open ? null : +b.dataset.open; posPage(); });
+  $$("[data-prep]").forEach(f => f.onsubmit = async e => {
+    e.preventDefault(); const id = f.dataset.prep;
+    try {
+      await api(`/api/purchase-requests/${id}/prepare`, { method: "POST", json: { vendor: $(`#pv${id}`).value.trim(), amount: Number($(`#pa${id}`).value),
+        currency: $(`#pc${id}`).value, note: $(`#pn${id}`).value.trim() || null } });
+      reqOpen = null; toast("Sent to the manager for approval.", "ok"); reload();
+    } catch (ex) { toast(ex.message, "bad"); }
+  });
+  $$("[data-ok]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.ok;
+    try { const r = await api(`/api/purchase-requests/${id}/decision`, { method: "POST", json: { approve: true, note: $(`#pn${id}`).value.trim() || null } });
+      reqOpen = null; toast(`Approved. Purchase order ${r.po_number} is open.`, "ok"); reload(); } catch (ex) { toast(ex.message, "bad"); }
+  });
+  $$("[data-rej]").forEach(b => b.onclick = async () => {
+    const id = b.dataset.rej, note = $(`#pn${id}`).value.trim();
+    if (!note) { toast("Write a reason in the note to reject.", "bad"); $(`#pn${id}`).focus(); return; }
+    try { await api(`/api/purchase-requests/${id}/decision`, { method: "POST", json: { approve: false, note } });
+      reqOpen = null; toast("Request rejected.", "bad"); reload(); } catch (ex) { toast(ex.message, "bad"); }
+  });
 }
 
 /* ============================================================ activity */
 let actFilter = "all";
+function about(a) {      // what an activity entry concerns: an invoice, an order, a vendor, a user or a sign-in
+  const link = (href, text) => `<a class="cell-title" href="${href}">${esc(text)}</a>`;
+  if (a.invoice_id) return link(`#/invoice/${a.invoice_id}`, a.vendor || a.filename || "Invoice #" + a.invoice_id);
+  if (/^po_/.test(a.action)) { const m = /request #(\d+)/.exec(a.detail || ""); return link("#/pos", m ? "Purchase request #" + m[1] : "Purchase orders"); }
+  if (/^vendor_/.test(a.action)) return link("#/vendors", "Vendors");
+  if (/^user_/.test(a.action)) return can("manage") ? link("#/users", "Users") : "Users";
+  if (a.action === "demo_reset") return "Demo data";
+  if (["password_changed", "switched_role"].includes(a.action)) return "Account";
+  return "Sign-in";
+}
 async function activityPage() {
   setNav("activity"); document.title = "Activity · InPro Copilot";
   let rows = [];
   try { rows = await api("/api/activity?limit=300"); } catch (e) { toast(e.message, "bad"); }
   const groups = {
     all: () => true,
-    decisions: a => ["approved", "rejected", "confirmed"].includes(a.action),
+    decisions: a => ["approved", "rejected", "confirmed"].includes(a.action) && a.actor !== "AI",
     ai: a => a.actor === "AI",
-    security: a => !a.invoice_id && /sign|login|locked|password|user_/.test(a.action),
-    intake: a => /intake/i.test(a.actor) || a.action === "learned",
+    security: a => !a.invoice_id && /sign|login|locked|password|user_|switched/.test(a.action),
+    changes: a => /^po_/.test(a.action) || ["learned", "edited", "vendor_proposed", "vendor_verified", "vendor_rejected", "vendor_saved", "receipt_confirmed", "receipt_problem"].includes(a.action),
   };
   const shown = rows.filter(groups[actFilter]);
   MAIN().innerHTML = `<div class="page">
     <div class="page-head"><div><h1>Activity</h1><p>The audit trail: every upload, AI step, decision, sign-in and change, with who did it and when. Entries cannot be edited.</p></div></div>
     <div class="panel">
       <div class="toolbar"><div class="seg" role="group" aria-label="Show">
-        ${[["all", "Everything"], ["decisions", "Decisions"], ["ai", "AI steps"], ["intake", "Inbox and learning"], ["security", "Sign-ins and users"]].map(([k, l]) => `<button type="button" data-a="${k}" aria-pressed="${actFilter === k}">${l}</button>`).join("")}
+        ${[["all", "Everything"], ["decisions", "Decisions"], ["ai", "AI steps"], ["changes", "Orders, vendors and corrections"], ["security", "Sign-ins and users"]].map(([k, l]) => `<button type="button" data-a="${k}" aria-pressed="${actFilter === k}">${l}</button>`).join("")}
       </div></div>
-      ${shown.length ? `<table><thead><tr><th>When</th><th>Who</th><th>What</th><th class="hide-sm">Invoice</th></tr></thead><tbody>
+      ${shown.length ? `<table><thead><tr><th>When</th><th>Who</th><th>What</th><th class="hide-sm">About</th></tr></thead><tbody>
         ${shown.map(a => `<tr><td class="num sub" style="white-space:nowrap">${esc(when(a.ts))}</td><td><b style="font-weight:600">${esc(a.actor === "system" ? "System" : a.actor)}</b></td>
           <td>${esc(ACTION_TXT[a.action] || a.action.replace(/_/g, " "))}${a.detail ? `<div class="sub">${esc(a.detail)}</div>` : ""}</td>
-          <td class="hide-sm">${a.invoice_id ? `<a class="cell-title" href="#/invoice/${a.invoice_id}">${esc(a.vendor || a.filename || "#" + a.invoice_id)}</a>` : '<span class="muted">-</span>'}</td></tr>`).join("")}
+          <td class="hide-sm">${about(a)}</td></tr>`).join("")}
       </tbody></table>` : `<div class="empty"><p>No activity yet.</p></div>`}
     </div></div>`;
   $$("[data-a]").forEach(b => b.onclick = () => { actFilter = b.dataset.a; activityPage(); });
@@ -1343,17 +1939,17 @@ async function aiPage() {
 /* ============================================================ users (admin) */
 async function usersPage() {
   setNav("users"); document.title = "Users · InPro Copilot";
-  if (!can("manage")) { MAIN().innerHTML = `<div class="page"><h1>Users</h1><p class="muted">Only admins can manage users.</p></div>`; return; }
+  if (!can("manage")) { MAIN().innerHTML = `<div class="page"><h1>Users</h1><p class="muted">Only managers can manage users.</p></div>`; return; }
   let rows = [];
   try { rows = await api("/api/users"); } catch (e) { toast(e.message, "bad"); }
   MAIN().innerHTML = `<div class="page">
-    <div class="page-head"><div><h1>Users</h1><p>Who can sign in and what they may do. Viewers can only look; approvers approve up to their limit; admins can do everything. There is no public sign-up: accounts are created here.</p></div></div>
+    <div class="page-head"><div><h1>Users</h1><p>Who can sign in and what they may do. Accounts payable uploads and corrects invoices; procurement keeps purchase orders, confirms deliveries and verifies vendors; managers approve invoices (up to their limit, if one is set) and manage users. No role can both record and approve an invoice. There is no public sign-up: accounts are created here.</p></div></div>
     <div class="panel"><div class="panel-head"><h2>Add a user</h2></div><div class="panel-body">
       <form id="uForm" class="form-row">
         <div class="field"><label for="uName">Full name</label><input class="input" id="uName" required maxlength="80"></div>
         <div class="field"><label for="uEmail">Work email</label><input class="input" id="uEmail" type="email" required maxlength="200"></div>
-        <div class="field"><label for="uRole">Role</label><select class="input" id="uRole"><option value="approver">Approver</option><option value="viewer">Viewer</option><option value="admin">Admin</option></select></div>
-        <div class="field"><label for="uLimit">Approval limit</label><input class="input num" id="uLimit" type="number" min="0" step="1" placeholder="No limit"></div>
+        <div class="field"><label for="uRole">Role</label><select class="input" id="uRole"><option value="ap">Accounts payable</option><option value="procurement">Procurement</option><option value="approver">Manager</option></select></div>
+        <div class="field"><label for="uLimit">Approval limit (optional)</label><input class="input num" id="uLimit" type="number" min="0" step="1" placeholder="No limit"></div>
         <div class="field"><label for="uPw">Temporary password</label><input class="input" id="uPw" type="password" autocomplete="new-password" required></div>
         <div><button class="btn btn-primary" type="submit">Add user</button></div>
       </form>
@@ -1363,7 +1959,7 @@ async function usersPage() {
       <table><thead><tr><th>Name</th><th>Role</th><th class="r">Approval limit</th><th class="hide-sm">Last sign-in</th><th>Status</th><th></th></tr></thead><tbody>
       ${rows.map(u => `<tr><td><span class="cell-title">${esc(u.name)}</span><div class="sub">${esc(u.email)}</div></td>
         <td>${esc(ROLE_TXT[u.role] || u.role)}</td>
-        <td class="r num">${u.role === "approver" ? (u.approval_limit != null ? esc(plain(u.approval_limit)) : "No limit") : '<span class="muted">-</span>'}</td>
+        <td class="r num">${u.role === "approver" ? (u.approval_limit != null ? esc(plain(u.approval_limit)) : "No limit") : '<span class="muted">Does not approve</span>'}</td>
         <td class="hide-sm sub">${u.last_login ? esc(when(u.last_login)) : "Never"}</td>
         <td>${!u.active ? '<span class="pill p-neutral">Disabled</span>' : u.locked ? '<span class="pill p-rejected">Locked</span>' : '<span class="pill p-approved">Active</span>'}</td>
         <td><div class="inline-actions">${u.id === ME.user.id ? '<span class="sub">You</span>' : `
@@ -1406,9 +2002,8 @@ function route() {
   const h = location.hash;
   const m = h.match(/^#\/invoice\/(\d+)/);
   if (m) return reviewPage(m[1]);
-  if (h.startsWith("#/invoices")) return invoicesPage();
-  if (h.startsWith("#/inbox")) return inboxPage();
-  if (h.startsWith("#/lab")) return labPage();
+  if (h.startsWith("#/invoices") || h.startsWith("#/done")) return invoicesPage();
+  if (h.startsWith("#/upload")) return uploadPage();
   if (h.startsWith("#/vendors")) return vendorsPage();
   if (h.startsWith("#/pos")) return posPage();
   if (h.startsWith("#/activity")) return activityPage();
@@ -1419,9 +2014,9 @@ function route() {
 window.addEventListener("hashchange", route);
 $("#file").onchange = e => { uploadFiles([...e.target.files]); e.target.value = ""; };
 
-// drag and drop anywhere on the Invoices page
+// drag and drop anywhere on the Invoices or Upload page
 let dragDepth = 0;
-const onInvoices = () => ME && can("upload") && location.hash.startsWith("#/invoices");
+const onInvoices = () => ME && can("upload") && /^#\/(invoices|upload)/.test(location.hash);
 window.addEventListener("dragenter", e => { if (!onInvoices() || ![...(e.dataTransfer?.types || [])].includes("Files")) return; dragDepth++; $("#dropzone").classList.add("on"); });
 window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#dropzone").classList.remove("on"); });
 window.addEventListener("dragover", e => { if (onInvoices()) e.preventDefault(); });

@@ -28,7 +28,7 @@ from .config import load_env
 
 load_env()            # API keys and settings from .env (before anything reads them)
 
-from . import auth  # noqa: E402
+from . import auth, workflow  # noqa: E402
 from .decision import Policy  # noqa: E402
 from .pipeline import Pipeline  # noqa: E402
 from .reader import OcrUnavailable  # noqa: E402
@@ -72,6 +72,37 @@ class DecisionIn(BaseModel):
     user: str = Field(default="reviewer", max_length=80)        # only used when sign-in is switched off
 
 
+class RequestIn(BaseModel):
+    item: str = Field(min_length=2, max_length=300)
+    vendor: str = Field(min_length=1, max_length=200)
+    currency: str = Field(default="INR", min_length=3, max_length=3)
+    amount: float = Field(gt=0, lt=1e10)
+    needed_by: str | None = Field(default=None, max_length=10)
+    reason: str | None = Field(default=None, max_length=500)
+
+
+class PrepareIn(BaseModel):
+    vendor: str = Field(min_length=1, max_length=200)
+    currency: str = Field(min_length=3, max_length=3)
+    amount: float = Field(gt=0, lt=1e10)
+    note: str | None = Field(default=None, max_length=500)
+
+
+class RecordOrderIn(BaseModel):
+    """An order the invoice quotes that was placed outside the app (by phone or e-mail)."""
+    invoice_id: int
+    item: str = Field(min_length=1, max_length=300)
+    vendor: str = Field(min_length=1, max_length=200)
+    currency: str = Field(min_length=3, max_length=3)
+    amount: float = Field(gt=0, lt=1e10)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class RequestDecisionIn(BaseModel):
+    approve: bool
+    note: str | None = Field(default=None, max_length=500)
+
+
 class PoIn(BaseModel):
     po_number: str = Field(min_length=1, max_length=40)
     vendor: str = Field(min_length=1, max_length=200)
@@ -83,12 +114,47 @@ class VendorIn(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     tax_id: str | None = Field(default=None, max_length=40)
     bank_account: str | None = Field(default=None, max_length=60)
-    email_domains: str | None = Field(default=None, max_length=300)
+    invoice_id: int | None = None                  # proposed from this invoice's review page
+
+
+class VerifyIn(BaseModel):
+    approve: bool
+    note: str | None = Field(default=None, max_length=500)
+
+
+class FieldsIn(BaseModel):
+    changes: dict[str, str | float | int | None]
+    note: str | None = Field(default=None, max_length=500)
+
+
+class ReviewVendorIn(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    tax_id: str | None = Field(default=None, max_length=40)
+    bank_account: str | None = Field(default=None, max_length=60)
+
+
+class ReviewIn(BaseModel):
+    approve: bool
+    note: str | None = Field(default=None, max_length=500)
+    vendor: ReviewVendorIn | None = None            # a supplier that is not on the list yet, added with the review
+
+
+class RemoveIn(BaseModel):
+    reason: str = Field(min_length=1, max_length=300)
+
+
+class ReceiptIn(BaseModel):
+    ok: bool
+    note: str | None = Field(default=None, max_length=500)
 
 
 class LoginIn(BaseModel):
     email: str = Field(min_length=3, max_length=200)
     password: str = Field(min_length=1, max_length=200)
+
+
+class SwitchIn(BaseModel):
+    email: str = Field(min_length=3, max_length=200)
 
 
 class PasswordIn(BaseModel):
@@ -99,19 +165,13 @@ class PasswordIn(BaseModel):
 class UserIn(BaseModel):
     name: str = Field(min_length=2, max_length=80)
     email: str = Field(min_length=5, max_length=200, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
-    role: str = Field(pattern=r"^(viewer|approver|admin)$")
+    role: str = Field(pattern=r"^(ap|procurement|approver)$")
     approval_limit: float | None = Field(default=None, ge=0)
     password: str = Field(min_length=1, max_length=200)
 
 
-class LabIn(BaseModel):
-    base: str = Field(min_length=1, max_length=40)
-    trick: str = Field(min_length=1, max_length=40)
-    value: str | None = Field(default=None, max_length=80)
-
-
 class UserPatch(BaseModel):
-    role: str | None = Field(default=None, pattern=r"^(viewer|approver|admin)$")
+    role: str | None = Field(default=None, pattern=r"^(ap|procurement|approver)$")
     approval_limit: float | None = Field(default=None, ge=0)
     clear_limit: bool = False
     active: bool | None = None
@@ -121,14 +181,16 @@ class UserPatch(BaseModel):
 def _compact(inv: dict[str, Any]) -> dict[str, Any]:
     f = inv["fields"] or {}
     d = inv["decision"] or {}
+    src = inv.get("source") or {}
     return {
+        "stage": workflow.stage(inv), "uploaded_by": src.get("by"), "edited": bool(inv.get("edits")),
+        "waived": (inv.get("waiver") or {}).get("fields") or [],
         "id": inv["id"], "filename": inv["filename"], "uploaded_at": inv["uploaded_at"],
         "vendor": f.get("vendor"), "invoice_number": f.get("invoice_number"), "invoice_date": f.get("invoice_date"),
         "total": f.get("total"), "currency": f.get("currency"),
         "ai_outcome": inv["ai_outcome"], "status": inv["status"], "decided_by": inv["decided_by"],
         "summary": d.get("summary"), "extractor": inv["extractor"],
         "flags": sum(1 for c in inv["checks"] or [] if c["status"] in ("warn", "fail")),
-        "lab": bool((inv.get("source") or {}).get("lab")),
     }
 
 
@@ -143,19 +205,22 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
     store = Store(db_path)
     pipe = Pipeline(store, upload_dir, extractor=extractor,
                     policy=Policy(auto_approve_limit=float(os.getenv("INPRO_AUTO_LIMIT", "50000"))),
-                    require_po=os.getenv("INPRO_REQUIRE_PO", "0") == "1", llm_client=llm_client)
+                    require_po=os.getenv("INPRO_REQUIRE_PO", "0") == "1", llm_client=llm_client,
+                    require_receipt=os.getenv("INPRO_REQUIRE_RECEIPT", "0") == "1")
     if auth_on:
         auth.ensure_first_users(store)
-    from .intake import Intake
-    intake = Intake(pipe, store)
-    if os.getenv("INPRO_INTAKE", "1") == "1":
-        intake.start()                       # watches the inbox folder (and the mailbox, if configured)
+    if auth.demo_mode():
+        try:
+            from .demo import refresh_demo_vendors
+            refresh_demo_vendors(store, ROOT)          # demo data from an older version: complete the vendor list
+        except Exception:
+            pass
 
     app = FastAPI(title="InPro Copilot", version="0.2.0",
                   description="AI pre-review for invoice approvals: read, check, explain, recommend.")
-    app.state.store, app.state.pipeline, app.state.auth_on, app.state.intake = store, pipe, auth_on, intake
+    app.state.store, app.state.pipeline, app.state.auth_on = store, pipe, auth_on
     app.state.public = public
-    demo_emails_set = {e for _, e, *_ in auth.DEMO_USERS}
+    demo_logins = {e for _, e, *_ in auth.DEMO_USERS}
 
     # public demo: a fresh server starts with the demo story already loaded (the disk there is not permanent)
     if (public and os.getenv("INPRO_AUTOSEED") != "0") or os.getenv("INPRO_AUTOSEED") == "1":
@@ -164,9 +229,8 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         def _autoseed():
             try:
                 if not store.list_invoices():
-                    from .demo import seed_demo, write_demo_emails
+                    from .demo import seed_demo
                     seed_demo(pipe, ROOT)
-                    write_demo_emails(intake, ROOT)
             except Exception:
                 pass
         threading.Thread(target=_autoseed, name="inpro-autoseed", daemon=True).start()
@@ -185,7 +249,20 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         q.append(t)
 
     # sign-in switched off (tests, local experiments): everyone acts as a local administrator
-    LOCAL = {"id": 0, "name": "Local user", "email": "local", "role": "admin", "approval_limit": None, "active": 1}
+    LOCAL = {"id": 0, "name": "Local user", "email": "local", "role": "local", "approval_limit": None, "active": 1}   # sign-in off: one person does everything
+
+    # ---- notifications (notices.py): whoever's turn it is hears about it; whoever a decision affects hears the outcome
+    from . import notices
+    _label = notices.label
+
+    def _stages() -> dict[int, str]:
+        return notices.stages(store)
+
+    def _announce(before: dict[int, str], actor: str | None) -> None:
+        notices.announce(store, before, actor)
+
+    def _tell(people, text: str, actor: str | None, invoice_id: int | None = None, link: str | None = None) -> None:
+        notices.tell(store, people, text, actor, invoice_id, link)
     login_attempts: dict[str, deque] = defaultdict(deque)        # per-IP throttle for the sign-in form
 
     # ------------------------------------------------------------------ who is asking, and security headers
@@ -252,11 +329,33 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
             user, token = auth.login(store, body.email, body.password, ip)
         except auth.LoginError as e:
             raise HTTPException(401, str(e))
+        set_session_cookie(request, response, token)
+        return {"user": auth.public_user(user)}
+
+    def set_session_cookie(request: Request, response: Response, token: str) -> None:
         secure = os.getenv("INPRO_COOKIE_SECURE", "auto")
         response.set_cookie(auth.COOKIE, token, httponly=True, samesite="strict", path="/",
                             secure=(request.url.scheme == "https") if secure == "auto" else secure == "1",
                             max_age=int(auth.session_hours() * 3600))
-        return {"user": auth.public_user(user)}
+
+    @app.post("/api/auth/switch")
+    def switch_role(body: SwitchIn, request: Request, response: Response, user=need("read")):
+        """Demo only: see the app as another demo person in one click, without signing out and in again.
+        Works only between the built-in demo accounts, so it can never reach a real account."""
+        if not auth_on or not auth.demo_mode() or not auth.is_demo_account(user.get("email")):
+            raise HTTPException(404, "Switching roles is only available in the demo.")
+        if not auth.is_demo_account(body.email):
+            raise HTTPException(400, "That is not one of the demo accounts.")
+        limit(user, "switch", 60, 600)
+        target = store.user_by_email(body.email)
+        if not target or not target["active"]:
+            raise HTTPException(400, "That demo account is not available.")
+        old = request.cookies.get(auth.COOKIE)
+        if old:
+            store.delete_session(auth.token_hash(old))
+        set_session_cookie(request, response, auth.start_session(store, target))
+        store.audit(None, user["name"], "switched_role", f"now viewing as {target['name']}")
+        return {"user": auth.public_user(store.user_by_id(target["id"]))}
 
     @app.post("/api/auth/logout")
     def do_logout(request: Request, response: Response):
@@ -282,7 +381,7 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
     def change_password(body: PasswordIn, request: Request, user=need("read")):
         if not auth_on or not user.get("id"):
             raise HTTPException(400, "Password changes are not available for this account.")
-        if public and user["email"] in demo_emails_set:
+        if public and user["email"] in demo_logins:
             raise HTTPException(400, "Demo accounts keep their password on the public demo, so every visitor can sign in.")
         full = store.user_by_id(user["id"])
         if not auth.verify_password(body.current, full["password_hash"]):
@@ -326,9 +425,9 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         target = store.user_by_id(uid)
         if not target:
             raise HTTPException(404, "User not found")
-        if uid == user.get("id") and (body.active is False or (body.role and body.role != "admin")):
-            raise HTTPException(400, "You cannot disable or demote your own account. Ask another admin.")
-        if public and target["email"] in demo_emails_set and (body.password or body.active is False or body.role
+        if uid == user.get("id") and (body.active is False or (body.role and not auth.can({"role": body.role}, "manage"))):
+            raise HTTPException(400, "You cannot disable or demote your own account. Ask another manager.")
+        if public and target["email"] in demo_logins and (body.password or body.active is False or body.role
                                                               or body.clear_limit or body.approval_limit is not None):
             raise HTTPException(400, "The demo accounts stay as they are on the public demo, so every visitor gets the same tour. "
                                      "Create a new account to try these settings.")
@@ -411,7 +510,9 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
             p = Path(tmp) / name
             p.write_bytes(data)
             try:
+                before = _stages()
                 rec = pipe.process(p, filename=name, uploaded_by=user["name"] if auth_on else None)
+                _announce(before, user["name"])
             except OcrUnavailable as e:
                 raise HTTPException(422, str(e))
             except Exception as e:  # corrupt PDF, unreadable image ...
@@ -420,10 +521,10 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         return rec
 
     @app.get("/api/invoices")
-    def list_invoices(status: str | None = None, q: str | None = None, user=need("read")):
+    def list_invoices(status: str | None = None, q: str | None = None, mine: bool = False, user=need("read")):
         if status and status not in {"pending", "approved", "rejected"}:
             raise HTTPException(400, "status must be pending, approved or rejected")
-        rows = [_compact(i) for i in store.list_invoices(status)]
+        rows = [_compact(i) for i in store.list_invoices(status) if not mine or workflow.is_task_for(user, i)]
         if q:
             ql = q.lower()
             rows = [r for r in rows if any(ql in str(r.get(k) or "").lower() for k in ("vendor", "invoice_number", "invoice_date", "filename"))]
@@ -439,10 +540,129 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         if str(inv["stored_path"]).lower().endswith(".pdf") and Path(inv["stored_path"]).exists():
             import pymupdf
             inv["pages"] = len(pymupdf.open(inv["stored_path"]))
-        total = (inv["fields"] or {}).get("total")
-        inv["you"] = {"can_decide": auth.can(user, "decide"), "within_limit": auth.within_limit(user, total),
-                      "approval_limit": user.get("approval_limit")}
+        inv["you"] = workflow.describe(user, inv)
+        from .checks import same_vendor
+        rec = next((v for v in store.vendors() if same_vendor((inv["fields"] or {}).get("vendor"), v["name"], 85)), None)
+        inv["vendor_record"] = rec
         return inv
+
+    @app.get("/api/invoices/{inv_id}/vendor-suggestion")
+    def vendor_suggestion(inv_id: int, user=need("read")):
+        """The new-vendor card, pre-filled from what was read on the invoice, with each value checked."""
+        from . import bank
+        from .taxid import validate_tax_id
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        f = inv["fields"] or {}
+        tax = None
+        if f.get("tax_id"):
+            r = validate_tax_id(f["tax_id"])
+            tax = {"valid": r.valid, "kind": r.kind, "reason": r.reason}
+        acct = None
+        if f.get("bank_account"):
+            number, _ = bank.parts(f["bank_account"])
+            if bank.looks_like_iban(number):
+                ok = bank.iban_valid(number)
+                acct = {"valid": ok, "message": "IBAN checksum is valid" if ok else "IBAN fails its checksum: check for a typo"}
+            else:
+                acct = {"valid": None, "message": "Account number (no checksum to test): confirm it with the supplier"}
+        return {"name": f.get("vendor"), "tax_id": f.get("tax_id"), "tax_check": tax, "bank_account": f.get("bank_account"),
+                "bank_check": acct}
+
+    @app.get("/api/invoices/{inv_id}/evidence")
+    def invoice_evidence(inv_id: int, user=need("read")):
+        """Proof on the document: where each problem is printed, and what it is compared with."""
+        from .evidence import evidence
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        return {"items": evidence(store, inv)}
+
+    @app.patch("/api/invoices/{inv_id}/fields")
+    def correct_fields(inv_id: int, body: FieldsIn, user=need("edit")):
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        if not workflow.can_edit(user, inv):
+            raise HTTPException(409, "Fields are corrected during the accounts payable review; after it, the reading is final.")
+        try:
+            before = _stages()
+            rec = pipe.edit_fields(inv_id, body.changes, user["name"] if auth_on else "Local user", body.note)
+            _announce(before, user["name"])
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        rec["audit"] = store.audit_log(inv_id)
+        return rec
+
+    @app.post("/api/invoices/{inv_id}/review")
+    def review_invoice(inv_id: int, body: ReviewIn, user=need("review")):
+        """Accounts payable approves (the invoice goes on, a new supplier is proposed with it) or rejects (closed with the
+        reason, never paid; the record stays). The supplier, the amount and the currency are needed to approve."""
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        ok, why = workflow.can_review(user, inv)
+        if not ok:
+            raise HTTPException(409, why)
+        name, note = user["name"] if auth_on else "Local user", (body.note or "").strip() or None
+        if not body.approve and not note:
+            raise HTTPException(400, "Say why the invoice is rejected, so the supplier can be told.")
+        if body.approve:
+            missing = workflow.missing_to_pay(inv)
+            if missing:
+                raise HTTPException(409, "Fill in the " + " and ".join(m.replace("_", " ").replace("total", "amount") for m in missing)
+                                    + " first: they are needed to pay.")
+            if workflow._kind(workflow._check(inv, "vendor")) == "new" and not (body.vendor and body.vendor.name.strip()):
+                raise HTTPException(409, "This supplier is not on the vendor list: add it with the review.")
+        before = _stages()
+        try:
+            rec = pipe.review(inv_id, name, body.approve, note, body.vendor.model_dump() if body.vendor and body.approve else None)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        _announce(before, name)
+        rec = store.get_invoice(inv_id)
+        rec["audit"] = store.audit_log(inv_id)
+        rec["you"] = workflow.describe(user, rec)
+        return rec
+
+    @app.post("/api/invoices/{inv_id}/remove")
+    def remove_invoice(inv_id: int, body: RemoveIn, user=need("read")):
+        """Take an invoice that was uploaded by mistake out of the queue (accounts payable or a manager, with a reason,
+        until a person decides it). It is never paid and counts nowhere, but its record and history stay."""
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        ok, why = workflow.can_remove(user, inv)
+        if not ok:
+            raise HTTPException(403 if "can remove" in why else 409, why)
+        if not body.reason.strip():
+            raise HTTPException(400, "Say why the invoice is removed.")
+        name = user["name"] if auth_on else "Local user"
+        store.remove_invoice(inv_id, name, body.reason.strip())
+        store.audit(inv_id, name, "removed", body.reason.strip())
+        order = inv.get("order_request") or {}
+        if order.get("status") in ("requested", "prepared"):        # an order recorded only for this invoice
+            store.update_request(order["id"], status="rejected", decided_by=name, decided_at=auth.iso(auth.utcnow()),
+                                 note="Its invoice was removed")
+            store.audit(inv_id, name, "po_rejected", f"request #{order['id']} closed: its invoice was removed")
+        out = store.get_invoice(inv_id)
+        out["you"] = workflow.describe(user, out)
+        return out
+
+    @app.post("/api/invoices/{inv_id}/receipt")
+    def confirm_receipt(inv_id: int, body: ReceiptIn, user=need("receipt")):
+        inv = store.get_invoice(inv_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        if workflow.stage_key(inv) != "receipt":
+            raise HTTPException(409, "This invoice is not waiting for a delivery confirmation.")
+        if not body.ok and not (body.note or "").strip():
+            raise HTTPException(400, "Say what the problem is, so the manager and the supplier know.")
+        before = _stages()
+        rec = pipe.confirm_receipt(inv_id, body.ok, user["name"] if auth_on else "Local user", (body.note or "").strip() or None)
+        _announce(before, user["name"] if auth_on else None)
+        return rec
 
     @app.get("/api/invoices/{inv_id}/file")
     def get_file(inv_id: int, user=need("read")):
@@ -469,12 +689,18 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
         inv = store.get_invoice(inv_id)
         if not inv:
             raise HTTPException(404, "Invoice not found")
-        total = (inv["fields"] or {}).get("total")
-        if body.approve and not auth.within_limit(user, total):
-            raise HTTPException(403, f"This invoice ({total:,.2f}) is above your approval limit ({user['approval_limit']:,.2f}). "
-                                     "An approver with a higher limit, such as a finance manager, must approve it.")
+        if inv.get("removed_at"):
+            raise HTTPException(409, "This invoice was removed, so it is not paid.")
+        if body.approve:
+            ok, why = workflow.can_approve(user, inv)
+            if not ok:
+                raise HTTPException(403, why or "This invoice cannot be approved now.")
         actor = user["name"] if auth_on else body.user
-        rec = pipe.human_decision(inv_id, body.approve, actor, body.note)
+        rec = pipe.human_decision(inv_id, body.approve, actor, body.note, workflow.open_items(inv) if body.approve else None)
+        people = {(inv.get("source") or {}).get("by"), (inv.get("ap_review") or {}).get("by")}
+        what = _label(inv)
+        _tell(people, f"{actor} approved {what} for payment." if body.approve
+              else f"{actor} rejected {what}" + (f": {body.note.strip()}" if (body.note or "").strip() else "."), actor, inv_id, f"#/invoice/{inv_id}")
         rec["audit"] = store.audit_log(inv_id)
         return rec
 
@@ -494,75 +720,10 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
             if r["status"] in who:
                 who[r["status"]]["checks" if str(r["decided_by"] or "").startswith("AI") else "person"] += 1
         return {"total": len(rows), "by_status": store.counts(), "by_ai_outcome": by_ai, "human_overrides": overrides,
+                "my_tasks": sum(1 for r in rows if workflow.is_task_for(user, r)),
+                "my_requests": sum(1 for r in store.requests() if workflow.request_task_for(user, r)),
+                "by_stage": {k: sum(1 for r in rows if workflow.stage_key(r) == k) for k in workflow.STAGES if k != "done"},
                 "approved_by": who["approved"], "rejected_by": who["rejected"]}
-
-    # ------------------------------------------------------------------ intake: e-mail and watched folder
-    def _intake_rows(limit: int = 100) -> list[dict[str, Any]]:
-        rows = store.intake_log(limit)
-        for r in rows:
-            r["sender_check"] = r["bank_check"] = None
-            if r.get("invoice_id"):
-                inv = store.get_invoice(r["invoice_id"])
-                for c in (inv or {}).get("checks") or []:
-                    if c["name"] in ("sender", "bank"):
-                        r[c["name"] + "_check"] = {"status": c["status"], "message": c["message"], "kind": (c.get("details") or {}).get("kind")}
-        return rows
-
-    @app.get("/api/intake")
-    def intake_status(user=need("read")):
-        imap = intake.imap_settings()
-        return {"public": public, "folder": None if public else str(intake.folder.resolve()),
-                "interval_seconds": intake.interval, "running": intake.running,
-                "last_run": intake.last_run, "last_error": intake.last_error,
-                "imap": {"configured": bool(imap), "host": imap["host"] if imap else None, "user": imap["user"] if imap else None,
-                         "folder": imap["folder"] if imap else None},
-                "log": _intake_rows()}
-
-    @app.post("/api/intake/scan")
-    def intake_scan(user=need("upload")):
-        return {"results": intake.run_once()}
-
-    @app.post("/api/intake/email")
-    async def intake_email(file: UploadFile = File(...), user=need("upload")):
-        limit(user, "upload", 40, 600)
-        name = Path(file.filename or "message.eml").name
-        if Path(name).suffix.lower() != ".eml":
-            raise HTTPException(415, "Upload a saved e-mail (.eml). In Outlook or Gmail: open the message, then Save as / Download message.")
-        data = await file.read()
-        if not data or len(data) > 4 * MAX_BYTES:
-            raise HTTPException(400, "The e-mail file is empty or too large.")
-        return {"results": intake.process_email_bytes(data)}
-
-    @app.post("/api/demo/emails")
-    def demo_emails(user=need("manage")):
-        from .demo import write_demo_emails
-        return {"results": write_demo_emails(intake, ROOT)}
-
-    # ------------------------------------------------------------------ fraud lab
-    @app.get("/api/lab")
-    def lab_info(user=need("read")):
-        from . import lab
-        return {"bases": lab.bases(), "tricks": lab.TRICKS, **lab.attempts(store)}
-
-    @app.get("/api/lab/base/{key}.png")
-    def lab_base_image(key: str, small: int = 0, page: int = 0, user=need("read")):
-        from . import lab
-        if key not in lab.BASES:
-            raise HTTPException(404, "Unknown invoice")
-        try:
-            png = lab.render_base(key, small=bool(small), page=page)
-        except IndexError:
-            raise HTTPException(404, "No such page")
-        return Response(png, media_type="image/png", headers={"Cache-Control": "private, max-age=86400"})
-
-    @app.post("/api/lab/forge")
-    def lab_forge(body: LabIn, user=need("upload")):
-        from . import lab
-        limit(user, "lab", 40, 600)
-        try:
-            return lab.forge(pipe, body.base, body.trick, body.value, by=user["name"] if auth_on else "Local user")
-        except lab.LabError as e:
-            raise HTTPException(400, str(e))
 
     # ------------------------------------------------------------------ overview
     @app.get("/api/overview")
@@ -572,28 +733,210 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
 
     # ------------------------------------------------------------------ master data
     @app.post("/api/purchase-orders")
-    def add_po(body: PoIn, user=need("manage")):
+    def add_po(body: PoIn, user=need("po_import")):
+        """Load a purchase order that was already approved in the company's ERP (integrations only, with the service
+        token). People never open an order directly: it starts as a purchase request and a manager approves it."""
         store.upsert_po(body.po_number.strip(), body.vendor.strip(), body.currency.upper(), body.amount)
         store.audit(None, user["name"], "po_saved", f"{body.po_number} {body.vendor} {body.amount:,.2f} {body.currency.upper()}")
+        pipe.recheck_open(f"purchase order {body.po_number.strip()} saved")
         return {"ok": True}
 
     @app.get("/api/purchase-orders")
     def list_pos(user=need("read")):
-        return list(store.purchase_orders().values())
+        origin = {r["po_number"]: r for r in store.requests() if r.get("po_number")}
+        return [{**p, "request_id": (origin.get(p["po_number"]) or {}).get("id")} for p in store.purchase_orders().values()]
+
+    # ------------------------------------------------------------------ purchase requests
+    @app.get("/api/purchase-requests")
+    def list_requests(user=need("read")):
+        return [workflow.describe_request(user, r) for r in store.requests()]
+
+    @app.post("/api/purchase-requests")
+    def add_request(body: RequestIn, user=need("request")):
+        """Accounts payable asks for a purchase. It goes to procurement to prepare, then to a manager to approve."""
+        import re as _re
+        if body.needed_by and not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", body.needed_by):
+            raise HTTPException(400, "Give the date as YYYY-MM-DD.")
+        name = user["name"] if auth_on else "Local user"
+        rid = store.add_request(requested_by=name, item=body.item.strip(), vendor=body.vendor.strip(), currency=body.currency.upper(),
+                                amount=round(body.amount, 2), needed_by=body.needed_by, reason=(body.reason or "").strip() or None)
+        store.audit(None, name, "po_requested", f"request #{rid}: {body.item.strip()} from {body.vendor.strip()}, "
+                                               f"{body.amount:,.2f} {body.currency.upper()}")
+        store.notify(f"New purchase request #{rid} to prepare: {body.item.strip()} from {body.vendor.strip()}, requested by {name}.",
+                     role="procurement", actor=name, link="#/pos")
+        return workflow.describe_request(user, store.request(rid))
+
+    @app.post("/api/purchase-requests/after-the-fact")
+    def record_order(body: RecordOrderIn, user=need("po")):
+        """The invoice quotes an order that is not on file because it was placed outside the app. Procurement records
+        it, with the reason; like every order it then needs a manager's approval (an after-the-fact purchase order)."""
+        inv = store.get_invoice(body.invoice_id)
+        if not inv:
+            raise HTTPException(404, "Invoice not found")
+        if workflow.stage_key(inv) != "po_missing":
+            raise HTTPException(409, "This invoice is not waiting for its order to be recorded.")
+        po = str((inv.get("fields") or {}).get("po_number") or "").strip()
+        if not po:
+            raise HTTPException(400, "The invoice does not quote a purchase order number.")
+        if po in store.purchase_orders():
+            raise HTTPException(409, f"Purchase order {po} is already on file.")
+        if not body.reason.strip():
+            raise HTTPException(400, "Say why it was ordered outside the app.")
+        name = user["name"] if auth_on else "Local user"
+        rid = store.add_request(requested_by=name, item=body.item.strip(), vendor=body.vendor.strip(), currency=body.currency.upper(),
+                                amount=round(body.amount, 2), reason=body.reason.strip(), kind="after_the_fact",
+                                invoice_id=inv["id"], po_number=po)
+        before = _stages()
+        store.update_request(rid, status="prepared", prepared_by=name, prepared_at=auth.iso(auth.utcnow()))
+        _announce(before, name)
+        store.audit(inv["id"], name, "po_recorded", f"request #{rid}: {po} from {body.vendor.strip()}, {body.amount:,.2f} "
+                                                   f"{body.currency.upper()}, ordered outside the app: {body.reason.strip()}")
+        return workflow.describe_request(user, store.request(rid))
+
+    def _request(rid: int) -> dict[str, Any]:
+        r = store.request(rid)
+        if not r:
+            raise HTTPException(404, "Purchase request not found")
+        return r
+
+    @app.post("/api/purchase-requests/{rid}/prepare")
+    def prepare_request(rid: int, body: PrepareIn, user=need("po")):
+        """Procurement confirms the supplier and the price, then sends the order to a manager."""
+        r = _request(rid)
+        if r["status"] != "requested":
+            raise HTTPException(409, "This request is not waiting for procurement.")
+        name = user["name"] if auth_on else "Local user"
+        store.update_request(rid, vendor=body.vendor.strip(), currency=body.currency.upper(), amount=round(body.amount, 2),
+                             status="prepared", prepared_by=name, prepared_at=auth.iso(auth.utcnow()),
+                             note=(body.note or "").strip() or None)
+        store.audit(None, name, "po_prepared", f"request #{rid}: {body.vendor.strip()}, {body.amount:,.2f} {body.currency.upper()}"
+                                              + (f"; {body.note.strip()}" if (body.note or "").strip() else ""))
+        store.notify(f"Order to approve: request #{rid}, {r['item']} from {body.vendor.strip()}, {body.amount:,.2f} {body.currency.upper()}.",
+                     role="approver", actor=name, link="#/pos")
+        return workflow.describe_request(user, store.request(rid))
+
+    @app.post("/api/purchase-requests/{rid}/decision")
+    def decide_request(rid: int, body: RequestDecisionIn, user=need("read")):
+        """A manager approves (which creates the purchase order) or rejects. Procurement may reject before preparing."""
+        r = _request(rid)
+        name = user["name"] if auth_on else "Local user"
+        info = workflow.describe_request(user, r)
+        if body.approve:
+            ok, why = workflow.can_approve_request(user, r)
+            if not ok:
+                raise HTTPException(403, why)
+            po = r.get("po_number") or store.next_po_number()       # an order placed outside the app keeps its number
+            if po in store.purchase_orders():
+                raise HTTPException(409, f"Purchase order {po} is already on file.")
+            store.upsert_po(po, r["vendor"], r["currency"], r["amount"])
+            store.update_request(rid, status="approved", decided_by=name, decided_at=auth.iso(auth.utcnow()), po_number=po,
+                                 note=(body.note or "").strip() or r.get("note"))
+            store.audit(r.get("invoice_id"), name, "po_approved",
+                        f"request #{rid} approved: {po} for {r['vendor']}, {r['amount']:,.2f} {r['currency']}")
+            before = _stages()
+            pipe.recheck_open(f"purchase order {po} created")
+            _announce(before, name)
+            _tell([r.get("requested_by"), r.get("prepared_by")], f"{name} approved request #{rid}: purchase order {po} is open.", name, link="#/pos")
+        else:
+            if not info["can_reject"]:
+                raise HTTPException(403, "Procurement can reject a request before preparing it; a manager after.")
+            if not (body.note or "").strip():
+                raise HTTPException(400, "Give a reason for rejecting the request.")
+            store.update_request(rid, status="rejected", decided_by=name, decided_at=auth.iso(auth.utcnow()), note=body.note.strip())
+            store.audit(r.get("invoice_id"), name, "po_rejected", f"request #{rid} rejected: {body.note.strip()}")
+            _tell([r.get("requested_by"), r.get("prepared_by")], f"{name} rejected request #{rid}: {body.note.strip()}", name, link="#/pos")
+            inv = store.get_invoice(r["invoice_id"]) if r.get("invoice_id") else None
+            if inv and inv["status"] == "pending":       # an order nobody approved is not paid: its invoice is rejected too
+                pipe.human_decision(inv["id"], False, name, f"Order {r.get('po_number')} was not approved: {body.note.strip()}")
+        return workflow.describe_request(user, store.request(rid))
 
     @app.post("/api/vendors")
-    def add_vendor(body: VendorIn, user=need("manage")):
-        from . import bank
-        from .sender import registrable
-        acct = (body.bank_account or "").strip() or None
-        if acct:
-            number, ifsc = bank.parts(acct)
-            if bank.looks_like_iban(number) and not bank.iban_valid(number):
-                raise HTTPException(400, f"IBAN {bank.pretty(number)} fails the IBAN checksum. Check it for a typo.")
-            acct = number + (f" / {ifsc}" if ifsc else "")
-        doms = ",".join(sorted({registrable(d.strip().lstrip("@").lower()) for d in (body.email_domains or "").replace(";", ",").split(",") if d.strip()})) or None
-        store.add_vendor(body.name.strip(), (body.tax_id or "").strip() or None, acct, doms)
-        store.audit(None, user["name"], "vendor_saved", ", ".join(x for x in (body.name, body.tax_id, acct, doms) if x))
+    def add_vendor(body: VendorIn, user=need("vendor_propose")):
+        """Add a supplier. Nobody creates and activates a supplier alone: accounts payable PROPOSES it (procurement then
+        verifies it), procurement adds it as VERIFIED, and in both cases a manager approves it before it is active.
+        A local single-user setup adds it directly."""
+        from .checks import same_vendor
+        name_by = user["name"] if auth_on else "Local user"
+        verifier = auth.can(user, "vendor_verify")
+        existing = next((v for v in store.vendors() if same_vendor(body.name.strip(), v["name"], 92)), None)
+        if existing and not verifier:
+            raise HTTPException(409, f"{existing['name']} is already on the vendor list. Changing an existing supplier's details, "
+                                     "such as its bank account, needs procurement.")
+        status = "approved" if user["role"] == "local" else "verified" if verifier else "pending"
+        before = _stages()
+        try:
+            v = pipe.save_vendor(existing["name"] if existing else body.name.strip(), body.tax_id, body.bank_account,
+                                 by=name_by, status=status, invoice_id=body.invoice_id)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        pipe.recheck_open(f"supplier {v['name']} added")
+        if status == "verified":
+            store.notify(f"New supplier to approve: {v['name']}, added by {name_by}.", role="approver", actor=name_by, link="#/vendors")
+        elif status == "pending":
+            store.notify(f"New supplier to verify: {v['name']}, proposed by {name_by}.", role="procurement", actor=name_by, link="#/vendors")
+        _announce(before, name_by)
+        return {"ok": True, "status": status, "vendor": v}
+
+    @app.post("/api/vendors/{vid}/verify")
+    def verify_vendor(vid: int, body: VerifyIn, user=need("vendor_verify")):
+        """Procurement checks a proposed supplier is real (by phone, on a known number) and sends it to a manager."""
+        v = store.vendor(vid)
+        if not v:
+            raise HTTPException(404, "Vendor not found")
+        if v["status"] != "pending":
+            raise HTTPException(409, f"{v['name']} is not waiting for verification.")
+        name = user["name"] if auth_on else "Local user"
+        if auth_on and v.get("proposed_by") == name:
+            raise HTTPException(403, "You proposed this supplier, so someone else must verify it (segregation of duties).")
+        if not body.approve and not (body.note or "").strip():
+            raise HTTPException(400, "Give a reason for rejecting the supplier.")
+        status = ("approved" if user["role"] == "local" else "verified") if body.approve else "rejected"
+        before = _stages()
+        store.set_vendor_status(vid, status, name, (body.note or "").strip() or None)
+        store.audit(None, name, "vendor_verified" if body.approve else "vendor_rejected",
+                    v["name"] + (f": {body.note.strip()}" if (body.note or "").strip() else ""))
+        n = pipe.recheck_open(f"supplier {v['name']} {status}")
+        _tell([v.get("proposed_by")], f"{name} verified the supplier {v['name']}. It is now with the manager for approval."
+              if body.approve else f"{name} rejected the supplier {v['name']}: {(body.note or '').strip()}", name, link="#/vendors")
+        _announce(before, name)
+        return {"ok": True, "status": status, "rechecked": n}
+
+    @app.post("/api/vendors/{vid}/approve")
+    def approve_vendor(vid: int, body: VerifyIn, user=need("decide")):
+        """The manager's approval of a supplier procurement verified. Only an approved supplier is active and payable."""
+        v = store.vendor(vid)
+        if not v:
+            raise HTTPException(404, "Vendor not found")
+        if v["status"] != "verified":
+            raise HTTPException(409, f"{v['name']} is not waiting for a manager's approval.")
+        name = user["name"] if auth_on else "Local user"
+        if auth_on and name in {v.get("proposed_by"), v.get("verified_by")}:
+            raise HTTPException(403, "You proposed or verified this supplier, so another person must approve it (segregation of duties).")
+        if not body.approve and not (body.note or "").strip():
+            raise HTTPException(400, "Give a reason for rejecting the supplier.")
+        before = _stages()
+        store.set_vendor_approval(vid, body.approve, name, (body.note or "").strip() or None)
+        store.audit(None, name, "vendor_approved" if body.approve else "vendor_rejected",
+                    v["name"] + (f": {body.note.strip()}" if (body.note or "").strip() else ""))
+        n = pipe.recheck_open(f"supplier {v['name']} {'approved' if body.approve else 'rejected'}")
+        _tell([v.get("proposed_by"), v.get("verified_by")],
+              f"{name} approved the supplier {v['name']}. It is on the vendor list now." if body.approve
+              else f"{name} rejected the supplier {v['name']}: {(body.note or '').strip()}", name, link="#/vendors")
+        _announce(before, name)
+        return {"ok": True, "status": "approved" if body.approve else "rejected", "rechecked": n}
+
+    # ---- notifications
+    @app.get("/api/notifications")
+    def notifications(user=need("read")):
+        key = user.get("email") or user["name"]
+        items = store.notifications_for(user["role"], user["name"])
+        seen = store.last_seen(key)
+        return {"items": [{**n, "unread": n["id"] > seen} for n in items], "unread": sum(1 for n in items if n["id"] > seen)}
+
+    @app.post("/api/notifications/seen")
+    def notifications_seen(user=need("read")):
+        items = store.notifications_for(user["role"], user["name"], limit=1)
+        store.mark_seen(user.get("email") or user["name"], items[0]["id"] if items else 0)
         return {"ok": True}
 
     @app.get("/api/vendors")
@@ -620,9 +963,8 @@ def create_app(db_path: str | None = None, upload_dir: str | None = None, extrac
                     pass
         store.audit(None, user["name"], "demo_reset", "all invoices removed")
         if public:
-            from .demo import seed_demo, write_demo_emails
+            from .demo import seed_demo
             seed_demo(pipe, ROOT)
-            write_demo_emails(intake, ROOT)
             return {"ok": True, "reseeded": True}
         return {"ok": True}
 

@@ -5,7 +5,6 @@ venv/
 .pytest_cache/
 *.db
 uploads/
-inbox/
 _sync/
 .git/
 .github/

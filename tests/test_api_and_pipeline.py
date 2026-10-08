@@ -31,9 +31,9 @@ def test_upload_returns_fields_checks_decision_and_trace(client):
     assert r.status_code == 200
     j = r.json()
     assert j["fields"]["invoice_number"] == "993548900" and j["fields"]["total"] == 717.97 and j["fields"]["currency"] == "EUR"
-    assert {c["name"] for c in j["checks"]} == {"completeness", "math", "duplicate", "vendor", "tax_id", "po_match", "bank", "sender"}
+    assert {c["name"] for c in j["checks"]} == {"completeness", "math", "duplicate", "vendor", "tax_id", "po_match", "bank"}
     assert [t["step"] for t in j["trace"]][0] == "read" and j["trace"][-1]["step"] == "decide"
-    assert j["ai_outcome"] == "auto_approve" and j["status"] == "approved"
+    assert j["ai_outcome"] == "auto_approve" and j["status"] == "pending"          # recommended; people decide
     assert [a["action"] for a in j["audit"]][:2] == ["received", "extracted"]
 
 
@@ -90,9 +90,14 @@ def test_filename_cannot_escape_the_upload_folder(client, tmp_path):
 
 def test_demo_seed(client):
     j = client.post("/api/demo/seed").json()
-    assert j["seeded"] and len(j["invoices"]) == 12
+    assert j["seeded"] and len(j["invoices"]) == 13
     assert {i["outcome"] for i in j["invoices"]} == {"auto_approve", "needs_review", "reject"}
     assert client.post("/api/demo/seed").json()["seeded"] is False
+    o = client.get("/api/overview").json()                              # the Overview page's figures
+    fl = o["flow"]
+    assert o["invoices"] == 13 and fl["ap"] + fl["procurement"] + fl["manager"] + fl["approved"] + fl["rejected"] == 13
+    assert fl["approved"] == 3 and fl["rejected"] == 2 and fl["rejected_by_ap"] == 2 and fl["manager"] == 2
+    assert o["by_check"]["bank"] >= 1 and o["protected"]["EUR"] > 0 and o["time"]["saved_hours"] > 0
 
 
 def test_missing_tesseract_gives_clear_error_and_demo_continues(monkeypatch, tmp_path):
@@ -107,7 +112,7 @@ def test_missing_tesseract_gives_clear_error_and_demo_continues(monkeypatch, tmp
     app = create_app(db_path=str(tmp_path / "t.db"), upload_dir=str(tmp_path / "u"), extractor="rules")
     res = seed_demo(app.state.pipeline, ROOT)
     assert res["seeded"] and len(res["skipped"]) == 1 and "Tesseract" in res["skipped"][0]["reason"]
-    assert len(res["invoices"]) == 11
+    assert len(res["invoices"]) == 12
 
 
 def test_reset_clears_invoices(tmp_path):
@@ -128,13 +133,63 @@ def test_decisions_are_saved_counted_and_repeats_are_marked(tmp_path):
     c = TestClient(app)
     c.post("/api/demo/seed")
     rows = c.get("/api/invoices").json()
-    pend = next(r for r in rows if r["status"] == "pending")
-    auto = next(r for r in rows if r["decided_by"] and r["decided_by"].startswith("AI") and r["status"] == "approved")
+    pend = next(r for r in rows if r["status"] == "pending" and r["stage"]["key"] == "approval")
+    done = next(r for r in rows if r["status"] == "approved")
     before = c.get("/api/stats").json()
     r = c.post(f"/api/invoices/{pend['id']}/decision", json={"approve": True, "user": "Approver"}).json()
     assert r["status"] == "approved" and r["decided_by"] == "Approver"
     after = c.get("/api/stats").json()
     assert after["by_status"]["approved"] == before["by_status"]["approved"] + 1
     assert after["approved_by"]["person"] == before["approved_by"]["person"] + 1
-    again = c.post(f"/api/invoices/{auto['id']}/decision", json={"approve": True, "user": "Approver"}).json()
+    again = c.post(f"/api/invoices/{done['id']}/decision", json={"approve": True, "user": "Approver"}).json()
     assert again["audit"][-1]["action"] == "confirmed"
+
+
+def test_old_database_loses_its_email_leftovers(tmp_path):
+    import sqlite3
+    from inpro_copilot.store import Store
+    db = tmp_path / "old.db"
+    old = sqlite3.connect(db)
+    old.executescript("""CREATE TABLE vendors (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT UNIQUE, tax_id TEXT,
+                         bank_account TEXT, email_domains TEXT);
+                         INSERT INTO vendors(name, email_domains) VALUES ('Coolblue', 'coolblue.nl');
+                         CREATE TABLE intake (id INTEGER PRIMARY KEY, sender TEXT);""")
+    old.commit(); old.close()
+    st = Store(str(db))
+    tables = {r[0] for r in st.db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    assert "intake" not in tables and "email_domains" not in st.vendors()[0]
+    assert st.vendors()[0]["name"] == "Coolblue"
+
+
+def test_old_demo_vendor_list_is_completed_at_start(tmp_path, monkeypatch):
+    monkeypatch.setenv("INPRO_DEMO_MODE", "1")
+    from inpro_copilot.api import create_app
+    from inpro_copilot.store import Store
+    db = str(tmp_path / "old.db")
+    st = Store(db)                                              # the vendor list an older version made
+    for name in ("WS Retail Services", "Free", "Sammy Maystone", "e-Luscious"):
+        st.add_vendor(name)
+    st.add_vendor("Coolblue", "NL810433941B01", "NL50INGB0683251309")
+    vendors = {v["name"]: v for v in create_app(db_path=db, upload_dir=str(tmp_path / "u"), extractor="rules").state.store.vendors()}
+    assert "Sammy Maystone" not in vendors and "e-Luscious" not in vendors
+    assert vendors["WS Retail Services"]["tax_id"] == "29670869006" and vendors["Free"]["bank_account"] == "Direct debit"
+    assert vendors["Coolblue"]["bank_account"] == "NL50INGB0683251309"           # what was on file stays
+
+
+def test_supplier_details_printed_inside_a_picture_are_read():
+    """saeco.pdf has real text, but the supplier's name, VAT number and IBAN are a pasted picture."""
+    import pytest
+    from inpro_copilot.reader import ocr_available, read_document
+    from inpro_copilot.extractor_rules import extract_fields
+    if not ocr_available():
+        pytest.skip("Tesseract is not installed")
+    f = extract_fields(read_document(REAL / "saeco.pdf"))
+    assert f.vendor == "e-Luscious Nederland B.V." and f.tax_id == "NL815254295B01" and f.bank_account == "NL58RABO0198723202"
+    assert f.invoice_number == "VF1005193039" and f.total == 49.99
+
+
+def test_digital_pdfs_still_read_without_tesseract(monkeypatch):
+    import inpro_copilot.reader as rd
+    monkeypatch.setattr(rd, "ocr_available", lambda: False)
+    f = rd.read_document(REAL / "saeco.pdf")
+    assert f.method == "pdf_text" and "VF1005193039" in f.text and "Luscious" not in f.text

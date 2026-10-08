@@ -151,3 +151,38 @@ def test_scan_misread_is_review_not_reject():
     assert check_math(bad, Context()).status == "fail"                 # digital document: hard fail
     r = check_math(bad, Context(ocr=True))                              # scan: could be an OCR misread
     assert r.status == "warn" and "compare with the image" in r.message
+
+
+def test_tax_id_compared_without_punctuation_or_a_misprinted_country_prefix():
+    from inpro_copilot.checks import Context, check_vendor
+    from inpro_copilot.models import InvoiceFields
+    ctx = Context(vendors=[{"name": "NETPRESSE", "tax_id": "FR63530848134", "status": "approved"}])
+    assert check_vendor(InvoiceFields(vendor="NETPRESSE", tax_id="F63530848134"), ctx).status == "pass"
+    assert check_vendor(InvoiceFields(vendor="NETPRESSE", tax_id="FR 6353 0848 134"), ctx).status == "pass"
+    assert check_vendor(InvoiceFields(vendor="NETPRESSE", tax_id="FR63530848137"), ctx).status == "fail"
+
+
+def test_printed_shipping_and_handling_explain_the_total():
+    from inpro_copilot.checks import Context, check_math
+    from inpro_copilot.models import InvoiceFields
+    text = "Subtotal $156.00\nSales Tax 8% $12.48\nShipping and Handling $10.00\nTotal Due $178.48"
+    r = check_math(InvoiceFields(subtotal=156.0, tax_amount=12.48, total=178.48), Context(doc_text=text))
+    assert r.status == "pass" and "shipping 10.00" in r.message
+    r = check_math(InvoiceFields(subtotal=156.0, tax_amount=12.48, total=188.48), Context(doc_text=text))
+    assert r.status == "fail"                                   # a gap no printed charge explains is still caught
+    r = check_math(InvoiceFields(subtotal=100.0, tax_amount=21.0, total=116.0),
+                   Context(doc_text="Subtotal 100.00\nVAT 21.00\nDiscount -5.00\nTotal 116.00"))
+    assert r.status == "pass" and "- discount 5.00" in r.message
+
+
+def test_invoice_hash_label_is_read(tmp_path):
+    import pymupdf
+    from inpro_copilot.extractor_rules import extract_fields
+    from inpro_copilot.reader import read_document
+    doc = pymupdf.open(); page = doc.new_page()
+    page.insert_text((60, 80), "KV Custom Windows & Doors Ltd", fontsize=12)
+    page.insert_text((60, 120), "Invoice#: 4326", fontsize=11)
+    page.insert_text((60, 140), "Invoice date: Mar 15, 2022", fontsize=11)
+    page.insert_text((60, 160), "Total Due $178.48", fontsize=11)
+    doc.save(tmp_path / "hash.pdf")
+    assert extract_fields(read_document(tmp_path / "hash.pdf")).invoice_number == "4326"

@@ -11,9 +11,13 @@ and only the right people may approve (and only up to their limit). So:
     other sites cannot send it). The database keeps only a hash of the token. Sessions expire after
     8 hours without activity.
   * Every change request must carry a custom header, which a forged cross-site form cannot add (CSRF).
-  * Roles:  viewer   - can see everything, change nothing (auditors)
-            approver - can upload, approve up to their approval limit, reject anything
-            admin    - everything, plus users, vendors, purchase orders and demo data
+  * Three roles, split the way finance teams split the work (segregation of duties). The person who records an
+    invoice never approves it, and the people who keep the vendor list never approve payments:
+            ap          - accounts payable: uploads invoices, corrects misread fields, proposes new vendors, requests purchases
+            procurement - prepares purchase requests, keeps purchase orders, confirms deliveries, verifies new vendors
+            approver    - manager: approves purchase requests and invoices (optionally up to a limit), manages users
+    No role can take an invoice from upload to approval alone. On top of that, nobody may approve an invoice
+    they uploaded or corrected, nor verify a vendor they proposed (workflow.py).
   * Integrations (Power Automate, SharePoint) use a service token instead of a password.
   * Logins, failed logins, lockouts, password and user changes go to the audit log.
 
@@ -30,7 +34,7 @@ from typing import Any
 
 from .config import env, env_float
 
-ROLES = ("viewer", "approver", "admin")
+ROLES = ("ap", "procurement", "approver")
 MAX_FAILED = 5
 LOCK_MINUTES = 15
 MIN_PASSWORD = 10
@@ -38,11 +42,18 @@ COOKIE = "inpro_session"
 CSRF_HEADER = "x-inpro-csrf"
 
 PERMISSIONS = {
-    "viewer": {"read"},
-    "approver": {"read", "upload", "decide"},
-    "service": {"read", "upload"},
-    "admin": {"read", "upload", "decide", "manage"},
+    "ap": {"read", "upload", "edit", "review", "vendor_propose", "request"},
+    "procurement": {"read", "po", "receipt", "vendor_propose", "vendor_verify"},
+    "approver": {"read", "decide", "manage"},
+    "admin": {"read", "decide", "manage"},           # accounts made by older versions: treated as a manager
+    # po_import: load purchase orders that were already approved elsewhere (the company's ERP), through the API only.
+    # No person can open a purchase order on their own: every order starts as a request and a manager approves it.
+    "service": {"read", "upload", "po_import"},            # integrations (Power Automate, the ERP) with a token, not a person
+    "local": {"read", "upload", "edit", "review", "vendor_propose", "vendor_verify", "po", "receipt", "decide", "manage", "request",
+              "po_import"},
+    "viewer": {"read"},                                    # read-only accounts made by older versions
 }
+ALL_PERMISSIONS = PERMISSIONS["local"]
 
 
 def utcnow() -> datetime:
@@ -73,7 +84,7 @@ def verify_password(password: str, stored: str | None) -> bool:
         return False
 
 
-_DUMMY = hash_password(secrets.token_hex(8))       # used so unknown e-mails take as long as known ones
+_DUMMY = hash_password(secrets.token_hex(8))       # so unknown accounts take as long to refuse as known ones
 
 
 def password_problem(password: str) -> str | None:
@@ -109,11 +120,12 @@ def within_limit(user: dict[str, Any], amount: float | None) -> bool:
 # ------------------------------------------------------------------ demo accounts
 
 DEMO_USERS = [
-    # name, email, role, approval limit (None = no limit), what it shows in the demo
-    ("Priya Shetty", "priya@demo.inpro", "admin", None, "Finance manager: approves any amount, manages users"),
-    ("Rahul Kamath", "rahul@demo.inpro", "approver", 500.0, "Approver: can approve up to 500"),
-    ("Meera Nayak", "meera@demo.inpro", "viewer", None, "Auditor: can look, cannot change anything"),
+    # name, email, role, approval limit (None = no limit), what it shows in the demo; in the order of the invoice flow
+    ("Ananya Rao", "ananya@demo.inpro", "ap", None, "Accounts payable: uploads invoices, fixes misread fields, proposes new vendors"),
+    ("Vikram Pai", "vikram@demo.inpro", "procurement", None, "Procurement: purchase orders, confirms deliveries, verifies new vendors"),
+    ("Rahul Kamath", "rahul@demo.inpro", "approver", None, "Manager: approves or rejects invoices, manages users"),
 ]
+DEMO_DOMAIN = "@demo.inpro"
 
 
 def demo_password() -> str:
@@ -121,18 +133,29 @@ def demo_password() -> str:
 
 
 def ensure_first_users(store) -> list[str]:
-    """First start: create the demo accounts (demo mode) or one admin from .env settings."""
-    if store.user_count():
-        return []
+    """Demo mode: make sure every demo account exists (also adds new ones to an older database).
+    Otherwise, on first start: one admin from the .env settings."""
     made = []
     if demo_mode():
+        wanted = {e for _, e, *_ in DEMO_USERS}
         for name, email, role, limit, _ in DEMO_USERS:
-            store.add_user(name, email, role, hash_password(demo_password()), limit)
-            made.append(email)
+            u = store.user_by_email(email)
+            if not u:
+                store.add_user(name, email, role, hash_password(demo_password()), limit)
+                made.append(email)
+            elif u["role"] != role or u["approval_limit"] != limit:   # from an older version: today's role and limit
+                store.update_user(u["id"], role=role, approval_limit=limit)
+        for u in store.list_users():                     # demo accounts that no longer exist (older versions had more)
+            if u["email"].endswith(DEMO_DOMAIN) and u["email"] not in wanted:
+                store.delete_sessions_for_user(u["id"])
+                store.delete_user(u["id"])
+        return made
+    if store.user_count():
+        return []
     else:
         email, pw = env("INPRO_ADMIN_EMAIL"), env("INPRO_ADMIN_PASSWORD")
         if email and pw:
-            store.add_user(env("INPRO_ADMIN_NAME", "Administrator"), email, "admin", hash_password(pw), None)
+            store.add_user(env("INPRO_ADMIN_NAME", "Administrator"), email, "approver", hash_password(pw), None)
             made.append(email)
     return made
 
@@ -172,11 +195,22 @@ def login(store, email: str, password: str, ip: str = "") -> tuple[dict[str, Any
             raise LoginError(f"Too many wrong passwords. The account is locked for {LOCK_MINUTES} minutes.")
         left = MAX_FAILED - failed
         raise LoginError("Email or password is incorrect." + (f" {left} attempt{'s' if left > 1 else ''} left before a 15-minute lock." if left <= 2 else ""))
+    token = start_session(store, u)
+    store.audit(None, u["name"], "signed_in", f"{email}; ip {ip}")
+    return store.user_by_id(u["id"]), token
+
+
+def start_session(store, u: dict[str, Any]) -> str:
+    """Open a new session for this user and return its token (only a hash of it is stored)."""
+    now = utcnow()
     token = secrets.token_urlsafe(32)
     store.create_session(token_hash(token), u["id"], iso(now), iso(now + timedelta(hours=session_hours())))
     store.set_login_success(u["id"], iso(now))
-    store.audit(None, u["name"], "signed_in", f"{email}; ip {ip}")
-    return store.user_by_id(u["id"]), token
+    return token
+
+
+def is_demo_account(email: str | None) -> bool:
+    return demo_mode() and (email or "").strip().lower() in {e for _, e, *_ in DEMO_USERS}
 
 
 def user_for_token(store, token: str | None) -> dict[str, Any] | None:

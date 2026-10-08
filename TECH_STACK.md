@@ -12,7 +12,7 @@ The everyday language of AI/ML and data work. Every library below has a Python v
 | Tool | What it is | What it does here | Why this one |
 |---|---|---|---|
 | **PyMuPDF** | A fast PDF library | Pulls out every word *with its position* on the page, and draws PDF pages as pictures for the preview | Positions matter: "the number to the right of *Invoice No.*" needs coordinates. Very fast (about 8 ms a document). |
-| **Tesseract OCR** (via **pytesseract**) | Free open-source "reading a picture" engine by Google | Turns a photo or scan into words with positions, same format as PyMuPDF | Free, runs on your own machine, so invoices never leave the building. Only needed for scans. |
+| **Tesseract OCR** (via **pytesseract**) | Free open-source "reading a picture" engine by Google | Turns a photo or scan into words with positions, same format as PyMuPDF | Free, runs on your own machine, so invoices never leave the building. Needed for scans; on normal PDFs it also reads text inside pictures (a logo, or the supplier's details pasted as an image), keeping only confident words. Without it, normal PDFs still work. |
 | **Pillow** | Python image library | Loads photos, rotates/cleans them before OCR; also used to make the simulated scans in the benchmark | Standard. |
 
 ### 2. Understanding the document (extraction)
@@ -35,20 +35,19 @@ The everyday language of AI/ML and data work. Every library below has a Python v
 
 Details, limits and privacy notes: [API_SETUP.md](API_SETUP.md).
 
-### 3. The eight checks (plain Python, no AI)
+### 3. The checks (plain Python, no AI)
 | Tool | Used for |
 |---|---|
-| **RapidFuzz** | "Fuzzy" text matching: `Coolblue B.V.` vs `Coolblue BV`, invoice `99354890` vs `993548901`. Powers duplicate and vendor matching, and spotting look-alike e-mail domains. |
+| **RapidFuzz** | "Fuzzy" text matching: `Coolblue B.V.` vs `Coolblue BV`, invoice `99354890` vs `993548901`. Powers duplicate and vendor matching. |
 | **Checksum code** (`taxid.py`) | India's GSTIN has a built-in check character; a mistyped one is detectable mathematically. Also UAE TRN and EU VAT formats. |
 | **IBAN checksum** (`bank.py`, ISO 13616 "mod 97") | Every IBAN carries two check digits, so a mistyped account number is caught by maths. Also reads Indian account number + IFSC. Repairs typical scan misreads (`NLSO...` -> `NL50...`) only when the checksum then proves it. |
 | **Bank-account memory** (`checks.check_bank`) | Compares the account printed on the invoice with the one on file (or on the vendor's earlier approved invoices). A changed account is the classic invoice-fraud trick, so it is a hard stop. |
-| **Sender verification** (`sender.py`) | For invoices that arrived by e-mail: is the sender's domain the supplier's real one? Catches look-alikes (`azure-interiors.com` vs `azure-interior.com`, `coo1blue.nl`, Cyrillic letters that look Latin), free Gmail-type accounts, and a Reply-To that sends your answer somewhere else. |
 | **Plain arithmetic** | subtotal + tax = total, line items add up, PO balance. |
 
 ### 4. The decision and the record
 | Tool | What it is | Why |
 |---|---|---|
-| **Decision policy** (`decision.py`) | A short, readable set of rules: reject / auto-approve / needs review | A manager can read and change it. No black box decides money. |
+| **Decision policy** (`decision.py`) | A short, readable set of rules: recommend reject / recommend approve / needs review | A manager can read and change it. No black box decides money: the checks only recommend; accounts payable reviews every invoice and a manager gives the final approval. |
 | **SQLite** | A database that lives in one file | Zero setup for a prototype. Stores invoices, vendors, purchase orders and the audit log. The store is isolated in one file (`store.py`), so moving to SQL Server/PostgreSQL later is a contained change. |
 
 ### 4b. Sign-in and security (`auth.py`)
@@ -56,28 +55,45 @@ Details, limits and privacy notes: [API_SETUP.md](API_SETUP.md).
 |---|---|---|
 | **scrypt** password hashing (Python's `hashlib`) | Stores a salted, deliberately slow fingerprint of each password, never the password | A stolen database does not reveal passwords |
 | **Session cookie** (HttpOnly, SameSite=Strict) | Keeps you signed in; JavaScript cannot read it, other sites cannot send it | Standard protection against session theft and cross-site attacks |
-| **Roles + approval limits** | Viewer / approver / admin; approvers have a maximum amount they may approve | Mirrors how finance teams delegate authority |
+| **Roles + approval limits** | Accounts payable / procurement / manager; a manager can have a maximum amount they may approve | Mirrors how finance teams split the work; no role can record and approve the same invoice |
 | **Lockout + throttling** | 5 wrong passwords lock an account for 15 minutes; too many attempts from one computer are slowed | Stops password guessing |
 | **Security headers** (CSP, X-Frame-Options ...) | Tell the browser to refuse foreign scripts and framing | Defence against injection and click-jacking |
 | **Service token** | Lets a Power Automate flow call the API without a person's password | Safe integration |
 
-### 4c. Invoices that arrive by themselves (`intake.py`)
-| Piece | What it does | Why |
-|---|---|---|
-| **Watched folder** | Drop a PDF, photo or saved e-mail (.eml) into `inbox/`; within ~20 seconds it is read, checked and moved to `inbox/processed` (or `inbox/failed`) | A scanner or shared drive can feed it with no clicks |
-| **E-mail reading** (Python's built-in `email` library) | Takes the sender, Reply-To, subject and every PDF/image attachment from an e-mail | The e-mail itself is evidence: who sent the invoice matters as much as what it says |
-| **Real mailbox** (Python's built-in `imaplib`, IMAP over SSL) | Optional: fetches unread mail from Gmail, Zoho or a company mail server with an app password (Microsoft 365 needs OAuth: see plan item 3) | How accounts payable really receives invoices (`invoices@company.com`) |
-| **Background thread** | Checks the folder and mailbox every 20 seconds while the server runs | No extra service or scheduler to install |
-| **Fingerprints** | Every message/attachment gets a SHA-256 fingerprint so nothing is processed twice | Safe to re-scan, restart, or receive the same mail twice |
+### 4c-2. Hand-offs and segregation of duties (`workflow.py`)
+Plain code, no new library. Each waiting invoice has a stage, derived from its accounts payable review and its check
+results, and each stage belongs to a role: `ap_review` (accounts payable approves or rejects, adding a new supplier
+with the review), `vendor_verify` (procurement), `vendor_approve` (manager), `po_missing` / `po_approval` (an order
+placed outside the app), `receipt` (only with `INPRO_REQUIRE_RECEIPT=1`) and `approval` (manager). A supplier moves
+pending -> verified -> approved (or rejected) and is payable only when approved. The server refuses an approval by
+the person who uploaded or corrected the invoice, and a supplier verification or approval by whoever added or verified
+it. Corrections keep the first reading and log old and new values; after any change the checks run again
+(`Pipeline.recheck`), counting only earlier invoices as possible duplicates.
+
+### 4c-2b. Notifications (`notices.py`, tables `notifications` and `notification_seen`)
+Plain code, no new library. After every action the server compares each waiting invoice's stage before and after, and
+tells the role whose turn it now is; decisions are also told to the people they affect (uploader, reviewer, whoever
+added a supplier). A note is addressed to a role or to one person, is never shown to the person who caused it, and
+each user has a "seen up to" pointer for the unread count. The screen asks for them every 30 seconds and after every
+action, so no WebSocket server is needed.
+
+### 4c-3. Purchase requests (`workflow.py`, table `purchase_requests`)
+Plain code, no new library. A request moves requested -> prepared (procurement: supplier and price) -> approved or
+rejected (manager). Approval creates the purchase order with the next free number; the open invoices are then checked
+again, so an invoice already waiting for that order moves on by itself. No role can create a purchase order directly
+(the `po_import` permission belongs only to the integration token, for orders already approved in an ERP). An invoice
+that quotes an order placed outside the app gets an *after-the-fact* request (kind `after_the_fact`, linked to the
+invoice, keeping the supplier's PO number) recorded by procurement with a reason; the invoice waits at the
+`po_approval` step until a manager approves it, and rejecting it rejects the invoice.
 
 ### 4d. Learning from approvals
-When a person approves an invoice, the copilot remembers that vendor's bank account and e-mail domain (only if
+When a person approves an invoice, the copilot remembers that vendor's bank account (only if
 the checks did not object). The next invoice is compared with what was approved, so a later change stands out.
-No AI and no new library: two columns in SQLite, and every "remembered" step appears in the audit log.
+No AI and no new library: one column in SQLite, and every "remembered" step appears in the audit log.
 
 ### 4e. The Overview page (`insights.py`)
 Computed from the invoices and the audit trail: value of invoices stopped before payment, where every invoice went
-(cleared / waiting / decided by a person / stopped), what each check caught, checking time saved, AI cost per invoice.
+(with accounts payable / procurement / the manager, approved, rejected), what each check caught, checking time saved, AI cost per invoice.
 The only assumptions are two settings (7 minutes to check an invoice by hand, 2 minutes to review one the copilot
 already checked), and the page prints them.
 
@@ -87,15 +103,15 @@ already checked), and the page prints them.
 | **FastAPI** | Python web framework | Automatic API docs at `/docs`, and it checks incoming data for you. |
 | **Uvicorn** | The server that runs FastAPI | Standard pair with FastAPI. |
 | **Pydantic** | Data validation | Rejects bad input (empty note, negative PO amount) before it reaches the logic. |
-| **Plain HTML + CSS + JavaScript** (one file, `ui/index.html`) | Sign-in page, side menu, overview, invoice queue, inbox, review screen, vendors, purchase orders, activity log, AI usage, users | No build step, nothing to install; works on phone and desktop, light and dark. Text is escaped before display so a hostile invoice cannot inject code into the page. |
+| **Plain HTML + CSS + JavaScript** (one file, `ui/index.html`) | Sign-in page, side menu with the notifications bell, overview, upload, invoice queue, review screen with pros and cons, a "done" page after each action, vendors, purchase orders, activity log, AI usage, users | No build step, nothing to install; works on phone and desktop, light and dark. Text is escaped before display so a hostile invoice cannot inject code into the page. |
 | **IBM Plex Sans** (Google Fonts) | The typeface | Calm, professional, with even-width figures for amounts |
 
-### 5b. The Fraud lab (`lab.py`)
+### 5b. Where the problem is (`evidence.py`)
 | Piece | What it does | Why |
 |---|---|---|
-| **PyMuPDF redaction + text** | Whites out the original value on a real invoice and prints the fraudster's value in the same spot, same size | Makes realistic forgeries in milliseconds, from the real documents |
-| **Same pipeline** | The forgery goes through exactly the same READ, EXTRACT, CHECK, DECIDE as any invoice | Nothing is special-cased: the result is whatever the checks decide |
-| **"Without history" re-check** | Runs the checks again with no earlier invoices on file | Shows whether a trick is caught on its own merits, not only because the original was already there |
+| **Word positions from the reader** | Finds where the problem value is printed (PDF text, or OCR boxes for scans and photos), ignoring spacing differences such as `FR76 1010...` vs `FR761010...` | The reviewer sees the exact spot instead of hunting for it |
+| **Page close-ups** | The page picture, zoomed on that spot with a box around it; for a duplicate, the earlier invoice's close-up next to this one | Proof in one glance, also on a phone |
+| **What it is compared with** | The account or tax ID on file, subtotal + tax, the earlier invoice, what is left on the PO; the changed characters highlighted | Explains the decision, not just the verdict |
 
 ### 5c. Hosting and automatic updates
 | Tool | What it does | Why |
@@ -109,7 +125,7 @@ already checked), and the page prints them.
 ### 6. Quality
 | Tool | Used for |
 |---|---|
-| **pytest** (154 tests) | Automatic tests for parsing, checks, tax IDs, IBANs, look-alike domains, the Fraud lab, public-demo protections, e-mail/folder/mailbox intake (with a fake mailbox), learning on approval, sign-in and roles, the AI-grounding guard, AI providers (faked, no network), caching, budget caps, merging, the API, and the missing-Tesseract case |
+| **pytest** (173 tests) | Automatic tests for parsing, checks, tax IDs, IBANs, where-the-problem-is proof, public-demo protections, the review flow (accounts payable, then new suppliers through procurement and a manager, then the manager's approval), notifications, hand-offs and segregation of duties, learning on approval, sign-in and roles, the AI-grounding guard, AI providers (faked, no network), caching, budget caps, merging, the API, and the missing-Tesseract case |
 | **Benchmark scripts** (`eval/`) | Measures accuracy on 12 real invoices and 130 altered/scanned copies, in rules, hybrid or AI mode, with AI requests/tokens/cost |
 | **Setup check** (`check_setup.py`) | Checks packages, Tesseract and sends one tiny test request to every configured AI model |
 
@@ -118,12 +134,11 @@ already checked), and the page prints them.
 Each is small enough to finish in a day or two. I'd do them in this order because each adds something Hanif can *see*.
 
 1. **Measure the AI reader on live models.** (Code done.) Add a free Gemini key and run `python eval/run_benchmark.py --mode hybrid`. Report the result next to the rules reader: this is the honest answer to "does the AI help, and what does it cost?".
-2. **Learn from approver corrections.** Bank accounts and e-mail domains are already learned on approval. Next: when an approver fixes a field, store it so the next invoice from that vendor uses the correction. Stack: a new SQLite table, no new library.
-3. **Microsoft 365 mailbox via Microsoft Graph.** IMAP with an app password works today for Gmail and Zoho, but Microsoft is retiring password sign-in for IMAP; Graph (with Entra ID sign-in) is how a Microsoft 365 customer would connect `invoices@company.com`.
-4. **Power Automate / SharePoint hand-off.** The `POST /api/invoices` endpoint already returns the verdict as JSON. Add an API key header, a webhook back to the workflow, and a small Power Automate flow. **Needs**: a Microsoft 365 developer tenant (free) to test. I can't verify how InPro itself is wired inside, so this is the first thing to ask Hanif.
-5. **Sign in with Microsoft (Entra ID).** Local sign-in, roles and approval limits are done; single sign-on is the production step.
-6. **Move to PostgreSQL / SQL Server + Docker.** Packaging the app as a container so it deploys anywhere (Azure App Service is the natural home for a Microsoft-based product).
-7. **OCR for logos/embedded images** (fixes the one miss in the benchmark), and a **table reader** for line items.
+2. **Learn from approver corrections.** Bank accounts are already learned on approval. Next: when an approver fixes a field, store it so the next invoice from that vendor uses the correction. Stack: a new SQLite table, no new library.
+3. **Power Automate / SharePoint hand-off.** The `POST /api/invoices` endpoint already returns the verdict as JSON. Add an API key header, a webhook back to the workflow, and a small Power Automate flow. **Needs**: a Microsoft 365 developer tenant (free) to test. I can't verify how InPro itself is wired inside, so this is the first thing to ask Hanif.
+4. **Sign in with Microsoft (Entra ID).** Local sign-in, roles and approval limits are done; single sign-on is the production step.
+5. **Move to PostgreSQL / SQL Server + Docker.** Packaging the app as a container so it deploys anywhere (Azure App Service is the natural home for a Microsoft-based product).
+6. A **table reader** for line items. (Reading text inside logos and pasted pictures is done: it fixed the last miss in the benchmark.)
 
 ## C. How this fits a Microsoft/SharePoint product
 

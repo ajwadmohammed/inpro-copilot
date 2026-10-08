@@ -97,30 +97,4 @@ All settings live in `.env`; see `.env.example` for the full list with comments.
 | `INPRO_LLM_DAILY_LIMIT` | `300` | Max AI requests per day |
 | `INPRO_LLM_MONTHLY_BUDGET_USD` | `1.00` | Max estimated paid spend per month |
 | `INPRO_LLM_MAX_TRIES` | `2` | Max successful AI answers per document (escalation) |
-| `INPRO_INBOX_DIR` | `inbox` | Watched folder for PDFs, photos and saved e-mails (.eml) |
-| `INPRO_INTAKE_INTERVAL` | `20` | Seconds between checks of the folder and the mailbox (`INPRO_INTAKE=0` switches intake off) |
-| `INPRO_IMAP_HOST` / `_USER` / `_PASSWORD` | (empty) | A real mailbox to read invoices from (see section 8) |
 | `INPRO_MANUAL_MINUTES` / `INPRO_REVIEW_MINUTES` | `7` / `2` | The two time assumptions behind "checking time saved" on the Overview page |
-
-## 8. Connect a real mailbox (optional, free)
-
-No API key is needed: the app reads e-mail over IMAP, which every major mail service offers.
-
-**Gmail** (personal or Google Workspace):
-1. Turn on 2-Step Verification for the Google account.
-2. Create an app password at <https://myaccount.google.com/apppasswords> (16 letters).
-3. Add to `.env`:
-   ```
-   INPRO_IMAP_HOST=imap.gmail.com
-   INPRO_IMAP_USER=invoices.yourname@gmail.com
-   INPRO_IMAP_PASSWORD=the16letterapppassword
-   ```
-4. Restart `run.bat`. The Inbox page shows "Connected". Every 20 seconds, unread mails are fetched, their PDF/image
-   attachments are checked, and the mails are marked as read.
-
-Tip: use a separate address just for invoices, not your personal inbox.
-
-**Zoho Mail** works the same way (`imap.zoho.in` or `imap.zoho.com`, with a Zoho app password).
-**Outlook.com / Microsoft 365** no longer accept passwords over IMAP; Microsoft requires its OAuth sign-in. That needs
-a Microsoft Graph connection, which is the next step on the plan (see TECH_STACK.md). Until then, save an Outlook
-message as a file and drop it into the `inbox` folder or upload it on the Inbox page.

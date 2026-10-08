@@ -124,8 +124,8 @@ def parse_date(text: str, prefer_mdy: bool = False) -> str | None:
     m = re.search(r"\b(\d{1,2})\s*[.\-]?\s*([a-zäéûôèà]+)\.?,?\s+(\d{4})\b", tl)
     if m and m[2] in MONTHS:
         return _mk(int(m[3]), MONTHS[m[2]], int(m[1]))
-    # Jan 1, 2022 / August 3 , 2014 / March 5 2021
-    m = re.search(r"\b([a-zäéûôèà]+)\.?\s+(\d{1,2})\s*,?\s+(\d{4})\b", tl)
+    # Jan 1, 2022 / August 3 , 2014 / March 5 2021 / August 3rd, 2014 / August 3°, 2014 (a scan's speck after the day)
+    m = re.search(r"\b([a-zäéûôèà]+)\.?\s+(\d{1,2})(?:st|nd|rd|th|[°º*'’])?\s*,?\s+(\d{4})\b", tl)
     if m and m[1] in MONTHS:
         return _mk(int(m[3]), MONTHS[m[1]], int(m[2]))
     return None
@@ -146,7 +146,7 @@ def all_dates(text: str) -> set[str]:
     for m in re.finditer(r"\b(\d{1,2})\s*[.\-]?\s*([a-zäéûôèà]+)\.?,?\s+(\d{4})\b", tl):
         if m[2] in MONTHS:
             out.add(_mk(int(m[3]), MONTHS[m[2]], int(m[1])))
-    for m in re.finditer(r"\b([a-zäéûôèà]+)\.?\s+(\d{1,2})\s*,?\s+(\d{4})\b", tl):
+    for m in re.finditer(r"\b([a-zäéûôèà]+)\.?\s+(\d{1,2})(?:st|nd|rd|th|[°º*'’])?\s*,?\s+(\d{4})\b", tl):
         if m[1] in MONTHS:
             out.add(_mk(int(m[3]), MONTHS[m[1]], int(m[2])))
     out.discard(None)
